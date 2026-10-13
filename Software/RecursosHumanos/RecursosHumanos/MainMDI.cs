@@ -2209,9 +2209,8 @@ public class MainMDI : Form
 		frmLogin.ShowDialog(this);
 		if (frmLogin.DialogResult == DialogResult.OK)
 		{
-			RRHHClass rRHHClass = new RRHHClass();
-			DataTable dataTable = rRHHClass.BuscarEmpleado_Codigo(Conversions.ToInteger(RRHH.codEmple));
-			TSSL_Usuario.Text = dataTable.Rows[0]["Apellido_paterno"].ToString() + " " + dataTable.Rows[0]["Apellido_Materno"].ToString() + " " + dataTable.Rows[0]["Nombres"].ToString();
+			// El nombre ya fue obtenido mediante PostgreSQL durante el login.
+			TSSL_Usuario.Text = frmLogin.EmployeeDisplayName;
 		}
 		else
 		{

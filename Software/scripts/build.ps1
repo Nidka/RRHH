@@ -6,7 +6,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
-$solution = Join-Path $root 'RRHH.Recovered.sln'
+$solution = Join-Path $root 'RRHH.sln'
 
 dotnet restore $solution --ignore-failed-sources
 if ($LASTEXITCODE -ne 0) {

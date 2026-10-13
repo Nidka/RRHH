@@ -6,6 +6,7 @@
     <UseWindowsForms>True</UseWindowsForms>
     <TargetFramework>net48</TargetFramework>
     <PlatformTarget>x86</PlatformTarget>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
   </PropertyGroup>
   <PropertyGroup>
     <LangVersion>12.0</LangVersion>
@@ -44,6 +45,7 @@
       <HintPath>..\lib\legacy\DevExpress.XtraReports.v11.2.dll</HintPath>
     </Reference>
     <Reference Include="System.Data" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="DevExpress.XtraTreeList.v11.2">
@@ -64,5 +66,10 @@
   <ItemGroup>
     <ProjectReference Include="..\ClassRRHH\ClassRRHH.csproj" />
     <ProjectReference Include="..\GRLL.Common.Rutinas\GRLL.Common.Rutinas.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Npgsql 4.1 es la rama compatible con .NET Framework 4.8. -->
+    <PackageReference Include="Npgsql" Version="4.1.14" />
+    <PackageReference Include="System.Memory" Version="4.5.5" />
   </ItemGroup>
 </Project>

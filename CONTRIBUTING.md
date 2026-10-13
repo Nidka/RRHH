@@ -2,7 +2,7 @@
 
 1. Crear una rama desde `main`: `git switch -c feature/nombre-corto`.
 2. Mantener cada cambio pequeño y enfocado.
-3. Ejecutar `scripts\build.cmd` antes de publicar la rama.
+3. Ejecutar `Software\scripts\build.cmd` antes de publicar la rama.
 4. No subir contraseñas, archivos `.bak`, dumps con datos ni DLL licenciadas.
 5. Integrar mediante pull request y revisión de otra persona.
 
