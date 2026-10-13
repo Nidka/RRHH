@@ -1,0 +1,68 @@
+<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+  <PropertyGroup>
+    <AssemblyName>RecursosHumanos</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <OutputType>WinExe</OutputType>
+    <UseWindowsForms>True</UseWindowsForms>
+    <TargetFramework>net48</TargetFramework>
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup>
+    <LangVersion>12.0</LangVersion>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>app.ico</ApplicationIcon>
+    <RootNamespace />
+  </PropertyGroup>
+  <ItemGroup>
+    <None Remove="RecursosHumanos.exe.licenses" />
+    <EmbeddedResource Include="RecursosHumanos.exe.licenses" LogicalName="RecursosHumanos.exe.licenses" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.VisualBasic" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="GRLL">
+      <HintPath>..\lib\legacy\GRLL.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraGrid.v11.2">
+      <HintPath>..\lib\legacy\DevExpress.XtraGrid.v11.2.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraEditors.v11.2">
+      <HintPath>..\lib\legacy\DevExpress.XtraEditors.v11.2.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.Utils.v11.2">
+      <HintPath>..\lib\legacy\DevExpress.Utils.v11.2.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraPrinting.v11.2">
+      <HintPath>..\lib\legacy\DevExpress.XtraPrinting.v11.2.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraBars.v11.2">
+      <HintPath>..\lib\legacy\DevExpress.XtraBars.v11.2.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.XtraReports.v11.2">
+      <HintPath>..\lib\legacy\DevExpress.XtraReports.v11.2.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="DevExpress.XtraTreeList.v11.2">
+      <HintPath>..\lib\legacy\DevExpress.XtraTreeList.v11.2.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Core" />
+    <Reference Include="DevExpress.Data.v11.2">
+      <HintPath>..\lib\legacy\DevExpress.Data.v11.2.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Data.Linq" />
+    <Reference Include="DevExpress.Printing.v11.2.Core">
+      <HintPath>..\lib\legacy\DevExpress.Printing.v11.2.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Interop.Microsoft.Office.Core">
+      <HintPath>..\lib\legacy\Interop.Microsoft.Office.Core.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ClassRRHH\ClassRRHH.csproj" />
+    <ProjectReference Include="..\GRLL.Common.Rutinas\GRLL.Common.Rutinas.csproj" />
+  </ItemGroup>
+</Project>

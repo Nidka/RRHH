@@ -1,0 +1,241 @@
+using System;
+using System.Data.Linq.Mapping;
+
+namespace GRLL.Common;
+
+public class SP_ABA_FILTRAR_BIEN_TIPOResult
+{
+	private string _IdBien;
+
+	private string _Descripcion;
+
+	private string _Observaciones;
+
+	private char? _Estado;
+
+	private string _IdUnidadMedida;
+
+	private decimal? _PrecioRef;
+
+	private DateTime? _FechaRef;
+
+	private string _IdFamilia;
+
+	private string _IdClase;
+
+	private string _IdGrupo;
+
+	private char? _Tipo;
+
+	private string _Unidad;
+
+	private char? _EsActivoFijo;
+
+	[Column(Storage = "_IdBien", DbType = "Char(13) NOT NULL", CanBeNull = false)]
+	public string IdBien
+	{
+		get
+		{
+			return _IdBien;
+		}
+		set
+		{
+			if (!string.Equals(_IdBien, value))
+			{
+				_IdBien = value;
+			}
+		}
+	}
+
+	[Column(Storage = "_Descripcion", DbType = "VarChar(120)")]
+	public string Descripcion
+	{
+		get
+		{
+			return _Descripcion;
+		}
+		set
+		{
+			if (!string.Equals(_Descripcion, value))
+			{
+				_Descripcion = value;
+			}
+		}
+	}
+
+	[Column(Storage = "_Observaciones", DbType = "VarChar(120)")]
+	public string Observaciones
+	{
+		get
+		{
+			return _Observaciones;
+		}
+		set
+		{
+			if (!string.Equals(_Observaciones, value))
+			{
+				_Observaciones = value;
+			}
+		}
+	}
+
+	[Column(Storage = "_Estado", DbType = "Char(1)")]
+	public char? Estado
+	{
+		get
+		{
+			return _Estado;
+		}
+		set
+		{
+			if (!_Estado.Equals(value))
+			{
+				_Estado = value;
+			}
+		}
+	}
+
+	[Column(Storage = "_IdUnidadMedida", DbType = "Char(4)")]
+	public string IdUnidadMedida
+	{
+		get
+		{
+			return _IdUnidadMedida;
+		}
+		set
+		{
+			if (!string.Equals(_IdUnidadMedida, value))
+			{
+				_IdUnidadMedida = value;
+			}
+		}
+	}
+
+	[Column(Storage = "_PrecioRef", DbType = "Decimal(0,0)")]
+	public decimal? PrecioRef
+	{
+		get
+		{
+			return _PrecioRef;
+		}
+		set
+		{
+			if (!_PrecioRef.Equals(value))
+			{
+				_PrecioRef = value;
+			}
+		}
+	}
+
+	[Column(Storage = "_FechaRef", DbType = "DateTime")]
+	public DateTime? FechaRef
+	{
+		get
+		{
+			return _FechaRef;
+		}
+		set
+		{
+			if (!_FechaRef.Equals(value))
+			{
+				_FechaRef = value;
+			}
+		}
+	}
+
+	[Column(Storage = "_IdFamilia", DbType = "Char(4)")]
+	public string IdFamilia
+	{
+		get
+		{
+			return _IdFamilia;
+		}
+		set
+		{
+			if (!string.Equals(_IdFamilia, value))
+			{
+				_IdFamilia = value;
+			}
+		}
+	}
+
+	[Column(Storage = "_IdClase", DbType = "Char(2)")]
+	public string IdClase
+	{
+		get
+		{
+			return _IdClase;
+		}
+		set
+		{
+			if (!string.Equals(_IdClase, value))
+			{
+				_IdClase = value;
+			}
+		}
+	}
+
+	[Column(Storage = "_IdGrupo", DbType = "Char(3)")]
+	public string IdGrupo
+	{
+		get
+		{
+			return _IdGrupo;
+		}
+		set
+		{
+			if (!string.Equals(_IdGrupo, value))
+			{
+				_IdGrupo = value;
+			}
+		}
+	}
+
+	[Column(Storage = "_Tipo", DbType = "Char(1)")]
+	public char? Tipo
+	{
+		get
+		{
+			return _Tipo;
+		}
+		set
+		{
+			if (!_Tipo.Equals(value))
+			{
+				_Tipo = value;
+			}
+		}
+	}
+
+	[Column(Storage = "_Unidad", DbType = "Char(4)")]
+	public string Unidad
+	{
+		get
+		{
+			return _Unidad;
+		}
+		set
+		{
+			if (!string.Equals(_Unidad, value))
+			{
+				_Unidad = value;
+			}
+		}
+	}
+
+	[Column(Storage = "_EsActivoFijo", DbType = "Char(1)")]
+	public char? EsActivoFijo
+	{
+		get
+		{
+			return _EsActivoFijo;
+		}
+		set
+		{
+			if (!_EsActivoFijo.Equals(value))
+			{
+				_EsActivoFijo = value;
+			}
+		}
+	}
+}

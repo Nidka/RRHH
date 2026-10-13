@@ -1,0 +1,5 @@
+<Project>
+  <ItemGroup>
+    <Compile Remove="**\InternalXmlHelper.cs" />
+  </ItemGroup>
+</Project>

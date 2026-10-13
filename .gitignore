@@ -1,0 +1,23 @@
+**/bin/
+**/obj/
+*.user
+*.suo
+*.log
+.vs/
+
+# Dependencias antiguas/licenciadas: cada desarrollador las instala localmente
+lib/legacy/*
+!lib/legacy/README.md
+
+# Nunca versionar respaldos ni datos reales de Recursos Humanos
+*.bak
+*.backup
+*.dump
+database/dumps/
+database/private/
+
+# Configuración y secretos locales
+.env
+.env.*
+!.env.example
+*.user.config

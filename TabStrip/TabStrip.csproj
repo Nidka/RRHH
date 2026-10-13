@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+  <PropertyGroup>
+    <AssemblyName>TabStrip</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <UseWindowsForms>True</UseWindowsForms>
+    <TargetFramework>net48</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <LangVersion>12.0</LangVersion>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup>
+    <RootNamespace />
+  </PropertyGroup>
+  <ItemGroup>
+    <None Remove="FarsiLibrary.Win.FATabStrip.bmp" />
+    <EmbeddedResource Include="FarsiLibrary.Win.FATabStrip.bmp" LogicalName="FarsiLibrary.Win.FATabStrip.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System.Design" />
+  </ItemGroup>
+</Project>
