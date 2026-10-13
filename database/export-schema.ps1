@@ -18,8 +18,19 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$pgDump = Get-Command pg_dump -ErrorAction SilentlyContinue
-if (-not $pgDump) {
+$pgDumpCommand = Get-Command pg_dump -ErrorAction SilentlyContinue
+$pgDumpPath = if ($pgDumpCommand) { $pgDumpCommand.Source } else { $null }
+
+if (-not $pgDumpPath) {
+    $postgresRoot = Join-Path $env:ProgramFiles 'PostgreSQL'
+    $pgDumpPath = Get-ChildItem -LiteralPath $postgresRoot -Directory -ErrorAction SilentlyContinue |
+        Sort-Object { [version]$_.Name } -Descending |
+        ForEach-Object { Join-Path $_.FullName 'bin\pg_dump.exe' } |
+        Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } |
+        Select-Object -First 1
+}
+
+if (-not $pgDumpPath) {
     throw 'No se encontró pg_dump. Instala las herramientas cliente de PostgreSQL y vuelve a ejecutar el script.'
 }
 
@@ -38,7 +49,7 @@ if ($Schema) {
     $arguments += @('--schema', $Schema)
 }
 
-& $pgDump.Source @arguments
+& $pgDumpPath @arguments
 if ($LASTEXITCODE -ne 0) {
     throw "pg_dump terminó con el código $LASTEXITCODE."
 }

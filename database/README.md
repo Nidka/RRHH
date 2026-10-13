@@ -13,7 +13,7 @@ personal de Recursos Humanos. En el repositorio sólo debe versionarse:
 Con las herramientas cliente de PostgreSQL instaladas:
 
 ```powershell
-.\database\export-schema.ps1 `
+.\database\export-schema.cmd `
   -HostName localhost `
   -DatabaseName CMI `
   -UserName postgres
@@ -22,6 +22,8 @@ Con las herramientas cliente de PostgreSQL instaladas:
 El script usa `pg_dump --schema-only` y crea `database/schema.sql`. La
 contraseña debe suministrarse mediante el mecanismo seguro de PostgreSQL
 (`pgpass`) o su solicitud interactiva; nunca se escribe en el repositorio.
+El exportador detecta automáticamente las instalaciones estándar de PostgreSQL
+en Windows aunque `pg_dump` no esté agregado a `PATH`.
 
 ## Situación actual
 
