@@ -1,6 +1,7 @@
 using GRLL.Common;
 using Microsoft.VisualBasic.CompilerServices;
 using RecursosHumanos.Data;
+using RRHH.PostgreSql;
 
 namespace RecursosHumanos;
 

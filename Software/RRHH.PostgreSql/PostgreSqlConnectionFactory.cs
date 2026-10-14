@@ -2,21 +2,32 @@ using System;
 using System.Configuration;
 using Npgsql;
 
-namespace RecursosHumanos.Data;
+namespace RRHH.PostgreSql;
 
 /// <summary>
-/// Punto único de configuración para la nueva capa PostgreSQL.
+/// Centraliza la configuración de PostgreSQL para todos los proyectos de RRHH.
+/// En producción se recomienda usar RRHH_POSTGRES_CONNECTION.
 /// </summary>
-internal sealed class PostgreSqlConnectionFactory
+public sealed class PostgreSqlConnectionFactory
 {
-	private const string EnvironmentVariable = "RRHH_POSTGRES_CONNECTION";
-	private const string ConfigurationName = "RrhhPostgreSql";
+	public const string EnvironmentVariable = "RRHH_POSTGRES_CONNECTION";
+	public const string ConfigurationName = "RrhhPostgreSql";
 
 	public string ConnectionString { get; }
 
 	public PostgreSqlConnectionFactory()
+		: this(ResolveConnectionString())
 	{
-		ConnectionString = ResolveConnectionString();
+	}
+
+	public PostgreSqlConnectionFactory(string connectionString)
+	{
+		if (string.IsNullOrWhiteSpace(connectionString))
+		{
+			throw new ArgumentException("La cadena de PostgreSQL no puede estar vacía.", nameof(connectionString));
+		}
+
+		ConnectionString = connectionString;
 	}
 
 	public NpgsqlConnection OpenConnection()

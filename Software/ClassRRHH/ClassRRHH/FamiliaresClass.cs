@@ -1,49 +1,44 @@
 using System.Data;
-using System.Data.SqlClient;
-using GRLL.Common;
-using Microsoft.VisualBasic.CompilerServices;
+using RRHH.PostgreSql;
 
 namespace ClassRRHH;
 
 public class FamiliaresClass
 {
-	public SqlConnection ObjCnn;
-
-	public SqlDataAdapter objDA;
+	private readonly PostgreSqlExecutor _database;
 
 	public FamiliaresClass()
+		: this(new PostgreSqlExecutor())
 	{
-		ObjCnn = clsConexion.Conexion;
-		objDA = new SqlDataAdapter();
+	}
+
+	public FamiliaresClass(PostgreSqlExecutor database)
+	{
+		_database = database;
 	}
 
 	public object llena_parentezco()
 	{
-		ObjCnn.Open();
-		DataTable dt_llena_Parentesco = new DataTable();
-		objDA.SelectCommand = new SqlCommand("select IdTipoFam, DescripTipoFam from tipofamiliar", ObjCnn);
-		objDA.Fill(dt_llena_Parentesco);
-		ObjCnn.Close();
-		return dt_llena_Parentesco;
+		return _database.Query(
+			"SELECT \"IdTipoFam\", \"DescripTipoFam\" " +
+			"FROM public.\"TipoFamiliar\" ORDER BY \"DescripTipoFam\";");
 	}
 
 	public object Busca_DNI(string numDoc, int tipodoc)
 	{
-		ObjCnn.Open();
-		DataTable dt_bus_persona = new DataTable();
-		objDA.SelectCommand = new SqlCommand("select * from persona where NumDocId='" + numDoc + "'and TipoDocID=" + Conversions.ToString(tipodoc), ObjCnn);
-		objDA.Fill(dt_bus_persona);
-		ObjCnn.Close();
-		return dt_bus_persona;
+		return _database.Query(
+			"SELECT * FROM public.\"Persona\" " +
+			"WHERE btrim(\"NumDocID\") = btrim(@numDoc) AND \"TipoDocID\" = @tipoDoc;",
+			new PostgreSqlParameterValue("numDoc", numDoc),
+			new PostgreSqlParameterValue("tipoDoc", tipodoc));
 	}
 
 	public object Busca_Codigo(int Codper)
 	{
-		ObjCnn.Open();
-		DataTable dt_bus_persona = new DataTable();
-		objDA.SelectCommand = new SqlCommand("select * from persona inner join familiar on familiar.idpersona=persona.idpersona where persona.IdPersona=" + Conversions.ToString(Codper), ObjCnn);
-		objDA.Fill(dt_bus_persona);
-		ObjCnn.Close();
-		return dt_bus_persona;
+		return _database.Query(
+			"SELECT p.*, f.* FROM public.\"Persona\" AS p " +
+			"INNER JOIN public.\"Familiar\" AS f ON f.\"IdPersona\" = p.\"IdPersona\" " +
+			"WHERE p.\"IdPersona\" = @personaId;",
+			new PostgreSqlParameterValue("personaId", Codper));
 	}
 }

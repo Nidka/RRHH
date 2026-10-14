@@ -66,6 +66,7 @@
   <ItemGroup>
     <ProjectReference Include="..\ClassRRHH\ClassRRHH.csproj" />
     <ProjectReference Include="..\GRLL.Common.Rutinas\GRLL.Common.Rutinas.csproj" />
+	<ProjectReference Include="..\RRHH.PostgreSql\RRHH.PostgreSql.csproj" />
   </ItemGroup>
   <ItemGroup>
     <!-- Npgsql 4.1 es la rama compatible con .NET Framework 4.8. -->

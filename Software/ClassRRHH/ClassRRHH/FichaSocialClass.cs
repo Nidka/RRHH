@@ -1,30 +1,45 @@
 using System.Data;
-using System.Data.SqlClient;
-using GRLL.Common;
+using RRHH.PostgreSql;
 
 namespace ClassRRHH;
 
 public class FichaSocialClass
 {
-	public SqlConnection ObjCnn;
-
-	public SqlDataAdapter objDA;
+	private readonly PostgreSqlExecutor _database;
 
 	public FichaSocialClass()
+		: this(new PostgreSqlExecutor())
 	{
-		ObjCnn = clsConexion.Conexion;
-		objDA = new SqlDataAdapter();
+	}
+
+	public FichaSocialClass(PostgreSqlExecutor database)
+	{
+		_database = database;
 	}
 
 	public object llenarFamiliares(int CodEmple)
 	{
-		ObjCnn.Open();
-		DataTable dt_llena_Familiares = new DataTable();
-		objDA.SelectCommand = new SqlCommand("spRRHH_BuscarFamiliares", ObjCnn);
-		objDA.SelectCommand.CommandType = CommandType.StoredProcedure;
-		objDA.SelectCommand.Parameters.Add("@idempleado", SqlDbType.Int).Value = CodEmple;
-		objDA.Fill(dt_llena_Familiares);
-		ObjCnn.Close();
-		return dt_llena_Familiares;
+		const string sql = """
+SELECT
+    btrim(concat_ws(' ', p."Apellido_Paterno", p."Apellido_Materno", p."Nombres")) AS "NombresCompletos",
+    p."FechaNacimiento" AS "fechaNacimiento",
+    f."FamSexo" AS "famSexo",
+    tf."DescripTipoFam",
+    f."FamGradoInstruc" AS "famgradoInstruc",
+    ec."DescripEstCivil" AS "descripestcivil",
+    f."ViveCasa" AS "vivecasa",
+    p."IdPersona" AS "Idpersona",
+    f."LaboraInstitucion" AS "laborainstitucion"
+FROM public."Familiar" AS f
+INNER JOIN public."Persona" AS p ON p."IdPersona" = f."IdPersona"
+LEFT JOIN public."TipoFamiliar" AS tf ON tf."IdTipoFam" = f."IdTipoFam"
+LEFT JOIN public."EstadoCivil" AS ec ON ec."IdEstadoCivil" = f."IdEstadoCivil"
+WHERE f."IdEmpleado" = @empleadoId
+ORDER BY "NombresCompletos";
+""";
+
+		return _database.Query(
+			sql,
+			new PostgreSqlParameterValue("empleadoId", CodEmple));
 	}
 }

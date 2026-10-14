@@ -1,6 +1,7 @@
 using System;
 using Npgsql;
 using NpgsqlTypes;
+using RRHH.PostgreSql;
 
 namespace RecursosHumanos.Data;
 

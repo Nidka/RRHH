@@ -23,6 +23,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+	<ProjectReference Include="..\RRHH.PostgreSql\RRHH.PostgreSql.csproj" />
     <ProjectReference Include="..\Seguridad\Seguridad.csproj" />
   </ItemGroup>
 </Project>

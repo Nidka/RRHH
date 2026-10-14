@@ -89,11 +89,19 @@
       "classrrhh": {
         "type": "Project",
         "dependencies": {
+          "RRHH.PostgreSql": "[1.0.0, )",
           "Seguridad": "[1.0.0, )"
         }
       },
       "grll.common.rutinas": {
         "type": "Project"
+      },
+      "rrhh.postgresql": {
+        "type": "Project",
+        "dependencies": {
+          "Npgsql": "[4.1.14, )",
+          "System.Memory": "[4.5.5, )"
+        }
       },
       "seguridad": {
         "type": "Project"
