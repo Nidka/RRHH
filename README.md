@@ -27,6 +27,15 @@ poder abrirlo y compilarlo con Visual Studio 2022.
   localmente en `Software/lib/legacy`. El código de GRLL queda disponible como referencia
   y para su refactorización gradual.
 
+## Arquitectura
+
+El código nuevo y el que se migra siguen **MVP con vista pasiva sobre capas**
+(Dominio, Aplicación, Infraestructura PostgreSQL y Presentación WinForms).
+La especificación completa está en
+[`Software/docs/ARQUITECTURA.md`](Software/docs/ARQUITECTURA.md) y la decisión
+en [`Software/docs/adr/0001-mvp-sobre-capas.md`](Software/docs/adr/0001-mvp-sobre-capas.md).
+Las reglas resumidas están en [`CLAUDE.md`](CLAUDE.md).
+
 ## Abrir y compilar
 
 Requisitos:

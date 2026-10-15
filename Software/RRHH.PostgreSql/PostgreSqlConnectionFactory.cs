@@ -1,17 +1,16 @@
 using System;
-using System.Configuration;
 using Npgsql;
 
 namespace RRHH.PostgreSql;
 
 /// <summary>
 /// Centraliza la configuración de PostgreSQL para todos los proyectos de RRHH.
-/// En producción se recomienda usar RRHH_POSTGRES_CONNECTION.
+/// La cadena de conexión solo viene de RRHH_POSTGRES_CONNECTION; nunca de
+/// app.config ni del código.
 /// </summary>
 public sealed class PostgreSqlConnectionFactory
 {
 	public const string EnvironmentVariable = "RRHH_POSTGRES_CONNECTION";
-	public const string ConfigurationName = "RrhhPostgreSql";
 
 	public string ConnectionString { get; }
 
@@ -57,20 +56,13 @@ public sealed class PostgreSqlConnectionFactory
 	private static string ResolveConnectionString()
 	{
 		string fromEnvironment = Environment.GetEnvironmentVariable(EnvironmentVariable);
-		if (!string.IsNullOrWhiteSpace(fromEnvironment))
+		if (string.IsNullOrWhiteSpace(fromEnvironment))
 		{
-			return fromEnvironment;
+			throw new InvalidOperationException(
+				$"Defina la variable de entorno {EnvironmentVariable} con la cadena de conexión " +
+				"de PostgreSQL, por ejemplo: Host=localhost;Port=5432;Database=CMI;Username=rrhh_app;Password=...");
 		}
 
-		ConnectionStringSettings configured =
-			ConfigurationManager.ConnectionStrings[ConfigurationName];
-		if (configured == null || string.IsNullOrWhiteSpace(configured.ConnectionString))
-		{
-			throw new ConfigurationErrorsException(
-				$"Falta '{ConfigurationName}' en app.config. También puede definir " +
-				$"la variable de entorno {EnvironmentVariable}.");
-		}
-
-		return configured.ConnectionString;
+		return fromEnvironment;
 	}
 }

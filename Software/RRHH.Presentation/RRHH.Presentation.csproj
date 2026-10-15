@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Presenters e interfaces de vista. No debe referenciar WinForms ni
+       DevExpress: así la regla de la vista pasiva se comprueba al compilar. -->
+  <PropertyGroup>
+    <AssemblyName>RRHH.Presentation</AssemblyName>
+    <RootNamespace>RRHH.Presentation</RootNamespace>
+    <TargetFramework>net48</TargetFramework>
+    <LangVersion>12.0</LangVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\RRHH.Application\RRHH.Application.csproj" />
+  </ItemGroup>
+</Project>

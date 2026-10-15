@@ -1,12 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data.Linq;
-using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Windows.Forms;
@@ -21,11 +18,12 @@ using GRLL.Common;
 using Microsoft.VisualBasic;
 using Microsoft.VisualBasic.CompilerServices;
 using RecursosHumanos.My.Resources;
+using RRHH.Presentation.Catalogos;
 
 namespace RecursosHumanos;
 
 [DesignerGenerated]
-public class FrmMantEstCivil : FrmConsulta
+public class FrmMantEstCivil : FrmConsulta, IFormularioCatalogo
 {
 	private static List<WeakReference> __ENCList = new List<WeakReference>();
 
@@ -73,7 +71,9 @@ public class FrmMantEstCivil : FrmConsulta
 	[AccessedThroughProperty("PictureBox4")]
 	private PictureBox _PictureBox4;
 
-	public dcGRLLDataContext y;
+	private VistaCatalogoGrid _vista;
+
+	ICatalogoView IFormularioCatalogo.Vista => _vista;
 
 	internal GridControl DGVEstCivil
 	{
@@ -102,13 +102,11 @@ public class FrmMantEstCivil : FrmConsulta
 		set
 		{
 			RowAllowEventHandler value2 = Vista1_BeforeLeaveRow;
-			BaseContainerValidateEditorEventHandler value3 = Vista1_ValidatingEditor;
 			ValidateRowEventHandler value4 = Vista1_ValidateRow;
 			RowObjectEventHandler value5 = Vista1_RowUpdated;
 			if (_GridView1 != null)
 			{
 				_GridView1.BeforeLeaveRow -= value2;
-				_GridView1.ValidatingEditor -= value3;
 				_GridView1.ValidateRow -= value4;
 				_GridView1.RowUpdated -= value5;
 			}
@@ -116,7 +114,6 @@ public class FrmMantEstCivil : FrmConsulta
 			if (_GridView1 != null)
 			{
 				_GridView1.BeforeLeaveRow += value2;
-				_GridView1.ValidatingEditor += value3;
 				_GridView1.ValidateRow += value4;
 				_GridView1.RowUpdated += value5;
 			}
@@ -334,8 +331,8 @@ public class FrmMantEstCivil : FrmConsulta
 	{
 		base.Load += FrmMantEstCivil_Load;
 		__ENCAddToList(this);
-		y = new dcGRLLDataContext(clsConexion.Conexion);
 		InitializeComponent();
+		_vista = new VistaCatalogoGrid(this, GridView1, DataNavigator1, () => UcTxtCampoBusca.Text);
 	}
 
 	[DebuggerNonUserCode]
@@ -465,20 +462,20 @@ public class FrmMantEstCivil : FrmConsulta
 		this.GridView1.OptionsMenu.EnableGroupPanelMenu = false;
 		this.GridView1.OptionsView.ShowGroupPanel = false;
 		this.GridColumn1.Caption = "Codigo";
-		this.GridColumn1.FieldName = "IdEstadoCivil";
+		this.GridColumn1.FieldName = "Id";
 		this.GridColumn1.Name = "GridColumn1";
 		this.GridColumn1.OptionsColumn.AllowEdit = false;
 		this.GridColumn1.Visible = true;
 		this.GridColumn1.VisibleIndex = 0;
 		this.GridColumn1.Width = 60;
-		this.GridColumn2.Caption = "DescripciÃ³n";
-		this.GridColumn2.FieldName = "DescripEstCivil";
+		this.GridColumn2.Caption = "Descripción";
+		this.GridColumn2.FieldName = "Descripcion";
 		this.GridColumn2.Name = "GridColumn2";
 		this.GridColumn2.Visible = true;
 		this.GridColumn2.VisibleIndex = 1;
 		this.GridColumn2.Width = 187;
 		this.GridColumn3.Caption = "Abreviatura";
-		this.GridColumn3.FieldName = "AbrevEstCiv";
+		this.GridColumn3.FieldName = "Extra";
 		this.GridColumn3.Name = "GridColumn3";
 		this.GridColumn3.Visible = true;
 		this.GridColumn3.VisibleIndex = 2;
@@ -629,169 +626,41 @@ public class FrmMantEstCivil : FrmConsulta
 		this.PerformLayout();
 	}
 
+	// La lógica está en CatalogoPresenter; estos manejadores solo reenvían
+	// los eventos de los controles a VistaCatalogoGrid.
 	private void FrmMantEstCivil_Load(object sender, EventArgs e)
 	{
-		llenardata();
+		_vista.Buscar();
 	}
 
 	private void DataNavigator1_ButtonClick(object sender, NavigatorButtonClickEventArgs e)
 	{
-		if (e.Button.ButtonType == NavigatorButtonType.Append)
-		{
-			if (GridView1.FocusedColumn != null)
-			{
-				GridView1.FocusedColumn = GridView1.Columns[GridColumn2.FieldName];
-				DataNavigator1.Buttons.DoClick(DataNavigator1.Buttons.Last);
-				if (Information.IsDBNull(RuntimeHelpers.GetObjectValue(GridView1.FocusedValue)) | (GridView1.FocusedValue == null))
-				{
-					e.Handled = true;
-				}
-				GridView1.ClearSorting();
-				GridView1.ShowEditor();
-			}
-			return;
-		}
-		if (e.Button.ButtonType == NavigatorButtonType.EndEdit)
-		{
-			EstadoCivil obj = (EstadoCivil)GridView1.GetRow(GridView1.FocusedRowHandle);
-			Actualizar(obj);
-		}
-		if (e.Button.ButtonType == NavigatorButtonType.Remove)
-		{
-			EstadoCivil estadoCivil = (EstadoCivil)GridView1.GetRow(GridView1.FocusedRowHandle);
-			if ((estadoCivil != null && estadoCivil.DescripEstCivil != null) ? true : false)
-			{
-				if (MessageBox.Show("Va a eliminar el registro :" + ObtenerMensaje(estadoCivil) + "\r\nDesea continuar ?", "", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
-				{
-					e.Handled = true;
-				}
-				else
-				{
-					try
-					{
-						EstadoCivilMapper.Instance().Delete(estadoCivil);
-					}
-					catch (SqlException ex)
-					{
-						ProjectData.SetProjectError(ex);
-						SqlException ex2 = ex;
-						if (ex2.Number == 547)
-						{
-							Interaction.MsgBox("Se hace referencia a este registro en otra tabla.", MsgBoxStyle.Critical);
-							e.Handled = true;
-							ProjectData.ClearProjectError();
-							return;
-						}
-						ProjectData.ClearProjectError();
-					}
-				}
-			}
-			else
-			{
-				e.Handled = true;
-				if (estadoCivil == null || estadoCivil.DescripEstCivil == null)
-				{
-					GridView1.DeleteRow(GridView1.FocusedRowHandle);
-				}
-			}
-		}
-		if (e.Button.ButtonType == NavigatorButtonType.CancelEdit)
-		{
-			EstadoCivil estadoCivil2 = (EstadoCivil)GridView1.GetRow(GridView1.FocusedRowHandle);
-			if (estadoCivil2 == null || estadoCivil2.DescripEstCivil == null)
-			{
-				GridView1.DeleteRow(GridView1.FocusedRowHandle);
-			}
-		}
-	}
-
-	private void Actualizar(EstadoCivil obj)
-	{
-		if (obj.IdEstadoCivil == 0)
-		{
-			Table<EstadoCivil> estadoCivil = y.EstadoCivil;
-			ParameterExpression parameterExpression = Expression.Parameter(typeof(EstadoCivil), "n");
-			int num = y.EstadoCivil.Select(n => n.IdEstadoCivil).Max();
-			num = Conversions.ToInteger(decimal.Add(decimal.Parse(Conversions.ToString(num)), 1m).ToString().PadLeft(4, '0'));
-			obj.IdEstadoCivil = num;
-			EstadoCivilMapper.Instance().Insert(obj);
-			MessageBox.Show("Se insertÃ³ el registro :" + ObtenerMensaje(obj), "", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
-		}
-		else
-		{
-			EstadoCivilMapper.Instance().Update(obj);
-			MessageBox.Show("Se actualizÃ³ el registro :" + ObtenerMensaje(obj), "", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
-		}
-	}
-
-	private string ObtenerMensaje(EstadoCivil obj, bool EsEliminar = true)
-	{
-		string text = "\r\nCÃ³digo=" + Conversions.ToString(obj.IdEstadoCivil) + "\r\n";
-		text = text + "DescripciÃ³n=" + obj.DescripEstCivil + "\r\n";
-		text = text + "Abreviatura=" + obj.AbrevEstCiv + "\r\n";
-		if (!EsEliminar)
-		{
-			text += " correctamente";
-		}
-		return text;
+		_vista.ClickNavegador(e);
 	}
 
 	private void Vista1_BeforeLeaveRow(object sender, RowAllowEventArgs e)
 	{
-		EstadoCivil estadoCivil = (EstadoCivil)GridView1.GetRow(e.RowHandle);
-		if (estadoCivil != null && estadoCivil.DescripEstCivil == null)
-		{
-			e.Allow = false;
-			GridView1.ShowEditor();
-		}
-	}
-
-	private void Vista1_RowUpdated(object sender, RowObjectEventArgs e)
-	{
-		EstadoCivil estadoCivil = (EstadoCivil)e.Row;
-		if (estadoCivil.DescripEstCivil != null)
-		{
-			Actualizar(estadoCivil);
-		}
+		_vista.AntesDeSalirDeFila(e);
 	}
 
 	private void Vista1_ValidateRow(object sender, ValidateRowEventArgs e)
 	{
-		EstadoCivil estadoCivil = (EstadoCivil)e.Row;
-		if (estadoCivil.DescripEstCivil == null)
-		{
-			e.ErrorText = "Debe ingresar datos";
-			e.Valid = false;
-		}
+		_vista.ValidarFila(e);
 	}
 
-	private void Vista1_ValidatingEditor(object sender, BaseContainerValidateEditorEventArgs e)
+	private void Vista1_RowUpdated(object sender, RowObjectEventArgs e)
 	{
-		if (Operators.CompareString(GridView1.FocusedColumn.FieldName, "DescripEstCivil", TextCompare: false) == 0 && e.Value != null && e.Value.ToString().Trim().Length == 0)
-		{
-			e.Valid = false;
-			e.ErrorText = "Debe ingresar la descripciÃ³n";
-		}
-	}
-
-	private void llenardata()
-	{
-		Table<EstadoCivil> estadoCivil = y.EstadoCivil;
-		ParameterExpression parameterExpression = Expression.Parameter(typeof(EstadoCivil), "n");
-		string filter = UcTxtCampoBusca.Text ?? string.Empty;
-		IQueryable<EstadoCivil> dataSource = y.EstadoCivil.Where(n => n.DescripEstCivil != null && n.DescripEstCivil.Contains(filter));
-		DGVEstCivil.DataSource = dataSource;
-		DataNavigator1.DataSource = dataSource;
+		_vista.FilaActualizada(e);
 	}
 
 	private void UcTxtCampoBusca_TextChanged(object sender, EventArgs e)
 	{
-		llenardata();
+		_vista.Buscar();
 	}
 
 	private void Button1_Click(object sender, EventArgs e)
 	{
-		llenardata();
+		_vista.Buscar();
 	}
 
 	private void BtnCerrar_Click(object sender, EventArgs e)

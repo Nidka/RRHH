@@ -9,6 +9,7 @@ using System.Windows.Forms;
 using ClassRRHH;
 using Microsoft.VisualBasic.CompilerServices;
 using RecursosHumanos.My.Resources;
+using RRHH.Domain.Catalogos;
 
 namespace RecursosHumanos;
 
@@ -2295,7 +2296,7 @@ public class MainMDI : Form
 	{
 		if (ObjMantCargo == null || (ObjMantCargo.IsDisposed ? true : false))
 		{
-			ObjMantCargo = new FrmMantCargos();
+			ObjMantCargo = CompositionRoot.CrearCatalogo<FrmMantCargos>(TipoCatalogo.Cargo);
 		}
 		else
 		{
@@ -2309,7 +2310,7 @@ public class MainMDI : Form
 	{
 		if (ObjMantGrupoSangrineo == null || (ObjMantGrupoSangrineo.IsDisposed ? true : false))
 		{
-			ObjMantGrupoSangrineo = new FrmMantGrupoSanguineo();
+			ObjMantGrupoSangrineo = CompositionRoot.CrearCatalogo<FrmMantGrupoSanguineo>(TipoCatalogo.GrupoSanguineo);
 		}
 		else
 		{
@@ -2323,7 +2324,7 @@ public class MainMDI : Form
 	{
 		if (ObjMantTipoTrab == null || (ObjMantTipoTrab.IsDisposed ? true : false))
 		{
-			ObjMantTipoTrab = new FrmMantTipoTrab();
+			ObjMantTipoTrab = CompositionRoot.CrearCatalogo<FrmMantTipoTrab>(TipoCatalogo.TipoTrabajador);
 		}
 		else
 		{
@@ -2337,7 +2338,7 @@ public class MainMDI : Form
 	{
 		if (ObjMantRegimen == null || (ObjMantRegimen.IsDisposed ? true : false))
 		{
-			ObjMantRegimen = new FrmMantRegimen();
+			ObjMantRegimen = CompositionRoot.CrearCatalogo<FrmMantRegimen>(TipoCatalogo.RegimenPension);
 		}
 		else
 		{
@@ -2351,7 +2352,7 @@ public class MainMDI : Form
 	{
 		if (ObjMantNacionalidad == null || (ObjMantNacionalidad.IsDisposed ? true : false))
 		{
-			ObjMantNacionalidad = new FrmMantNacionalidades();
+			ObjMantNacionalidad = CompositionRoot.CrearCatalogo<FrmMantNacionalidades>(TipoCatalogo.Nacionalidad);
 		}
 		else
 		{
@@ -2365,7 +2366,7 @@ public class MainMDI : Form
 	{
 		if (ObjMantEstCivil == null || (ObjMantEstCivil.IsDisposed ? true : false))
 		{
-			ObjMantEstCivil = new FrmMantEstCivil();
+			ObjMantEstCivil = CompositionRoot.CrearCatalogo<FrmMantEstCivil>(TipoCatalogo.EstadoCivil);
 		}
 		else
 		{
@@ -2379,7 +2380,7 @@ public class MainMDI : Form
 	{
 		if (ObjMantTipoInst == null || (ObjMantTipoInst.IsDisposed ? true : false))
 		{
-			ObjMantTipoInst = new FrmMantTipoInst();
+			ObjMantTipoInst = CompositionRoot.CrearCatalogo<FrmMantTipoInst>(TipoCatalogo.TipoInstitucion);
 		}
 		else
 		{
@@ -2393,7 +2394,7 @@ public class MainMDI : Form
 	{
 		if (ObjFrmMantTipoDocIdent == null || (ObjFrmMantTipoDocIdent.IsDisposed ? true : false))
 		{
-			ObjFrmMantTipoDocIdent = new FrmMantTipoDocIdent();
+			ObjFrmMantTipoDocIdent = CompositionRoot.CrearCatalogo<FrmMantTipoDocIdent>(TipoCatalogo.TipoDocumentoIdentidad);
 		}
 		else
 		{
@@ -2407,7 +2408,7 @@ public class MainMDI : Form
 	{
 		if (ObjFrmMantTipoEstudio == null || (ObjFrmMantTipoEstudio.IsDisposed ? true : false))
 		{
-			ObjFrmMantTipoEstudio = new FrmMantTipoEstudio();
+			ObjFrmMantTipoEstudio = CompositionRoot.CrearCatalogo<FrmMantTipoEstudio>(TipoCatalogo.TipoEstudio);
 		}
 		else
 		{
@@ -2608,7 +2609,7 @@ public class MainMDI : Form
 	{
 		if (ObjFrmMantTipoPerm == null || (ObjFrmMantTipoPerm.IsDisposed ? true : false))
 		{
-			ObjFrmMantTipoPerm = new FrmMantTipoPerm();
+			ObjFrmMantTipoPerm = CompositionRoot.CrearCatalogo<FrmMantTipoPerm>(TipoCatalogo.TipoPermiso);
 		}
 		else
 		{
@@ -2664,7 +2665,7 @@ public class MainMDI : Form
 	{
 		if (ObjFrmMantTipoPerm == null || (ObjFrmMantTipoPerm.IsDisposed ? true : false))
 		{
-			ObjFrmMantTipoPerm = new FrmMantTipoPerm();
+			ObjFrmMantTipoPerm = CompositionRoot.CrearCatalogo<FrmMantTipoPerm>(TipoCatalogo.TipoPermiso);
 		}
 		else
 		{

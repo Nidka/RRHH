@@ -1,7 +1,7 @@
 using System;
 using System.Drawing;
 using System.Windows.Forms;
-using RecursosHumanos.Data;
+using RRHH.Application.Seguridad;
 
 namespace RecursosHumanos;
 
@@ -105,9 +105,9 @@ public sealed class FrmLogin : Form
 
 		try
 		{
-			Module1.PostgreSql.VerifySchema();
-			UserAccess access = Module1.Users.FindAccess(RRHH.Codsys, login);
-			if (access == null || !access.EmployeeId.HasValue)
+			CompositionRoot.VerificarBaseDeDatos();
+			AccesoUsuario access = CompositionRoot.CrearObtenerAccesoUsuario().Ejecutar(RRHH.Codsys, login);
+			if (access == null)
 			{
 				_status.Text = "El usuario no está activo o no tiene acceso a RRHH.";
 				return;
@@ -134,19 +134,19 @@ public sealed class FrmLogin : Form
 		}
 	}
 
-	private void ApplyAccess(UserAccess access)
+	private void ApplyAccess(AccesoUsuario access)
 	{
 		RRHH.LogUser = access.Login;
-		RRHH.codEmple = access.EmployeeId.Value.ToString();
-		RRHH.IdROl = access.RoleId.ToString();
+		RRHH.codEmple = access.IdEmpleado.Value.ToString();
+		RRHH.IdROl = access.IdRol.ToString();
 		RRHH.Partida = 0;
 		RRHH.Bienestar = false;
 		RRHH.Asistencias = false;
-		EmployeeDisplayName = string.IsNullOrWhiteSpace(access.EmployeeName)
+		EmployeeDisplayName = string.IsNullOrWhiteSpace(access.NombreEmpleado)
 			? access.Login
-			: access.EmployeeName;
+			: access.NombreEmpleado;
 
-		switch (access.RoleId)
+		switch (access.IdRol)
 		{
 			case 3:
 				RRHH.Partida = 2;

@@ -8,11 +8,13 @@
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Npgsql" Version="4.1.14" />
     <PackageReference Include="System.Memory" Version="4.5.5" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\RRHH.Application\RRHH.Application.csproj" />
   </ItemGroup>
 </Project>

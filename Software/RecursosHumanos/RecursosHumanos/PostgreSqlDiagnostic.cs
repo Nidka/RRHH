@@ -1,9 +1,9 @@
 using System;
 using System.IO;
 using System.Linq;
-using RRHH.PostgreSql;
+using RRHH.Application.Seguridad;
 
-namespace RecursosHumanos.Data;
+namespace RecursosHumanos;
 
 internal static class PostgreSqlDiagnostic
 {
@@ -21,24 +21,22 @@ internal static class PostgreSqlDiagnostic
 
 		try
 		{
-			PostgreSqlConnectionFactory factory = new PostgreSqlConnectionFactory();
-			factory.VerifySchema();
+			CompositionRoot.VerificarBaseDeDatos();
 			string login = GetOption(arguments, "--login");
 			string result = "PostgreSQL: conexión y esquema RRHH verificados.";
 
 			if (!string.IsNullOrWhiteSpace(login))
 			{
-				UserAccess access = new PostgreSqlUserRepository(factory)
-					.FindAccess(RRHH.Codsys, login);
+				AccesoUsuario access = CompositionRoot.CrearObtenerAccesoUsuario().Ejecutar(RRHH.Codsys, login);
 				if (access == null)
 				{
 					throw new InvalidOperationException(
-						$"El usuario '{login}' no tiene acceso activo al sistema {RRHH.Codsys}.");
+						$"El usuario '{login}' no tiene acceso activo al sistema {RRHH.Codsys} o no está asociado a un empleado.");
 				}
 
 				result += Environment.NewLine +
-					$"Usuario={access.Login}; Empleado={access.EmployeeId}; " +
-					$"Rol={access.RoleId}; Nombre={access.EmployeeName}";
+					$"Usuario={access.Login}; Empleado={access.IdEmpleado}; " +
+					$"Rol={access.IdRol}; Nombre={access.NombreEmpleado}";
 			}
 
 			WriteResult(result);

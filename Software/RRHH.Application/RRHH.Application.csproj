@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>RRHH.Application</AssemblyName>
+    <RootNamespace>RRHH.Application</RootNamespace>
+    <TargetFramework>net48</TargetFramework>
+    <LangVersion>12.0</LangVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\RRHH.Domain\RRHH.Domain.csproj" />
+  </ItemGroup>
+</Project>

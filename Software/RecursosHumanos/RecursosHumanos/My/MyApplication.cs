@@ -6,7 +6,6 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 using Microsoft.VisualBasic.ApplicationServices;
-using RecursosHumanos.Data;
 
 namespace RecursosHumanos.My;
 

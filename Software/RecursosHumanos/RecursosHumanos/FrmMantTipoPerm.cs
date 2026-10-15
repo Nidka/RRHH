@@ -1,12 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data.Linq;
-using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Windows.Forms;
@@ -22,11 +19,12 @@ using GRLL.Common;
 using Microsoft.VisualBasic;
 using Microsoft.VisualBasic.CompilerServices;
 using RecursosHumanos.My.Resources;
+using RRHH.Presentation.Catalogos;
 
 namespace RecursosHumanos;
 
 [DesignerGenerated]
-public class FrmMantTipoPerm : FrmConsulta
+public class FrmMantTipoPerm : FrmConsulta, IFormularioCatalogo
 {
 	private static List<WeakReference> __ENCList = new List<WeakReference>();
 
@@ -62,7 +60,9 @@ public class FrmMantTipoPerm : FrmConsulta
 	[AccessedThroughProperty("ToolTipController1")]
 	private ToolTipController _ToolTipController1;
 
-	public dcGRLLDataContext y;
+	private VistaCatalogoGrid _vista;
+
+	ICatalogoView IFormularioCatalogo.Vista => _vista;
 
 	internal ImageList ImageList2
 	{
@@ -130,13 +130,11 @@ public class FrmMantTipoPerm : FrmConsulta
 		set
 		{
 			RowAllowEventHandler value2 = Vista1_BeforeLeaveRow;
-			BaseContainerValidateEditorEventHandler value3 = Vista1_ValidatingEditor;
 			ValidateRowEventHandler value4 = Vista1_ValidateRow;
 			RowObjectEventHandler value5 = Vista1_RowUpdated;
 			if (_GridView1 != null)
 			{
 				_GridView1.BeforeLeaveRow -= value2;
-				_GridView1.ValidatingEditor -= value3;
 				_GridView1.ValidateRow -= value4;
 				_GridView1.RowUpdated -= value5;
 			}
@@ -144,7 +142,6 @@ public class FrmMantTipoPerm : FrmConsulta
 			if (_GridView1 != null)
 			{
 				_GridView1.BeforeLeaveRow += value2;
-				_GridView1.ValidatingEditor += value3;
 				_GridView1.ValidateRow += value4;
 				_GridView1.RowUpdated += value5;
 			}
@@ -263,8 +260,8 @@ public class FrmMantTipoPerm : FrmConsulta
 	{
 		base.Load += FrmMantTipoPerm_Load;
 		__ENCAddToList(this);
-		y = new dcGRLLDataContext(clsConexion.Conexion);
 		InitializeComponent();
+		_vista = new VistaCatalogoGrid(this, GridView1, DataNavigator1, () => UcTxtCampoBusca.Text);
 	}
 
 	[DebuggerNonUserCode]
@@ -426,14 +423,14 @@ public class FrmMantTipoPerm : FrmConsulta
 		this.GridView1.OptionsMenu.EnableGroupPanelMenu = false;
 		this.GridView1.OptionsView.ShowGroupPanel = false;
 		this.GridColumn1.Caption = "Codigo";
-		this.GridColumn1.FieldName = "idTipoPermiso";
+		this.GridColumn1.FieldName = "Id";
 		this.GridColumn1.Name = "GridColumn1";
 		this.GridColumn1.OptionsColumn.AllowEdit = false;
 		this.GridColumn1.Visible = true;
 		this.GridColumn1.VisibleIndex = 0;
 		this.GridColumn1.Width = 60;
-		this.GridColumn2.Caption = "DescripciÃ³n";
-		this.GridColumn2.FieldName = "DescripTipoPermiso";
+		this.GridColumn2.Caption = "Descripción";
+		this.GridColumn2.FieldName = "Descripcion";
 		this.GridColumn2.Name = "GridColumn2";
 		this.GridColumn2.Visible = true;
 		this.GridColumn2.VisibleIndex = 1;
@@ -506,175 +503,41 @@ public class FrmMantTipoPerm : FrmConsulta
 		this.PerformLayout();
 	}
 
+	// La lógica está en CatalogoPresenter; estos manejadores solo reenvían
+	// los eventos de los controles a VistaCatalogoGrid.
 	private void FrmMantTipoPerm_Load(object sender, EventArgs e)
 	{
-		llenardata();
+		_vista.Buscar();
 	}
 
 	private void DataNavigator1_ButtonClick(object sender, NavigatorButtonClickEventArgs e)
 	{
-		if (e.Button.ButtonType == NavigatorButtonType.Append)
-		{
-			if (GridView1.FocusedColumn != null)
-			{
-				GridView1.FocusedColumn = GridView1.Columns[GridColumn2.FieldName];
-				DataNavigator1.Buttons.DoClick(DataNavigator1.Buttons.Last);
-				if (Information.IsDBNull(RuntimeHelpers.GetObjectValue(GridView1.FocusedValue)) | (GridView1.FocusedValue == null))
-				{
-					e.Handled = true;
-				}
-				GridView1.ClearSorting();
-				GridView1.ShowEditor();
-			}
-			return;
-		}
-		if (e.Button.ButtonType == NavigatorButtonType.EndEdit)
-		{
-			TipoPermiso obj = (TipoPermiso)GridView1.GetRow(GridView1.FocusedRowHandle);
-			Actualizar(obj);
-		}
-		if (e.Button.ButtonType == NavigatorButtonType.Remove)
-		{
-			TipoPermiso tipoPermiso = (TipoPermiso)GridView1.GetRow(GridView1.FocusedRowHandle);
-			if ((tipoPermiso != null && tipoPermiso.DescripTipoPermiso != null) ? true : false)
-			{
-				if (MessageBox.Show("Va a eliminar el registro :" + ObtenerMensaje(tipoPermiso) + "\r\nDesea continuar ?", "", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
-				{
-					e.Handled = true;
-				}
-				else
-				{
-					try
-					{
-						TipoPermisoMapper.Instance().Delete(tipoPermiso);
-					}
-					catch (SqlException ex)
-					{
-						ProjectData.SetProjectError(ex);
-						SqlException ex2 = ex;
-						if (ex2.Number == 547)
-						{
-							Interaction.MsgBox("Se hace referencia a este registro en otra tabla.", MsgBoxStyle.Critical);
-							e.Handled = true;
-							ProjectData.ClearProjectError();
-							return;
-						}
-						ProjectData.ClearProjectError();
-					}
-				}
-			}
-			else
-			{
-				e.Handled = true;
-				if (tipoPermiso == null || tipoPermiso.DescripTipoPermiso == null)
-				{
-					GridView1.DeleteRow(GridView1.FocusedRowHandle);
-				}
-			}
-		}
-		if (e.Button.ButtonType == NavigatorButtonType.CancelEdit)
-		{
-			TipoPermiso tipoPermiso2 = (TipoPermiso)GridView1.GetRow(GridView1.FocusedRowHandle);
-			if (tipoPermiso2 == null || tipoPermiso2.DescripTipoPermiso == null)
-			{
-				GridView1.DeleteRow(GridView1.FocusedRowHandle);
-			}
-		}
-	}
-
-	private void Actualizar(TipoPermiso obj)
-	{
-		if (obj.idTipoPermiso == 0)
-		{
-			Table<TipoPermiso> tipoPermiso = y.TipoPermiso;
-			ParameterExpression parameterExpression = Expression.Parameter(typeof(TipoPermiso), "n");
-			int num = y.TipoPermiso.Select(n => n.idTipoPermiso).Max();
-			num = Conversions.ToInteger(decimal.Add(decimal.Parse(Conversions.ToString(num)), 1m).ToString().PadLeft(4, '0'));
-			obj.idTipoPermiso = num;
-			TipoPermisoMapper.Instance().Insert(obj);
-			MessageBox.Show("Se insertÃ³ el registro :" + ObtenerMensaje(obj), "", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
-		}
-		else
-		{
-			TipoPermisoMapper.Instance().Update(obj);
-			MessageBox.Show("Se actualizÃ³ el registro :" + ObtenerMensaje(obj), "", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
-		}
-	}
-
-	private string ObtenerMensaje(TipoPermiso obj, bool EsEliminar = true)
-	{
-		string text = "\r\nCÃ³digo=" + Conversions.ToString(obj.idTipoPermiso) + "\r\n";
-		text = text + "Ley Regimen=" + obj.DescripTipoPermiso + "\r\n";
-		if (!EsEliminar)
-		{
-			text += " correctamente";
-		}
-		return text;
+		_vista.ClickNavegador(e);
 	}
 
 	private void Vista1_BeforeLeaveRow(object sender, RowAllowEventArgs e)
 	{
-		TipoPermiso tipoPermiso = (TipoPermiso)GridView1.GetRow(e.RowHandle);
-		if (tipoPermiso != null && tipoPermiso.DescripTipoPermiso == null)
-		{
-			e.Allow = false;
-			GridView1.ShowEditor();
-		}
-	}
-
-	private void Vista1_RowUpdated(object sender, RowObjectEventArgs e)
-	{
-		TipoPermiso tipoPermiso = (TipoPermiso)e.Row;
-		if (tipoPermiso.DescripTipoPermiso != null)
-		{
-			if (tipoPermiso.DescripTipoPermiso.Length > 50)
-			{
-				Interaction.MsgBox("Cantidad MÃ¡xima Exedida DescripciÃ³n");
-			}
-			else
-			{
-				Actualizar(tipoPermiso);
-			}
-		}
+		_vista.AntesDeSalirDeFila(e);
 	}
 
 	private void Vista1_ValidateRow(object sender, ValidateRowEventArgs e)
 	{
-		TipoPermiso tipoPermiso = (TipoPermiso)e.Row;
-		if (tipoPermiso.DescripTipoPermiso == null)
-		{
-			e.ErrorText = "Debe ingresar datos";
-			e.Valid = false;
-		}
+		_vista.ValidarFila(e);
 	}
 
-	private void Vista1_ValidatingEditor(object sender, BaseContainerValidateEditorEventArgs e)
+	private void Vista1_RowUpdated(object sender, RowObjectEventArgs e)
 	{
-		if (Operators.CompareString(GridView1.FocusedColumn.FieldName, "DescripTipoPermiso", TextCompare: false) == 0 && e.Value != null && e.Value.ToString().Trim().Length == 0)
-		{
-			e.Valid = false;
-			e.ErrorText = "Debe ingresar la descripciÃ³n";
-		}
-	}
-
-	private void llenardata()
-	{
-		Table<TipoPermiso> tipoPermiso = y.TipoPermiso;
-		ParameterExpression parameterExpression = Expression.Parameter(typeof(TipoPermiso), "n");
-		string filter = UcTxtCampoBusca.Text ?? string.Empty;
-		IQueryable<TipoPermiso> dataSource = y.TipoPermiso.Where(n => n.DescripTipoPermiso != null && n.DescripTipoPermiso.Contains(filter));
-		GridControl1.DataSource = dataSource;
-		DataNavigator1.DataSource = dataSource;
+		_vista.FilaActualizada(e);
 	}
 
 	private void UcTxtCampoBusca_TextChanged(object sender, EventArgs e)
 	{
-		llenardata();
+		_vista.Buscar();
 	}
 
 	private void Button1_Click(object sender, EventArgs e)
 	{
-		llenardata();
+		_vista.Buscar();
 	}
 
 	private void BtnCerrar_Click(object sender, EventArgs e)

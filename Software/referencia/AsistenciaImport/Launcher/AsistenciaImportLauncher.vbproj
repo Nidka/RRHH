@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{A42BF5B7-BA14-4D6E-9A35-E730EA537CA2}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>RRHH.AsistenciaImport.Launcher</RootNamespace>
+    <AssemblyName>RRHH.AsistenciaImport.Launcher</AssemblyName>
+    <StartupObject>RRHH.AsistenciaImport.Launcher.Program</StartupObject>
+    <MyType>Windows</MyType>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <PlatformTarget>x86</PlatformTarget>
+    <AppConfig>..\..\RecursosHumanos.exe.config</AppConfig>
+    <OutputPath Condition=" '$(Configuration)' == 'Debug' ">bin\Debug\</OutputPath>
+    <OutputPath Condition=" '$(Configuration)' == 'Release' ">bin\Release\</OutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Windows.Forms" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AsistenciaImport.vbproj">
+      <Project>{A821E4C1-3209-4B52-87B1-9B3B8CE01F31}</Project>
+      <Name>RRHH.AsistenciaImport</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Program.vb" />
+    <None Include="..\..\RecursosHumanos.exe.config">
+      <Link>App.config</Link>
+    </None>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
+</Project>

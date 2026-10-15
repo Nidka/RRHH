@@ -7,6 +7,7 @@
 
 # Dependencias antiguas/licenciadas: cada desarrollador las instala localmente
 Software/lib/legacy/*
+Software/necesarios/
 !Software/lib/legacy/README.md
 
 # Nunca versionar respaldos ni datos reales de Recursos Humanos
@@ -23,3 +24,6 @@ BD/CMI.sql
 .env.*
 !.env.example
 *.user.config
+
+# graphify (grafo generado localmente)
+graphify-out/
