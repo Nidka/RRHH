@@ -1,78 +1,89 @@
-# Migración a PostgreSQL
+# Migracion a PostgreSQL
 
-## Estado verificado
+## Estado operativo
 
-El dump privado `BD/CMI.sql` se restauró en una instancia PostgreSQL 17 de
-prueba y se comprobó con el ejecutable recuperado. El archivo fue creado por
-PostgreSQL 18.3 en formato personalizado y contiene 101 tablas con datos.
+La aplicacion se ejecuta con PostgreSQL/Npgsql. El arranque no crea una
+conexion SQL Server y los formularios recuperados usan implementaciones
+PostgreSQL compatibles para sus mappers y procedimientos heredados.
 
-La primera ruta vertical ya está migrada:
+Flujos cubiertos:
 
-- configuración PostgreSQL externa mediante `RRHH_POSTGRES_CONNECTION`;
-- conexión Npgsql y validación del esquema al iniciar sesión;
-- consulta parametrizada de usuario, empleado y rol;
-- carga del nombre del empleado en la ventana principal;
-- comprobador repetible `scripts/check-postgresql.cmd`.
+- autenticacion con PBKDF2-SHA256 y permisos del sistema RRHH;
+- catalogos, empleados, personas y ubigeo;
+- permisos, horarios, locales y feriados;
+- asistencia diaria, semanal, faltas, tardanzas y horas extra;
+- importacion biometrica desde Access hacia PostgreSQL;
+- legajo, ficha social, documentos y archivos;
+- reportes de personal, oficinas, cumpleanos, permisos y ficha social.
 
-El antiguo control de login abría una conexión SQL Server con las credenciales
-escritas por el usuario. Fue reemplazado para que el arranque no dependa de
-`GRLL_Usuario_Acceso` ni de `SqlConnection`.
+La migracion `BD/migrations/20261015_01_complete_module_tables.sql` agrega de
+forma idempotente las tablas `Documento`, `Archivo`, `Ingreso` y `Egreso` que
+no estaban en el dump PostgreSQL inicial.
 
-## Brecha de la base migrada
+## Verificacion
 
-La base SQL Server original contiene 100 tablas, 303 procedimientos, 90 vistas
-y 47 funciones escalares. El dump PostgreSQL disponible contiene tablas y
-datos, pero no funciones, procedimientos, vistas, claves ni restricciones. Se
-observaron filas duplicadas que las restricciones ausentes habrían impedido.
+```powershell
+.\Software\scripts\check-postgresql.cmd
+.\Software\scripts\check-postgresql.cmd -Modules
+dotnet test .\Software\RRHH.Tests\RRHH.Tests.csproj --no-restore -c Debug
+```
 
-Por ese motivo el repositorio incluye `BD/schema.sql`, pero no inventa contratos
-de procedimientos ni reglas de integridad. Es necesario reconstruirlos y
-validarlos con resultados conocidos del sistema original.
+`-Modules` ejecuta consultas reales de empleados, tipos, motivos, ubigeo,
+horarios, locales, asistencia, cumpleanos, ficha social y documentos. La
+prueba se ejecuto correctamente contra Neon el 2026-10-15; no escribe datos.
 
-## Dependencias heredadas aún activas
+## Importacion biometrica
 
-El resto de la aplicación contiene aproximadamente:
+Los relojes antiguos siguen entregando archivos `Marcacion.mdb`. Esto no
+convierte Access en base principal: `AsistenciaAccess` lee el archivo local y
+guarda `Asistencia` y `Marcacion` en PostgreSQL dentro de una transaccion. El
+equipo que ejecute este proceso necesita:
 
-- 55 archivos que usan `SqlConnection`, `SqlCommand` o `SqlDataAdapter`;
-- 807 archivos generados o consumidores de LINQ-to-SQL;
-- 78 usos de `CommandType.StoredProcedure`;
-- mapeos `dbo` y expresiones T-SQL como `CONVERT`, `ISNULL` y parámetros `@`.
+- plataforma x86;
+- Microsoft Jet OLE DB 4.0 de 32 bits;
+- acceso a la ruta configurada para la sede, PROIND o CONSEJO.
 
-El contexto `dcGRLLDataContext` se conserva temporalmente para que el código
-recuperado compile. LINQ-to-SQL genera dialecto SQL Server y no puede ejecutarse
-sobre Npgsql. Las pantallas que todavía lo usan no se consideran migradas.
+## Artefactos heredados
 
-## Seguridad del acceso
+Las fuentes decompiladas conservan clases LINQ-to-SQL y `TableAdapter`
+generados para los disenadores antiguos de Visual Studio/DevExpress. Se
+mantienen como referencia y compatibilidad visual. La ruta funcional de los
+formularios usa `PostgreSqlLegacyMapper`, `PostgreSqlLegacyContext` y
+`RRHHClass`; esta ultima no expone ni inicializa ya `SqlConnection`.
 
-La tabla `Usuario` migrada no contiene una contraseña ni un hash. El login
-actual selecciona el perfil de un usuario activo después de que PostgreSQL
-autentica la cuenta de conexión. Esto sirve para desarrollo y para continuar la
-migración, pero no debe publicarse en producción como autenticación de usuario
-final.
+Tambien existe codigo SQL Server deshabilitado con `#if false` dentro de
+`RRHHClass` para comparar la forma de los reportes durante la refactorizacion.
+No se incluye en el ensamblado.
 
-Antes de producción se debe elegir e implementar una identidad verificable
-(por ejemplo Active Directory/OIDC o una tabla de credenciales con hashes
-modernos), además de una cuenta PostgreSQL de mínimo privilegio. Las claves se
-inyectan mediante secretos; nunca se guardan en `app.config` ni en Git.
+## Brecha del esquema
 
-## Orden de trabajo recomendado
+El dump PostgreSQL contiene datos y tablas, pero no recupero todas las claves,
+restricciones, vistas ni rutinas de la base SQL Server original. Algunas
+tablas restauradas tienen duplicados y no se deben agregar restricciones a
+ciegas. La ruta segura es:
 
-1. Recuperar en PostgreSQL claves primarias, foráneas, índices y restricciones.
-2. Crear pruebas de caracterización contra SQL Server para empleados,
-   asistencia, permisos, ficha social y reportes.
-3. Migrar catálogos simples a repositorios Npgsql y retirar sus usos de
-   `dcGRLLDataContext`.
-4. Portar cada procedimiento `spRRHH_*` con consultas parametrizadas y pruebas
-   de equivalencia.
-5. Migrar las escrituras dentro de transacciones y resolver secuencias,
-   booleanos, fechas, valores nulos y mayúsculas/minúsculas.
-6. Migrar los TableAdapters y reportes.
-7. Retirar finalmente `System.Data.SqlClient`, LINQ-to-SQL y la cadena SQL
-   Server del programa.
+1. trabajar con una copia anonimizada;
+2. detectar y resolver duplicados;
+3. agregar indices y claves por modulo mediante migraciones idempotentes;
+4. ejecutar pruebas de caracterizacion antes y despues;
+5. desplegar primero en QA y luego en produccion.
 
-## Criterio de terminado
+## Seguridad
 
-La migración completa termina cuando no quedan dependencias de `SqlClient`, las
-operaciones de lectura y escritura se ejecutan exclusivamente por PostgreSQL,
-las reglas de integridad están restauradas y las pruebas funcionales pasan con
-una copia anonimizada de QA.
+`.env`, `BD/CMI.sql`, dumps y respaldos estan excluidos de Git. Cada
+desarrollador usa su propia configuracion local. En CI y produccion las
+credenciales deben venir del almacen de secretos de la plataforma.
+
+Las cuentas importadas sin hash no pueden iniciar sesion. Un administrador
+asigna la clave con `scripts/set-user-password.cmd`, que nunca la recibe como
+argumento visible del proceso.
+
+## Trabajo estructural pendiente
+
+La migracion operativa no equivale a una modernizacion completa. Queda:
+
+1. reemplazar el puente generico por repositorios por caso de uso;
+2. retirar `TableAdapter` y fuentes SQL Server no usadas de los reportes;
+3. restaurar reglas de integridad del esquema despues de sanear los datos;
+4. agregar pruebas funcionales de escritura con una copia anonimizada de QA;
+5. modernizar gradualmente DevExpress 11.2 y los controles de `GRLL.dll`.

@@ -2838,7 +2838,6 @@ public class FrmMantEmpleado_Basico : FrmConsulta
 		dataRow3["AreaOrganizacional"] = "(Seleccionar)";
 		dataTable3.Rows.InsertAt(dataRow3, 0);
 		UcCBArea.DataSource = dataTable3;
-		UcUbigeoCmb1.Conexion = objClassRRHH.ObjCnn;
 		UcUbigeoCmb1.GetDpto();
 		UcCBGrupoSanguineo.ValueMember = "IdTipoSangre";
 		UcCBGrupoSanguineo.DisplayMember = "DescripTS";
@@ -2849,7 +2848,6 @@ public class FrmMantEmpleado_Basico : FrmConsulta
 			DescripTS = "   "
 		});
 		UcCBGrupoSanguineo.DataSource = list;
-		UcUbigeoCmbDirec.Conexion = objClassRRHH.ObjCnn;
 		UcUbigeoCmbDirec.GetDpto();
 		UcFoto.AjustarImagen = true;
 		objClassRRHH.CodigoEmpleado = MantEmpleado_Basico_Cod;

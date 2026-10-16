@@ -3,8 +3,7 @@ using System;
 namespace RRHH.Application.Seguridad;
 
 /// <summary>
-/// Busca el acceso con el que el usuario entra a RRHH. Solo selecciona el
-/// perfil: no verifica contraseña (pendiente, ver PLAN_REFACTORIZACION.md).
+/// Autentica al usuario y obtiene el acceso con el que entra a RRHH.
 /// </summary>
 public sealed class ObtenerAccesoUsuario
 {
@@ -16,17 +15,17 @@ public sealed class ObtenerAccesoUsuario
 	}
 
 	/// <summary>
-	/// <c>null</c> si el login está vacío, si el usuario no está activo o no
-	/// tiene rol en el sistema, o si no está asociado a un empleado (RRHH lo necesita).
+	/// <c>null</c> si las credenciales son inválidas, si el usuario no está activo,
+	/// no tiene rol o no está asociado a un empleado (RRHH lo necesita).
 	/// </summary>
-	public AccesoUsuario Ejecutar(string codigoSistema, string login)
+	public AccesoUsuario Ejecutar(string codigoSistema, string login, string password)
 	{
-		if (string.IsNullOrWhiteSpace(login))
+		if (string.IsNullOrWhiteSpace(login) || string.IsNullOrEmpty(password))
 		{
 			return null;
 		}
 
-		AccesoUsuario acceso = _repository.Buscar(codigoSistema, login.Trim());
+		AccesoUsuario acceso = _repository.Autenticar(codigoSistema, login.Trim(), password);
 		return acceso?.IdEmpleado == null ? null : acceso;
 	}
 }

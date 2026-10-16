@@ -12102,17 +12102,10 @@ public class FrmFichaSocial : FrmConsulta
 	public void llenda_datos_empleado()
 	{
 		_Closure_0024__5 CS_0024_003C_003E8__locals4 = new _Closure_0024__5();
-		Table<Empleado> empleados = Module1.DcGrll.Empleados;
-		ParameterExpression parameterExpression = Expression.Parameter(typeof(Empleado), "qEmpleado");
-		IQueryable<Empleado> source = empleados.Where(qEmpleado => qEmpleado.IdEmpleado == CodEmple);
-		ParameterExpression parameterExpression2 = Expression.Parameter(typeof(Empleado), "qEmpleado");
-		empleado = source.Select(Expression.Lambda<Func<Empleado, Empleado>>(parameterExpression2, new ParameterExpression[1] { parameterExpression2 })).First();
+		empleado = EmpleadoMapper.Instance().SelectBy(qEmpleado => qEmpleado.IdEmpleado == CodEmple).First();
 		CS_0024_003C_003E8__locals4._0024VB_0024Local_codper = (int)empleado.IdPersona;
-		Table<Persona> source2 = Module1.DcGrll.Persona;
-		ParameterExpression parameterExpression3 = Expression.Parameter(typeof(Persona), "qPersona");
-		IQueryable<Persona> source3 = source2.Where(qPersona => qPersona.IdPersona == CS_0024_003C_003E8__locals4._0024VB_0024Local_codper);
-		ParameterExpression parameterExpression4 = Expression.Parameter(typeof(Persona), "qPersona");
-		persona = source3.Select(Expression.Lambda<Func<Persona, Persona>>(parameterExpression4, new ParameterExpression[1] { parameterExpression4 })).First();
+		persona = PersonaMapper.Instance().SelectBy(qPersona =>
+			qPersona.IdPersona == CS_0024_003C_003E8__locals4._0024VB_0024Local_codper).First();
 		UcTxtNDoc.Text = persona.NumDocID.SinNulo();
 		UcTxtApePater.Text = persona.Apellido_Paterno.SinNulo();
 		UcTxtApeMater.Text = persona.Apellido_Materno.SinNulo();

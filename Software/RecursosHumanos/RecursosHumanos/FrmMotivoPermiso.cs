@@ -507,21 +507,21 @@ public class FrmMotivoPermiso : FrmConsulta
 		if (Conversions.ToDouble(RRHH.IdROl) == 10.0)
 		{
 			GridControl gridControl = GridControl1;
-			dcGRLLDataContext dcGrll = Module1.DcGrll;
+			PostgreSqlLegacyContext dcGrll = Module1.DcGrll;
 			object selectedValue = UcComboBox1.SelectedValue;
 			gridControl.DataSource = dcGrll.spRRHH_getMotivo_perm((selectedValue != null) ? ((int?)selectedValue) : num, 'P');
 		}
 		else if (Conversions.ToDouble(RRHH.IdROl) == 14.0)
 		{
 			GridControl gridControl2 = GridControl1;
-			dcGRLLDataContext dcGrll2 = Module1.DcGrll;
+			PostgreSqlLegacyContext dcGrll2 = Module1.DcGrll;
 			object selectedValue2 = UcComboBox1.SelectedValue;
 			gridControl2.DataSource = dcGrll2.spRRHH_getMotivo_perm((selectedValue2 != null) ? ((int?)selectedValue2) : num, 'C');
 		}
 		else if (Conversions.ToDouble(RRHH.IdROl) == 13.0)
 		{
 			GridControl gridControl3 = GridControl1;
-			dcGRLLDataContext dcGrll3 = Module1.DcGrll;
+			PostgreSqlLegacyContext dcGrll3 = Module1.DcGrll;
 			object selectedValue3 = UcComboBox1.SelectedValue;
 			char? tipoModalidad = default(char?);
 			gridControl3.DataSource = dcGrll3.spRRHH_getMotivo_perm((selectedValue3 != null) ? ((int?)selectedValue3) : num, tipoModalidad);
@@ -545,21 +545,21 @@ public class FrmMotivoPermiso : FrmConsulta
 			if (Conversions.ToDouble(RRHH.IdROl) == 10.0)
 			{
 				GridControl gridControl = GridControl1;
-				dcGRLLDataContext dcGrll = Module1.DcGrll;
+				PostgreSqlLegacyContext dcGrll = Module1.DcGrll;
 				object selectedValue = UcComboBox1.SelectedValue;
 				gridControl.DataSource = dcGrll.spRRHH_getMotivo_perm((selectedValue != null) ? ((int?)selectedValue) : num, 'P');
 			}
 			else if (Conversions.ToDouble(RRHH.IdROl) == 14.0)
 			{
 				GridControl gridControl2 = GridControl1;
-				dcGRLLDataContext dcGrll2 = Module1.DcGrll;
+				PostgreSqlLegacyContext dcGrll2 = Module1.DcGrll;
 				object selectedValue2 = UcComboBox1.SelectedValue;
 				gridControl2.DataSource = dcGrll2.spRRHH_getMotivo_perm((selectedValue2 != null) ? ((int?)selectedValue2) : num, 'C');
 			}
 			else if (Conversions.ToDouble(RRHH.IdROl) == 13.0)
 			{
 				GridControl gridControl3 = GridControl1;
-				dcGRLLDataContext dcGrll3 = Module1.DcGrll;
+				PostgreSqlLegacyContext dcGrll3 = Module1.DcGrll;
 				object selectedValue3 = UcComboBox1.SelectedValue;
 				char? tipoModalidad = default(char?);
 				gridControl3.DataSource = dcGrll3.spRRHH_getMotivo_perm((selectedValue3 != null) ? ((int?)selectedValue3) : num, tipoModalidad);
@@ -580,21 +580,21 @@ public class FrmMotivoPermiso : FrmConsulta
 			if (Conversions.ToDouble(RRHH.IdROl) == 10.0)
 			{
 				GridControl gridControl = GridControl1;
-				dcGRLLDataContext dcGrll = Module1.DcGrll;
+				PostgreSqlLegacyContext dcGrll = Module1.DcGrll;
 				object selectedValue = UcComboBox1.SelectedValue;
 				gridControl.DataSource = dcGrll.spRRHH_getMotivo_perm((selectedValue != null) ? ((int?)selectedValue) : num, 'P');
 			}
 			else if (Conversions.ToDouble(RRHH.IdROl) == 14.0)
 			{
 				GridControl gridControl2 = GridControl1;
-				dcGRLLDataContext dcGrll2 = Module1.DcGrll;
+				PostgreSqlLegacyContext dcGrll2 = Module1.DcGrll;
 				object selectedValue2 = UcComboBox1.SelectedValue;
 				gridControl2.DataSource = dcGrll2.spRRHH_getMotivo_perm((selectedValue2 != null) ? ((int?)selectedValue2) : num, 'C');
 			}
 			else if (Conversions.ToDouble(RRHH.IdROl) == 13.0)
 			{
 				GridControl gridControl3 = GridControl1;
-				dcGRLLDataContext dcGrll3 = Module1.DcGrll;
+				PostgreSqlLegacyContext dcGrll3 = Module1.DcGrll;
 				object selectedValue3 = UcComboBox1.SelectedValue;
 				char? tipoModalidad = default(char?);
 				gridControl3.DataSource = dcGrll3.spRRHH_getMotivo_perm((selectedValue3 != null) ? ((int?)selectedValue3) : num, tipoModalidad);
@@ -618,21 +618,21 @@ public class FrmMotivoPermiso : FrmConsulta
 			if (Conversions.ToDouble(RRHH.IdROl) == 10.0)
 			{
 				GridControl gridControl = GridControl1;
-				dcGRLLDataContext dcGrll = Module1.DcGrll;
+				PostgreSqlLegacyContext dcGrll = Module1.DcGrll;
 				object selectedValue = UcComboBox1.SelectedValue;
 				gridControl.DataSource = dcGrll.spRRHH_getMotivo_perm((selectedValue != null) ? ((int?)selectedValue) : num, 'P');
 			}
 			else if (Conversions.ToDouble(RRHH.IdROl) == 14.0)
 			{
 				GridControl gridControl2 = GridControl1;
-				dcGRLLDataContext dcGrll2 = Module1.DcGrll;
+				PostgreSqlLegacyContext dcGrll2 = Module1.DcGrll;
 				object selectedValue2 = UcComboBox1.SelectedValue;
 				gridControl2.DataSource = dcGrll2.spRRHH_getMotivo_perm((selectedValue2 != null) ? ((int?)selectedValue2) : num, 'C');
 			}
 			else if (Conversions.ToDouble(RRHH.IdROl) == 13.0)
 			{
 				GridControl gridControl3 = GridControl1;
-				dcGRLLDataContext dcGrll3 = Module1.DcGrll;
+				PostgreSqlLegacyContext dcGrll3 = Module1.DcGrll;
 				object selectedValue3 = UcComboBox1.SelectedValue;
 				char? tipoModalidad = default(char?);
 				gridControl3.DataSource = dcGrll3.spRRHH_getMotivo_perm((selectedValue3 != null) ? ((int?)selectedValue3) : num, tipoModalidad);

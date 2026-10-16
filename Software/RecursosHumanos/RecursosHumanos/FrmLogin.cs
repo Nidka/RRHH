@@ -12,6 +12,7 @@ namespace RecursosHumanos;
 public sealed class FrmLogin : Form
 {
 	private readonly TextBox _userName = new TextBox();
+	private readonly TextBox _password = new TextBox();
 	private readonly Label _status = new Label();
 	private readonly Button _accept = new Button();
 	private readonly Button _cancel = new Button();
@@ -31,7 +32,7 @@ public sealed class FrmLogin : Form
 		MaximizeBox = false;
 		MinimizeBox = false;
 		ShowInTaskbar = false;
-		ClientSize = new Size(390, 175);
+		ClientSize = new Size(390, 215);
 		BackColor = Color.FromArgb(199, 223, 250);
 
 		Label title = new Label
@@ -54,19 +55,32 @@ public sealed class FrmLogin : Form
 		_userName.MaxLength = 20;
 		_userName.KeyDown += UserName_KeyDown;
 
+		Label passwordLabel = new Label
+		{
+			AutoSize = true,
+			Location = new Point(22, 90),
+			Text = "Contraseña:"
+		};
+
+		_password.Location = new Point(100, 86);
+		_password.Size = new Size(260, 23);
+		_password.MaxLength = 128;
+		_password.UseSystemPasswordChar = true;
+		_password.KeyDown += UserName_KeyDown;
+
 		_status.AutoEllipsis = true;
 		_status.ForeColor = Color.DarkSlateGray;
-		_status.Location = new Point(22, 87);
+		_status.Location = new Point(22, 121);
 		_status.Size = new Size(338, 35);
 		_status.Text = "La conexión se validará contra PostgreSQL.";
 
-		_accept.Location = new Point(196, 132);
+		_accept.Location = new Point(196, 172);
 		_accept.Size = new Size(78, 27);
 		_accept.Text = "Aceptar";
 		_accept.Click += Accept_Click;
 
 		_cancel.DialogResult = DialogResult.Cancel;
-		_cancel.Location = new Point(282, 132);
+		_cancel.Location = new Point(282, 172);
 		_cancel.Size = new Size(78, 27);
 		_cancel.Text = "Salir";
 
@@ -75,6 +89,8 @@ public sealed class FrmLogin : Form
 		Controls.Add(title);
 		Controls.Add(userLabel);
 		Controls.Add(_userName);
+		Controls.Add(passwordLabel);
+		Controls.Add(_password);
 		Controls.Add(_status);
 		Controls.Add(_accept);
 		Controls.Add(_cancel);
@@ -98,6 +114,12 @@ public sealed class FrmLogin : Form
 			_userName.Focus();
 			return;
 		}
+		if (_password.Text.Length == 0)
+		{
+			_status.Text = "Escriba su contraseña.";
+			_password.Focus();
+			return;
+		}
 
 		_accept.Enabled = false;
 		_status.Text = "Conectando con PostgreSQL...";
@@ -106,10 +128,15 @@ public sealed class FrmLogin : Form
 		try
 		{
 			CompositionRoot.VerificarBaseDeDatos();
-			AccesoUsuario access = CompositionRoot.CrearObtenerAccesoUsuario().Ejecutar(RRHH.Codsys, login);
+			AccesoUsuario access = CompositionRoot.CrearObtenerAccesoUsuario().Ejecutar(
+				RRHH.Codsys,
+				login,
+				_password.Text);
 			if (access == null)
 			{
-				_status.Text = "El usuario no está activo o no tiene acceso a RRHH.";
+				_status.Text = "Usuario o contraseña incorrectos, o sin acceso a RRHH.";
+				_password.SelectAll();
+				_password.Focus();
 				return;
 			}
 
@@ -136,6 +163,7 @@ public sealed class FrmLogin : Form
 
 	private void ApplyAccess(AccesoUsuario access)
 	{
+		_password.Clear();
 		RRHH.LogUser = access.Login;
 		RRHH.codEmple = access.IdEmpleado.Value.ToString();
 		RRHH.IdROl = access.IdRol.ToString();

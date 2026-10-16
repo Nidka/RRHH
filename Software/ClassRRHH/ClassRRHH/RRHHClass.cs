@@ -1,7 +1,8 @@
 using System;
 using System.Data;
-using System.Data.SqlClient;
 using System.Globalization;
+using System.Collections.Generic;
+using System.Linq;
 using GRLL.Common;
 using Microsoft.VisualBasic.CompilerServices;
 using RRHH.PostgreSql;
@@ -10,10 +11,6 @@ namespace ClassRRHH;
 
 public class RRHHClass
 {
-	public SqlConnection ObjCnn;
-
-	public SqlDataAdapter objDA;
-
 	private readonly PostgreSqlExecutor _database;
 
 	private int mCodigoEmpleado;
@@ -52,10 +49,6 @@ public class RRHHClass
 	public RRHHClass(PostgreSqlExecutor database)
 	{
 		_database = database ?? throw new ArgumentNullException(nameof(database));
-		// Se conserva temporalmente para los controles Ubigeo heredados de GRLL.
-		// Las operaciones de RRHH de esta clase usan PostgreSQL.
-		ObjCnn = clsConexion.Conexion;
-		objDA = new SqlDataAdapter();
 		mAnio = 2011;
 	}
 
@@ -109,20 +102,21 @@ public class RRHHClass
 
 	public bool importarBio(string FechaInicial, string FechaFinal)
 	{
-		if (ObjCnn.State == ConnectionState.Closed)
-		{
-			ObjCnn.Open();
-		}
-		objDA.SelectCommand = new SqlCommand("spRRHH_ImportarAsistenciaBio", ObjCnn);
-		objDA.SelectCommand.CommandType = CommandType.StoredProcedure;
-		objDA.SelectCommand.Parameters.Add("@FechaInicio", SqlDbType.VarChar).Value = FechaInicial;
-		objDA.SelectCommand.Parameters.Add("@FechaFin", SqlDbType.VarChar).Value = FechaFinal;
-		objDA.SelectCommand.CommandTimeout = 0;
-		objDA.SelectCommand.ExecuteNonQuery();
-		if (ObjCnn.State == ConnectionState.Open)
-		{
-			ObjCnn.Close();
-		}
+		_database.Execute("""
+INSERT INTO public."Asistencia"
+    ("Fecha","IdEmpleado","Hor_Ent","Hor_Sal","Flag_Ent","Flag_Sal","Estado","idHorario","Usuario","PC")
+SELECT m."Fecha"::date, m."IdEmpleado",
+       to_char(MIN(m."Fecha"),'HH24:MI:SS'), to_char(MAX(m."Fecha"),'HH24:MI:SS'),
+       TRUE, COUNT(*) > 1, TRUE, MAX(m."idHorario"), 'MIGRACION_BIO', 'POSTGRESQL'
+FROM public."Marcacion" m
+WHERE m."Fecha"::date BETWEEN @inicio AND @fin
+GROUP BY m."Fecha"::date,m."IdEmpleado"
+ON CONFLICT ("Fecha","IdEmpleado") DO UPDATE SET
+  "Hor_Ent"=EXCLUDED."Hor_Ent", "Hor_Sal"=EXCLUDED."Hor_Sal",
+  "Flag_Ent"=EXCLUDED."Flag_Ent", "Flag_Sal"=EXCLUDED."Flag_Sal",
+  "Estado"=EXCLUDED."Estado", "idHorario"=EXCLUDED."idHorario";
+""", new PostgreSqlParameterValue("inicio", ParseDate(FechaInicial).Date, DbType.Date),
+			new PostgreSqlParameterValue("fin", ParseDate(FechaFinal).Date, DbType.Date));
 		return true;
 	}
 
@@ -451,6 +445,8 @@ ORDER BY "NombresCompletos";
 
 	public object Generar_Ficha(int codEmple)
 	{
+		return GenerarFichaPostgreSql(codEmple, false);
+#if false
 		ObjCnn.Open();
 		DataSet dt_Generar_Ficha = new DataSet();
 		objDA.SelectCommand = new SqlCommand("spRRHH_fichaSocial", ObjCnn);
@@ -463,10 +459,13 @@ ORDER BY "NombresCompletos";
 		objDA.Fill(dt_Generar_Ficha, "FichaSocialExp");
 		ObjCnn.Close();
 		return dt_Generar_Ficha;
+#endif
 	}
 
 	public object Generar_Ficha_Prueba(int codEmple)
 	{
+		return GenerarFichaPostgreSql(codEmple, true);
+#if false
 		ObjCnn.Open();
 		DataSet ds_Generar_Ficha = new DataSet();
 		ds_Generar_Ficha.Clear();
@@ -582,79 +581,87 @@ ORDER BY "NombresCompletos";
 		}
 		ObjCnn.Close();
 		return ds_Generar_Ficha;
+#endif
 	}
 
 	public object Generar_Cuadro_Pers(int tipo)
 	{
-		ObjCnn.Open();
-		DataSet dt_Generar_Cuadro = new DataSet();
-		objDA.SelectCommand = new SqlCommand("spRRHH_Report_CuadroPer", ObjCnn);
-		objDA.SelectCommand.CommandType = CommandType.StoredProcedure;
-		objDA.SelectCommand.Parameters.Add("@Tipo", SqlDbType.Int).Value = tipo;
-		objDA.Fill(dt_Generar_Cuadro, "Cuadro");
-		ObjCnn.Close();
-		return dt_Generar_Cuadro;
+		DataTable table = _database.Query("""
+SELECT e."IdEmpleado" AS "Codigo", p."NumDocID" AS "DNI",
+       btrim(concat_ws(' ',p."Apellido_Paterno",p."Apellido_Materno",p."Nombres")) AS "NombresCompletos",
+       eo."AreaOrganizacional", c."Cargo" AS "cargo", tt."Descripcion",
+       e."Estado", e."IdTipoTrabajador"
+FROM public."Empleado" e
+JOIN public."Persona" p ON p."IdPersona"=e."IdPersona"
+LEFT JOIN public."Empleado_Area" ea ON ea."IdEmpleado"=e."IdEmpleado" AND ea."Year"=@year
+LEFT JOIN public."EstructOrganiz" eo ON eo."Year"=ea."Year" AND eo."idAreaOrganiz"=ea."idAreaOrganiz"
+LEFT JOIN public."Cargo" c ON c."IdCargo"=e."IdCargo"
+LEFT JOIN public."TipoTrabajador" tt ON tt."IdTipoTrabajador"=e."IdTipoTrabajador"
+WHERE (@tipo=0 OR e."IdTipoTrabajador"=@tipo)
+  AND COALESCE(NULLIF(btrim(e."Estado"),''),'0')='1'
+ORDER BY "NombresCompletos";
+""", new PostgreSqlParameterValue("year", mAnio), new PostgreSqlParameterValue("tipo", tipo));
+		return DataSetWith(table, "Cuadro");
 	}
 
 	public object Generar_Cumples(int mes)
 	{
-		ObjCnn.Open();
-		DataSet dt_Generar_Cumple = new DataSet();
-		objDA.SelectCommand = new SqlCommand("spRRHH_Report_Cumple", ObjCnn);
-		objDA.SelectCommand.CommandType = CommandType.StoredProcedure;
-		objDA.SelectCommand.Parameters.Add("@mes", SqlDbType.Int).Value = mes;
-		objDA.Fill(dt_Generar_Cumple, "spRRHH_Report_Cumple");
-		ObjCnn.Close();
-		return dt_Generar_Cumple;
+		DataTable table = _database.Query("""
+SELECT btrim(concat_ws(' ',p."Apellido_Paterno",p."Apellido_Materno",p."Nombres")) AS "NombresCompletos",
+       EXTRACT(DAY FROM p."FechaNacimiento")::integer AS "Dia",
+       EXTRACT(MONTH FROM p."FechaNacimiento")::integer AS "mes",
+       trim(to_char(p."FechaNacimiento", 'TMMonth')) AS "MESletras",
+       EXTRACT(YEAR FROM age(CURRENT_DATE,p."FechaNacimiento"))::integer AS "edadEmpleado",
+       eo."AreaOrganizacional", e."Estado"
+FROM public."Empleado" e JOIN public."Persona" p ON p."IdPersona"=e."IdPersona"
+LEFT JOIN public."Empleado_Area" ea ON ea."IdEmpleado"=e."IdEmpleado" AND ea."Year"=@year
+LEFT JOIN public."EstructOrganiz" eo ON eo."Year"=ea."Year" AND eo."idAreaOrganiz"=ea."idAreaOrganiz"
+WHERE EXTRACT(MONTH FROM p."FechaNacimiento")=@mes
+  AND COALESCE(NULLIF(btrim(e."Estado"),''),'0')='1'
+ORDER BY "Dia", "NombresCompletos";
+""", new PostgreSqlParameterValue("year", DateTime.Today.Year), new PostgreSqlParameterValue("mes", mes));
+		return DataSetWith(table, "spRRHH_Report_Cumple");
 	}
 
 	public object llena_tree_reporte()
 	{
-		ObjCnn.Open();
-		DataTable dt_Vista_Tree = new DataTable();
-		objDA.SelectCommand = new SqlCommand("Select AreaOrganizacional,siglafull,IdAreaOrganiz As Padre,IdDependeDe as Hijo from vEstructOrganiz where Year=" + Conversions.ToString(mAnio), ObjCnn);
-		objDA.Fill(dt_Vista_Tree);
-		ObjCnn.Close();
-		return dt_Vista_Tree;
+		return _database.Query("""
+SELECT "AreaOrganizacional", COALESCE(NULLIF("Sigla",''),"Abrev") AS "siglafull",
+       "idAreaOrganiz" AS "Padre", "idDependeDe" AS "Hijo"
+FROM public."EstructOrganiz" WHERE "Year"=@year ORDER BY "AreaOrganizacional";
+""", new PostgreSqlParameterValue("year", mAnio));
 	}
 
 	public object Generar_Report_oficina(int CodOficina)
 	{
-		ObjCnn.Open();
-		DataSet ds_Generar_Oficina = new DataSet();
-		objDA.SelectCommand = new SqlCommand("spRRHH_Report_Oficina_Unico", ObjCnn);
-		objDA.SelectCommand.CommandType = CommandType.StoredProcedure;
-		objDA.SelectCommand.Parameters.Add("@idarea", SqlDbType.Int).Value = CodOficina;
-		objDA.Fill(ds_Generar_Oficina, "spRRHH_Report_Oficina_Unico");
-		ObjCnn.Close();
-		return ds_Generar_Oficina;
+		DataTable table = ReporteOficina("ea.\"idAreaOrganiz\"=@area", new PostgreSqlParameterValue("area", CodOficina));
+		return DataSetWith(table, "spRRHH_Report_Oficina_Unico");
 	}
 
 	public object Generar_Report_oficina_Dep(string Sigla)
 	{
-		ObjCnn.Open();
-		DataSet ds_Generar_Dep = new DataSet();
-		objDA.SelectCommand = new SqlCommand("spRRHH_Report_Oficina", ObjCnn);
-		objDA.SelectCommand.CommandType = CommandType.StoredProcedure;
-		objDA.SelectCommand.Parameters.Add("@sigla", SqlDbType.VarChar).Value = Sigla;
-		objDA.Fill(ds_Generar_Dep, "spRRHH_Report_Oficina");
-		ObjCnn.Close();
-		return ds_Generar_Dep;
+		DataTable table = ReporteOficina("(eo.\"Sigla\"=@sigla OR eo.\"Abrev\"=@sigla)", Text("sigla", Sigla));
+		return DataSetWith(table, "spRRHH_Report_Oficina");
 	}
 
 	public object Generar_Report_Emple_ficha(string FechaInicio, string Fechatermino, int tipo)
 	{
-		ObjCnn.Open();
-		DataSet ds_Generar_Dep = new DataSet();
-		objDA.SelectCommand = new SqlCommand("spRRHH_Report_FechaIngreso", ObjCnn);
-		objDA.SelectCommand.CommandType = CommandType.StoredProcedure;
-		objDA.SelectCommand.Parameters.Add("@FechaIni", SqlDbType.Char, 8).Value = FechaInicio;
-		objDA.SelectCommand.Parameters.Add("@FechaFin", SqlDbType.Char, 8).Value = Fechatermino;
-		objDA.SelectCommand.Parameters.Add("@tipo", SqlDbType.Int).Value = tipo;
-		objDA.Fill(ds_Generar_Dep, "spRRHH_Report_FechaIngreso");
-		int x = ds_Generar_Dep.Tables[0].Rows.Count;
-		ObjCnn.Close();
-		return ds_Generar_Dep;
+		DataTable table = _database.Query("""
+SELECT btrim(concat_ws(' ',p."Apellido_Paterno",p."Apellido_Materno",p."Nombres")) AS "NombresCompletos",
+       e."FechaIngreso" AS "FechadeIngreso", eo."AreaOrganizacional",
+       EXTRACT(YEAR FROM age(CURRENT_DATE,e."FechaIngreso"))::integer AS "años",
+       EXTRACT(MONTH FROM age(CURRENT_DATE,e."FechaIngreso"))::integer AS "meses",
+       EXTRACT(DAY FROM age(CURRENT_DATE,e."FechaIngreso"))::integer AS "dias"
+FROM public."Empleado" e JOIN public."Persona" p ON p."IdPersona"=e."IdPersona"
+LEFT JOIN public."Empleado_Area" ea ON ea."IdEmpleado"=e."IdEmpleado" AND ea."Year"=@year
+LEFT JOIN public."EstructOrganiz" eo ON eo."Year"=ea."Year" AND eo."idAreaOrganiz"=ea."idAreaOrganiz"
+WHERE e."FechaIngreso"::date BETWEEN @inicio AND @fin AND (@tipo=0 OR e."IdTipoTrabajador"=@tipo)
+ORDER BY e."FechaIngreso", "NombresCompletos";
+""", new PostgreSqlParameterValue("year", DateTime.Today.Year),
+			new PostgreSqlParameterValue("inicio", ParseCompactDate(FechaInicio), DbType.Date),
+			new PostgreSqlParameterValue("fin", ParseCompactDate(Fechatermino), DbType.Date),
+			new PostgreSqlParameterValue("tipo", tipo));
+		return DataSetWith(table, "spRRHH_Report_FechaIngreso");
 	}
 
 	public DataTable generar_rep_cargos(int idCargo)
@@ -676,15 +683,13 @@ WHERE e."IdCargo" = @cargoId
 
 	public object llena_Asistencias(string fechaInicio, string fechaFin)
 	{
-		ObjCnn.Open();
-		DataTable dt_des_DI = new DataTable();
-		objDA.SelectCommand = new SqlCommand("spRRHH_GetRepAsistencias", ObjCnn);
-		objDA.SelectCommand.CommandType = CommandType.StoredProcedure;
-		objDA.SelectCommand.Parameters.Add("@FechaInicio", SqlDbType.VarChar).Value = fechaInicio;
-		objDA.SelectCommand.Parameters.Add("@FechaFin", SqlDbType.VarChar).Value = fechaFin;
-		objDA.Fill(dt_des_DI);
-		ObjCnn.Close();
-		return dt_des_DI;
+		return _database.Query("""
+SELECT a.*, p."NumDocID", p."Apellido_Paterno", p."Apellido_Materno", p."Nombres"
+FROM public."Asistencia" a JOIN public."Empleado" e ON e."IdEmpleado"=a."IdEmpleado"
+JOIN public."Persona" p ON p."IdPersona"=e."IdPersona"
+WHERE a."Fecha"::date BETWEEN @inicio AND @fin ORDER BY a."Fecha",p."Apellido_Paterno";
+""", new PostgreSqlParameterValue("inicio", ParseCompactDate(fechaInicio), DbType.Date),
+			new PostgreSqlParameterValue("fin", ParseCompactDate(fechaFin), DbType.Date));
 	}
 
 	public object llena_Permisos(int codempleado, int? permiso, int? motivo)
@@ -780,22 +785,51 @@ ORDER BY "NombresC";
 
 	public object LlenarPlanillaAsistencia(string fechas, string idTipoTrabajador, string idLocales)
 	{
-		if (ObjCnn.State == ConnectionState.Closed)
+		List<DateTime> dates = ParseDateList(fechas);
+		DataTable result = new DataTable("spRRHH_RepPlanillaAsistencias");
+		result.Columns.Add("IdEmpleado", typeof(int));
+		result.Columns.Add("NombresC", typeof(string));
+		foreach (DateTime date in dates)
 		{
-			ObjCnn.Open();
+			result.Columns.Add(date.ToString(), typeof(string));
 		}
-		DataTable dt_Generar_Faltas = new DataTable();
-		objDA.SelectCommand = new SqlCommand("spRRHH_RepPlanillaAsistencias", ObjCnn);
-		objDA.SelectCommand.CommandType = CommandType.StoredProcedure;
-		objDA.SelectCommand.Parameters.Add("@Fechas", SqlDbType.NVarChar).Value = fechas;
-		objDA.SelectCommand.Parameters.Add("@idTipoTrabajador", SqlDbType.Char).Value = idTipoTrabajador;
-		objDA.SelectCommand.Parameters.Add("@idLocales", SqlDbType.NVarChar).Value = idLocales;
-		objDA.Fill(dt_Generar_Faltas);
-		if (ObjCnn.State == ConnectionState.Open)
+		if (dates.Count == 0)
 		{
-			ObjCnn.Close();
+			return result;
 		}
-		return dt_Generar_Faltas;
+
+		int tipo = int.TryParse(idTipoTrabajador, out int parsedType) ? parsedType : 0;
+		int[] locales = ParseCsvIntegers(idLocales);
+		DataTable source = _database.Query("""
+SELECT e."IdEmpleado", btrim(concat_ws(' ',p."Apellido_Paterno",p."Apellido_Materno",p."Nombres")) AS "NombresC",
+       a."Fecha"::date AS "Dia", a."Hor_Ent", a."Hor_Sal"
+FROM public."Empleado" e JOIN public."Persona" p ON p."IdPersona"=e."IdPersona"
+LEFT JOIN public."Asistencia" a ON a."IdEmpleado"=e."IdEmpleado" AND a."Fecha"::date BETWEEN @inicio AND @fin
+WHERE (@tipo=0 OR e."IdTipoTrabajador"=@tipo)
+  AND (cardinality(@locales::integer[])=0 OR e."idLocal"=ANY(@locales::integer[]))
+  AND COALESCE(NULLIF(btrim(e."Estado"),''),'0')='1'
+ORDER BY "NombresC",a."Fecha";
+""", new PostgreSqlParameterValue("inicio", dates.Min(), DbType.Date),
+			new PostgreSqlParameterValue("fin", dates.Max(), DbType.Date),
+			new PostgreSqlParameterValue("tipo", tipo), new PostgreSqlParameterValue("locales", locales));
+
+		foreach (IGrouping<int, DataRow> employee in source.Rows.Cast<DataRow>().GroupBy(row => Convert.ToInt32(row["IdEmpleado"])))
+		{
+			DataRow target = result.NewRow();
+			target["IdEmpleado"] = employee.Key;
+			target["NombresC"] = employee.First()["NombresC"];
+			foreach (DataRow attendance in employee.Where(row => row["Dia"] != DBNull.Value))
+			{
+				DateTime date = Convert.ToDateTime(attendance["Dia"]).Date;
+				string column = date.ToString();
+				if (result.Columns.Contains(column))
+				{
+					target[column] = FormatAttendance(attendance["Hor_Ent"], attendance["Hor_Sal"]);
+				}
+			}
+			result.Rows.Add(target);
+		}
+		return result;
 	}
 
 	public DataTable GetFeriado(string fecha)
@@ -841,23 +875,22 @@ ORDER BY p."FechaInicio";
 
 	public object spRRHH_ObtenerHorasExtras(string fechaI, string fechaF, int? tipo)
 	{
-		if (ObjCnn.State == ConnectionState.Closed)
-		{
-			ObjCnn.Open();
-		}
-		DataTable dt_Generar_Faltas = new DataTable();
-		objDA.SelectCommand = new SqlCommand("spRRHH_ObtenerHorasExtras", ObjCnn);
-		objDA.SelectCommand.CommandType = CommandType.StoredProcedure;
-		objDA.SelectCommand.Parameters.Add("@FechaI", SqlDbType.NVarChar).Value = fechaI;
-		objDA.SelectCommand.Parameters.Add("@FechaF", SqlDbType.NVarChar).Value = fechaF;
-		objDA.SelectCommand.Parameters.Add("@tipo", SqlDbType.Int).Value = tipo;
-		dt_Generar_Faltas.TableName = "spRRHH_ObtenerHorasExtras";
-		objDA.Fill(dt_Generar_Faltas);
-		if (ObjCnn.State == ConnectionState.Open)
-		{
-			ObjCnn.Close();
-		}
-		return dt_Generar_Faltas;
+		DataTable result = _database.Query("""
+SELECT e."IdEmpleado",p."NumDocID",
+ btrim(concat_ws(' ',p."Apellido_Paterno",p."Apellido_Materno",p."Nombres")) AS "NombresC",
+ a."Fecha",a."Hor_Ent",a."Hor_Sal",h."Salida1",
+ ROUND(GREATEST(0,EXTRACT(EPOCH FROM (a."Hor_Sal"::time-h."Salida1"::time))/3600)::numeric,2) AS "HorasExtras"
+FROM public."Asistencia" a JOIN public."Empleado" e ON e."IdEmpleado"=a."IdEmpleado"
+JOIN public."Persona" p ON p."IdPersona"=e."IdPersona"
+LEFT JOIN public."Horario" h ON h."idHorario"=COALESCE(a."idHorario",e."idHorario")
+WHERE a."Fecha"::date BETWEEN @inicio AND @fin AND (@tipo IS NULL OR e."IdTipoTrabajador"=@tipo)
+ AND a."Hor_Sal" ~ '^\d{1,2}:\d{2}' AND h."Salida1" ~ '^\d{1,2}:\d{2}'
+ORDER BY a."Fecha","NombresC";
+""", new PostgreSqlParameterValue("inicio", ParseCompactDate(fechaI), DbType.Date),
+			new PostgreSqlParameterValue("fin", ParseCompactDate(fechaF), DbType.Date),
+			new PostgreSqlParameterValue("tipo", tipo, DbType.Int32));
+		result.TableName = "spRRHH_ObtenerHorasExtras";
+		return result;
 	}
 
 	public object BuscarPersonas(string ApellidoPaterno)
@@ -931,27 +964,30 @@ WHERE NOT EXISTS (
 
 	public DataTable spRRHH_RepAsisdiarria(string fechaI, string fechaF, string DNI, int? area, int? tipo, string year, string idLocales, int opt = 0)
 	{
-		if (ObjCnn.State == ConnectionState.Closed)
-		{
-			ObjCnn.Open();
-		}
-		DataTable dt_Generar_Faltas = new DataTable();
-		objDA.SelectCommand = new SqlCommand("spGetAsistenciasDetalle", ObjCnn);
-		objDA.SelectCommand.CommandType = CommandType.StoredProcedure;
-		objDA.SelectCommand.Parameters.Add("@FechaIni", SqlDbType.NVarChar).Value = fechaI;
-		objDA.SelectCommand.Parameters.Add("@FechaFin", SqlDbType.NVarChar).Value = fechaF;
-		objDA.SelectCommand.Parameters.Add("@DNI", SqlDbType.NVarChar).Value = DNI;
-		objDA.SelectCommand.Parameters.Add("@opt", SqlDbType.Int).Value = opt;
-		objDA.SelectCommand.Parameters.Add("@TipoEmpleado", SqlDbType.Int).Value = tipo;
-		objDA.SelectCommand.Parameters.Add("@idLocales", SqlDbType.NVarChar).Value = idLocales;
-		objDA.SelectCommand.Parameters.Add("@Area", SqlDbType.Int).Value = area;
-		dt_Generar_Faltas.TableName = "spGetAsistenciasDetalle";
-		objDA.Fill(dt_Generar_Faltas);
-		if (ObjCnn.State == ConnectionState.Open)
-		{
-			ObjCnn.Close();
-		}
-		return dt_Generar_Faltas;
+		int[] locales = ParseCsvIntegers(idLocales);
+		DataTable result = _database.Query("""
+SELECT a.*,p."NumDocID",p."Apellido_Paterno",p."Apellido_Materno",p."Nombres",
+ btrim(concat_ws(' ',p."Apellido_Paterno",p."Apellido_Materno",p."Nombres")) AS "NombresC",
+ eo."AreaOrganizacional",l."NombreLocal"
+FROM public."Asistencia" a JOIN public."Empleado" e ON e."IdEmpleado"=a."IdEmpleado"
+JOIN public."Persona" p ON p."IdPersona"=e."IdPersona"
+LEFT JOIN public."Empleado_Area" ea ON ea."IdEmpleado"=e."IdEmpleado" AND ea."Year"=@year
+LEFT JOIN public."EstructOrganiz" eo ON eo."Year"=ea."Year" AND eo."idAreaOrganiz"=ea."idAreaOrganiz"
+LEFT JOIN public."Local" l ON l."idLocal"=e."idLocal"
+WHERE a."Fecha"::date BETWEEN @inicio AND @fin
+ AND (@dni IS NULL OR p."NumDocID" ILIKE '%'||@dni||'%')
+ AND (@area IS NULL OR ea."idAreaOrganiz"=@area) AND (@tipo IS NULL OR e."IdTipoTrabajador"=@tipo)
+ AND (cardinality(@locales::integer[])=0 OR e."idLocal"=ANY(@locales::integer[]))
+ORDER BY a."Fecha","NombresC";
+""", new PostgreSqlParameterValue("inicio", ParseCompactDate(fechaI), DbType.Date),
+			new PostgreSqlParameterValue("fin", ParseCompactDate(fechaF), DbType.Date),
+			Text("dni", string.IsNullOrWhiteSpace(DNI) ? null : DNI.Trim()),
+			new PostgreSqlParameterValue("area", area, DbType.Int32),
+			new PostgreSqlParameterValue("tipo", tipo, DbType.Int32),
+			new PostgreSqlParameterValue("year", int.TryParse(year, out int parsedYear) ? parsedYear : DateTime.Today.Year),
+			new PostgreSqlParameterValue("locales", locales));
+		result.TableName = "spGetAsistenciasDetalle";
+		return result;
 	}
 
 	public DataTable spRRHH_ListarMotivos_byTipo(string fechaI)
@@ -969,49 +1005,89 @@ ORDER BY "Abrev";
 
 	public DataTable spRRHH_EstadisticaPermiso(string IdTipoTrabajador, string FechaInicio, string FechaFin, string idMotivos, string Motivos, string MotivosNull, string idAreas)
 	{
-		if (ObjCnn.State == ConnectionState.Closed)
+		int tipo = int.TryParse(IdTipoTrabajador, out int parsedType) ? parsedType : 0;
+		int area = int.TryParse(idAreas, out int parsedArea) ? parsedArea : 0;
+		int[] motivos = ParseCsvIntegers(idMotivos);
+		DataTable result = _database.Query("""
+SELECT btrim(concat_ws(' ',p."Apellido_Paterno",p."Apellido_Materno",p."Nombres")) AS "NombresC",
+ e."IdEmpleado",p."NumDocID",
+ COALESCE(SUM(CASE WHEN a."Hor_Ent" ~ '^\d{1,2}:\d{2}' AND h."Ingreso1" ~ '^\d{1,2}:\d{2}'
+  THEN GREATEST(0,EXTRACT(EPOCH FROM (a."Hor_Ent"::time-h."Ingreso1"::time))/60) ELSE 0 END),0)::integer AS "MinutosTarde",
+ eo."AreaOrganizacional",ea."idAreaOrganiz"
+FROM public."Empleado" e JOIN public."Persona" p ON p."IdPersona"=e."IdPersona"
+JOIN public."Empleado_Area" ea ON ea."IdEmpleado"=e."IdEmpleado" AND ea."Year"=@year
+JOIN public."EstructOrganiz" eo ON eo."Year"=ea."Year" AND eo."idAreaOrganiz"=ea."idAreaOrganiz"
+LEFT JOIN public."Asistencia" a ON a."IdEmpleado"=e."IdEmpleado" AND a."Fecha"::date BETWEEN @inicio AND @fin
+LEFT JOIN public."Horario" h ON h."idHorario"=COALESCE(a."idHorario",e."idHorario")
+WHERE (@tipo=0 OR e."IdTipoTrabajador"=@tipo) AND (@area=0 OR ea."idAreaOrganiz"=@area)
+ AND COALESCE(NULLIF(btrim(e."Estado"),''),'0')='1'
+GROUP BY e."IdEmpleado",p."NumDocID",p."Apellido_Paterno",p."Apellido_Materno",p."Nombres",eo."AreaOrganizacional",ea."idAreaOrganiz"
+ORDER BY "NombresC";
+""", new PostgreSqlParameterValue("inicio", ParseCompactDate(FechaInicio), DbType.Date),
+			new PostgreSqlParameterValue("fin", ParseCompactDate(FechaFin), DbType.Date),
+			new PostgreSqlParameterValue("year", DateTime.Today.Year),
+			new PostgreSqlParameterValue("tipo", tipo), new PostgreSqlParameterValue("area", area));
+
+		DataTable permissionCounts = _database.Query("""
+SELECT pe."IdEmpleado",pe."idMotivo",COUNT(*)::integer AS "Cantidad",m."Descrip_Motivo"
+FROM public."Permiso" pe JOIN public."Motivo_Perm" m ON m."idMotivo"=pe."idMotivo"
+WHERE pe."FechaInicio"::date <= @fin AND COALESCE(pe."FechaFin",pe."FechaInicio")::date >= @inicio
+ AND (cardinality(@motivos::integer[])=0 OR pe."idMotivo"=ANY(@motivos::integer[]))
+GROUP BY pe."IdEmpleado",pe."idMotivo",m."Descrip_Motivo";
+""", new PostgreSqlParameterValue("inicio", ParseCompactDate(FechaInicio), DbType.Date),
+			new PostgreSqlParameterValue("fin", ParseCompactDate(FechaFin), DbType.Date),
+			new PostgreSqlParameterValue("motivos", motivos));
+
+		Dictionary<int, string> names = permissionCounts.Rows.Cast<DataRow>()
+			.GroupBy(row => Convert.ToInt32(row["idMotivo"]))
+			.ToDictionary(group => group.Key, group => Convert.ToString(group.First()["Descrip_Motivo"]));
+		foreach (int id in motivos)
 		{
-			ObjCnn.Open();
+			string name = names.TryGetValue(id, out string description) ? description : "Motivo_" + id;
+			name = UniqueColumnName(result, name);
+			result.Columns.Add(name, typeof(int));
+			foreach (DataRow row in result.Rows) row[name] = 0;
+			names[id] = name;
 		}
-		DataTable dt_Generar_Faltas = new DataTable();
-		objDA.SelectCommand = new SqlCommand("spRRHH_EstadisticaPermiso", ObjCnn);
-		objDA.SelectCommand.CommandType = CommandType.StoredProcedure;
-		objDA.SelectCommand.Parameters.Add("@IdTipoTrabajador", SqlDbType.Int).Value = IdTipoTrabajador;
-		objDA.SelectCommand.Parameters.Add("@FechaInicio", SqlDbType.NVarChar).Value = FechaInicio;
-		objDA.SelectCommand.Parameters.Add("@FechaFin", SqlDbType.NVarChar).Value = FechaFin;
-		objDA.SelectCommand.Parameters.Add("@idMotivos", SqlDbType.NVarChar).Value = idMotivos;
-		objDA.SelectCommand.Parameters.Add("@Motivos", SqlDbType.NVarChar).Value = Motivos;
-		objDA.SelectCommand.Parameters.Add("@MotivosNull", SqlDbType.NVarChar).Value = MotivosNull;
-		objDA.SelectCommand.Parameters.Add("@idAreas", SqlDbType.NVarChar).Value = idAreas;
-		dt_Generar_Faltas.TableName = "spRRHH_EstadisticaPermiso";
-		objDA.Fill(dt_Generar_Faltas);
-		if (ObjCnn.State == ConnectionState.Open)
+		foreach (DataRow count in permissionCounts.Rows)
 		{
-			ObjCnn.Close();
+			int id = Convert.ToInt32(count["idMotivo"]);
+			if (!names.TryGetValue(id, out string name))
+			{
+				name = UniqueColumnName(result, Convert.ToString(count["Descrip_Motivo"]));
+				result.Columns.Add(name, typeof(int));
+				foreach (DataRow row in result.Rows) row[name] = 0;
+				names[id] = name;
+			}
+			DataRow target = result.Rows.Cast<DataRow>().FirstOrDefault(row =>
+				Convert.ToInt32(row["IdEmpleado"]) == Convert.ToInt32(count["IdEmpleado"]));
+			if (target != null) target[name] = count["Cantidad"];
 		}
-		return dt_Generar_Faltas;
+		result.TableName = "spRRHH_EstadisticaPermiso";
+		return result;
 	}
 
 	public DataTable spRRHH_ResumenEstadisticaPermiso(string FechaInicio, string FechaFin, int idMotivo, int idArea)
 	{
-		if (ObjCnn.State == ConnectionState.Closed)
-		{
-			ObjCnn.Open();
-		}
-		DataTable dt_Generar_Faltas = new DataTable();
-		objDA.SelectCommand = new SqlCommand("spRRHH_ResumenEstadisticaPermiso", ObjCnn);
-		objDA.SelectCommand.CommandType = CommandType.StoredProcedure;
-		objDA.SelectCommand.Parameters.Add("@idAreaOrganiz", SqlDbType.Int).Value = idArea;
-		objDA.SelectCommand.Parameters.Add("@idMotivo", SqlDbType.NVarChar).Value = idMotivo;
-		objDA.SelectCommand.Parameters.Add("@FechaInicio", SqlDbType.NVarChar).Value = FechaInicio;
-		objDA.SelectCommand.Parameters.Add("@FechaFin", SqlDbType.NVarChar).Value = FechaFin;
-		dt_Generar_Faltas.TableName = "spRRHH_ResumenEstadisticaPermiso";
-		objDA.Fill(dt_Generar_Faltas);
-		if (ObjCnn.State == ConnectionState.Open)
-		{
-			ObjCnn.Close();
-		}
-		return dt_Generar_Faltas;
+		DataTable result = _database.Query("""
+SELECT m."idMotivo",m."Descrip_Motivo",COUNT(pe."NPermiso")::integer AS "Cantidad",
+ ROUND(CASE WHEN totals.total=0 THEN 0 ELSE COUNT(pe."NPermiso")*100.0/totals.total END,2) AS "Porcentaje"
+FROM public."Motivo_Perm" m
+LEFT JOIN public."Permiso" pe ON pe."idMotivo"=m."idMotivo"
+ AND pe."FechaInicio"::date<=@fin AND COALESCE(pe."FechaFin",pe."FechaInicio")::date>=@inicio
+LEFT JOIN public."Empleado_Area" ea ON ea."IdEmpleado"=pe."IdEmpleado" AND ea."Year"=@year
+CROSS JOIN (SELECT COUNT(*)::numeric AS total FROM public."Permiso" p2
+ JOIN public."Empleado_Area" ea2 ON ea2."IdEmpleado"=p2."IdEmpleado" AND ea2."Year"=@year
+ WHERE p2."FechaInicio"::date<=@fin AND COALESCE(p2."FechaFin",p2."FechaInicio")::date>=@inicio
+ AND (@area=0 OR ea2."idAreaOrganiz"=@area)) totals
+WHERE m."idMotivo"=@motivo AND (@area=0 OR ea."idAreaOrganiz"=@area OR pe."IdEmpleado" IS NULL)
+GROUP BY m."idMotivo",m."Descrip_Motivo",totals.total;
+""", new PostgreSqlParameterValue("inicio", ParseCompactDate(FechaInicio), DbType.Date),
+			new PostgreSqlParameterValue("fin", ParseCompactDate(FechaFin), DbType.Date),
+			new PostgreSqlParameterValue("year", DateTime.Today.Year),
+			new PostgreSqlParameterValue("motivo", idMotivo), new PostgreSqlParameterValue("area", idArea));
+		result.TableName = "spRRHH_ResumenEstadisticaPermiso";
+		return result;
 	}
 
 	public DataTable spRRHH_GetAsistenciaDia(int codigo, string fecha)
@@ -1041,6 +1117,232 @@ ORDER BY p."Apellido_Paterno";
 		return _database.Query(
 			string.Format(CultureInfo.InvariantCulture, sql, membership),
 			new PostgreSqlParameterValue("tipoTrabajador", tipoTrabajador));
+	}
+
+	private DataSet GenerarFichaPostgreSql(int empleadoId, bool completa)
+	{
+		PostgreSqlParameterValue employee = new PostgreSqlParameterValue("empleado", empleadoId);
+		DataSet result = new DataSet();
+		DataTable personal = _database.Query("""
+SELECT e."IdEmpleado" AS "idempleado",p."Nombres",p."Apellido_Paterno",p."Apellido_Materno",
+ p."NumDocID" AS "NumDocId",p."Direccion" AS "direccion",p."Telefono",p."Fax",p."Email",
+ p."FechaNacimiento",p."FechaRegistro",p."NumCelular",p."FonoCentroLab",
+ e."Sexo" AS "sexo",e."ExpSocial",e."Brevete" AS "brevete",e."JefeHogar",e."CargaFam",
+ e."NumHijos" AS "Numhijos",e."ObsFam",e."NumLibretaMilitar",e."GradoInstruccion" AS "gradoInstruccion",
+ e."NumRUC",e."Foto" AS "foto",td."Descripcion" AS "TipoDoc",ec."DescripEstCivil" AS "EstadoCivil",
+ ts."DescripTS" AS "DescripTS",n."Descripcion" AS "Nacionalidad",
+ vc."DescripViveCon" AS "Descripvivecon",d."Descrip_Discapacidad" AS "Discapacidad",
+ EXTRACT(YEAR FROM age(CURRENT_DATE,p."FechaNacimiento"))::integer AS "edadEmpleado",
+ s."EnferCronica" AS "enfercronica",s."EnferCronicaDescrip" AS "enfercronicadescrip",
+ s."FamDiscapacidad" AS "famdiscapacidad",s."FamDiscapDescrip" AS "famdiscapdescrip",
+ s."Alergico" AS "alergico",s."AlergicoDescrip" AS "alergicodescrip"
+FROM public."Empleado" e JOIN public."Persona" p ON p."IdPersona"=e."IdPersona"
+LEFT JOIN public."TipoDocID" td ON td."TipoDocID"=p."TipoDocID"
+LEFT JOIN public."EstadoCivil" ec ON ec."IdEstadoCivil"=e."IdEstadoCivil"
+LEFT JOIN public."TipoSangre" ts ON ts."IdTipoSangre"=e."IdTipoSangre"
+LEFT JOIN public."Nacionalidad" n ON n."IdNacionalidad"=e."IdNacionalidad"
+LEFT JOIN public."ViveCon" vc ON vc."IdViveCon"=e."IdViveCon"
+LEFT JOIN public."Discapacidad" d ON d."IdDiscapacidad"=e."IdDiscapacidad"
+LEFT JOIN public."RRHH_Salud" s ON s."IdEmpleado"=e."IdEmpleado"
+WHERE e."IdEmpleado"=@empleado;
+""", employee);
+
+		DataTable work = _database.Query("""
+SELECT e."FechaIngreso" AS "Fechaingreso",e."FechaAFP",e."NroAFP",e."Profesion" AS "profesion",
+ e."NumResolCese",e."FechaResolCese",e."NumResol20530",e."FechaResol20530",
+ a."DescripAFP",c."Cargo" AS "cargo",eo."AreaOrganizacional",tt."Descripcion" AS "CondicionLab"
+FROM public."Empleado" e LEFT JOIN public."AFP" a ON a."IdAFP"=e."IdAFP"
+LEFT JOIN public."Cargo" c ON c."IdCargo"=e."IdCargo"
+LEFT JOIN public."TipoTrabajador" tt ON tt."IdTipoTrabajador"=e."IdTipoTrabajador"
+LEFT JOIN public."Empleado_Area" ea ON ea."IdEmpleado"=e."IdEmpleado" AND ea."Year"=@year
+LEFT JOIN public."EstructOrganiz" eo ON eo."Year"=ea."Year" AND eo."idAreaOrganiz"=ea."idAreaOrganiz"
+WHERE e."IdEmpleado"=@empleado;
+""", employee, new PostgreSqlParameterValue("year", DateTime.Today.Year));
+
+		DataTable experience = _database.Query("""
+SELECT ex."NomInstitucion",ex."Cargo" AS "CargoExp",ex."FechaIngreso" AS "FechaIngresoExp",
+ ex."FechaEgreso" AS "FEchaEgresoExp",ex."UnidadOrganica" AS "UnidadOrgaExp",
+ ti."DescripTipoInstitucion" AS "DescriptipoInstitucion"
+FROM public."ExpLaboral" ex LEFT JOIN public."TipoInstitucion" ti ON ti."IdTipoInstitucion"=ex."IdTipoInstitucion"
+WHERE ex."IdEmpleado"=@empleado ORDER BY ex."FechaIngreso" DESC;
+""", employee);
+
+		if (!completa)
+		{
+			AddReportTable(result, personal, "FichaSocial");
+			AddReportTable(result, experience, "FichaSocialExp");
+			return result;
+		}
+
+		AddReportTable(result, work, "spRRHH_Ficha_ExpLab_Datos");
+		AddReportTable(result, _database.Query("""
+SELECT c."idComportamiento",c."Fecha",c."IdEmpleado" AS "idEmpleado",c."NumResol",c."Titulo",c."Descripcion",tc."TipoCompDescrip"
+FROM public."Comportamiento" c LEFT JOIN public."TipoComportamiento" tc ON tc."idTipoComportamiento"=c."idTipoComportamiento"
+WHERE c."IdEmpleado"=@empleado ORDER BY c."Fecha" DESC;
+""", employee), "spRRHH_busca_Disciplina");
+		AddReportTable(result, experience, "spRRHH_Ficha_ExpLab");
+		AddReportTable(result, _database.Query("""
+SELECT btrim(concat_ws(' ',p."Apellido_Paterno",p."Apellido_Materno",p."Nombres")) AS "NombresFamilia",
+ f."FamSexo",f."FamGradoInstruc",f."ViveCasa",f."LaboraInstitucion",tf."DescripTipoFam",ec."DescripEstCivil",
+ EXTRACT(YEAR FROM age(CURRENT_DATE,p."FechaNacimiento"))::integer AS "edadFamiliar"
+FROM public."Familiar" f JOIN public."Persona" p ON p."IdPersona"=f."IdPersona"
+LEFT JOIN public."TipoFamiliar" tf ON tf."IdTipoFam"=f."IdTipoFam"
+LEFT JOIN public."EstadoCivil" ec ON ec."IdEstadoCivil"=f."IdEstadoCivil"
+WHERE f."IdEmpleado"=@empleado ORDER BY tf."DescripTipoFam",p."Apellido_Paterno";
+""", employee), "spRRHH_Ficha_Det_Familiar");
+		AddReportTable(result, _database.Query("""
+SELECT te."DescripTipoEst",er."CentroEstudios",er."AñoInicio",er."AñoTermino",ee."DescripEstadoEstudio"
+FROM public."EstudiosRealizado" er LEFT JOIN public."TipoEstudio" te ON te."IdTipoEstudios"=er."IdTipoEstudios"
+LEFT JOIN public."EstadoEstudio" ee ON ee."IdEstadoEstudio"=er."IdEstadoEstudio"
+WHERE er."IdEmpleado"=@empleado ORDER BY er."AñoInicio";
+""", employee), "spRRHH_Ficha_Estudio_Realizado");
+		AddReportTable(result, _database.Query(
+			"SELECT * FROM public.\"TitulosEmpleado\" WHERE \"IdEmpleado\"=@empleado ORDER BY \"Fecha\";", employee),
+			"spRRHH_Ficha_Estudio_Titulo");
+		AddReportTable(result, _database.Query(
+			"SELECT * FROM public.\"Capacitacion\" WHERE \"IdEmpleado\"=@empleado ORDER BY \"FechaInicio\";", employee),
+			"spRRHH_Ficha_Estudio_Capacitacion");
+		AddReportTable(result, ObtenerIngresosEgresos(empleadoId), "spRRHH_Ficha_Ingreso_Egreso");
+		AddReportTable(result, _database.Query("""
+SELECT v."NumDormitorio",v."NumServHig",v."NumCompart",v."NumPerDorm",v."Observacion" AS "observacion",
+ v."Telefono" AS "telefono",v."Cable" AS "cable",v."Internet" AS "internet",v."Otros" AS "otros",
+ te."DescripTenencia",tv."DescripTipo" AS "DescripTipo",mv."DescripMaterial",cv."DescripConserva",
+ uv."DescripUbicacion",av."DescripAlumbrado",wv."DescripAgua" AS "descripAgua",ev."DescripExcretas"
+FROM public."Vivienda" v LEFT JOIN public."TenenciaViv" te ON te."IdTenencia"=v."IdTenencia"
+LEFT JOIN public."TipoViv" tv ON tv."IdTipo"=v."IdTipo"
+LEFT JOIN public."MaterialViv" mv ON mv."IdMaterial"=v."IdMaterial"
+LEFT JOIN public."ConservacionViv" cv ON cv."IdConservacion"=v."IdConservacion"
+LEFT JOIN public."UbicacionViv" uv ON uv."IdUbicacion"=v."IdUbicacion"
+LEFT JOIN public."AlumbradoViv" av ON av."IdAlumbrado"=v."IdAlumbrado"
+LEFT JOIN public."AguaViv" wv ON wv."IdAgua"=v."IdAgua"
+LEFT JOIN public."ExcretasViv" ev ON ev."IdExcretas"=v."IdExcretas"
+WHERE v."IdEmpleado"=@empleado;
+""", employee), "spRRHH_Ficha_Vivienda");
+		AddReportTable(result, personal, "spRRHH_Ficha_DatosPersonales");
+		AddReportTable(result, _database.Query("""
+SELECT tf."DescripTipoFam",ts."DescripTS" AS "descripts",f."Enfermedad" AS "enfermedad",
+ f."TiempoEnfermedad" AS "tiempoenfermedad",f."NumAutogenSalud" AS "numautogensalud",p."NumDocID" AS "numdocid"
+FROM public."Familiar" f JOIN public."Persona" p ON p."IdPersona"=f."IdPersona"
+LEFT JOIN public."TipoFamiliar" tf ON tf."IdTipoFam"=f."IdTipoFam"
+LEFT JOIN public."TipoSangre" ts ON ts."IdTipoSangre"=f."IdTipoSangre"
+WHERE f."IdEmpleado"=@empleado;
+""", employee), "spRRHH_Ficha_Det_Familiar_Salud");
+		return result;
+	}
+
+	private DataTable ObtenerIngresosEgresos(int empleadoId)
+	{
+		bool available = Convert.ToBoolean(_database.Scalar(
+			"SELECT to_regclass('public.\"Ingreso\"') IS NOT NULL AND to_regclass('public.\"Egreso\"') IS NOT NULL;"));
+		if (!available)
+		{
+			return new DataTable();
+		}
+		return _database.Query("""
+SELECT i."Remuneracion",i."Honorarios" AS "honorarios",i."AlqPredio",i."AlqBienes",i."CapitalesColocados",
+ i."Dietas",i."Negocios",i."Otros" AS "OtrosIngresos",i."IngresoMiembros",i."NumPersonaAportan",
+ e."Alimentacion",e."Vivienda" AS "vivienda",e."Educacion" AS "educacion",e."Salud" AS "salud",
+ e."Vestido" AS "vestido",e."Recreacion" AS "recreacion",e."Prestamos" AS "prestamos",
+ e."Otros" AS "OtrosEgresos",e."Transporte" AS "transporte",e."EnergiaElec" AS "energiaelec",
+ e."Agua" AS "agua",e."BajaPolicia" AS "bajapolicia",e."Telefono" AS "telefono",
+ e."SeguroPriv" AS "seguropriv",e."TarjCredito" AS "tarjcredito"
+FROM public."Ingreso" i FULL JOIN public."Egreso" e ON e."IdEmpleado"=i."IdEmpleado"
+WHERE COALESCE(i."IdEmpleado",e."IdEmpleado")=@empleado;
+""", new PostgreSqlParameterValue("empleado", empleadoId));
+	}
+
+	private static void AddReportTable(DataSet dataSet, DataTable table, string name)
+	{
+		table.TableName = name;
+		dataSet.Tables.Add(table);
+	}
+
+	private DataTable ReporteOficina(string condition, params PostgreSqlParameterValue[] parameters)
+	{
+		string sql = """
+SELECT e."IdEmpleado" AS "idempleado",p."IdPersona" AS "idpersona",
+       p."Apellido_Paterno" AS "Apellido_paterno",p."Apellido_Materno" AS "apellido_materno",
+       p."Nombres" AS "nombres",eo."AreaOrganizacional"
+FROM public."Empleado" e JOIN public."Persona" p ON p."IdPersona"=e."IdPersona"
+JOIN public."Empleado_Area" ea ON ea."IdEmpleado"=e."IdEmpleado" AND ea."Year"=@year
+JOIN public."EstructOrganiz" eo ON eo."Year"=ea."Year" AND eo."idAreaOrganiz"=ea."idAreaOrganiz"
+WHERE {0} AND COALESCE(NULLIF(btrim(e."Estado"),''),'0')='1'
+ORDER BY p."Apellido_Paterno",p."Apellido_Materno",p."Nombres";
+""";
+		List<PostgreSqlParameterValue> all = new List<PostgreSqlParameterValue>(parameters ?? Array.Empty<PostgreSqlParameterValue>())
+		{
+			new PostgreSqlParameterValue("year", mAnio)
+		};
+		return _database.Query(string.Format(CultureInfo.InvariantCulture, sql, condition), all.ToArray());
+	}
+
+	private static DataSet DataSetWith(DataTable table, string name)
+	{
+		table.TableName = name;
+		DataSet dataSet = new DataSet();
+		dataSet.Tables.Add(table);
+		return dataSet;
+	}
+
+	private static int[] ParseCsvIntegers(string value)
+	{
+		if (string.IsNullOrWhiteSpace(value))
+		{
+			return Array.Empty<int>();
+		}
+		return value.Split(',')
+			.Select(item => item.Trim())
+			.Where(item => int.TryParse(item, out _))
+			.Select(int.Parse)
+			.Distinct()
+			.ToArray();
+	}
+
+	private static List<DateTime> ParseDateList(string value)
+	{
+		List<DateTime> result = new List<DateTime>();
+		foreach (string segment in (value ?? string.Empty).Split(']'))
+		{
+			string text = segment.Trim(' ', ',', '[');
+			if (string.IsNullOrWhiteSpace(text))
+			{
+				continue;
+			}
+			if (DateTime.TryParse(text, CultureInfo.CurrentCulture, DateTimeStyles.None, out DateTime date) ||
+				DateTime.TryParse(text, CultureInfo.GetCultureInfo("es-PE"), DateTimeStyles.None, out date) ||
+				DateTime.TryParse(text, CultureInfo.InvariantCulture, DateTimeStyles.None, out date))
+			{
+				result.Add(date.Date);
+			}
+		}
+		return result.Distinct().OrderBy(date => date).ToList();
+	}
+
+	private static string FormatAttendance(object entrance, object exit)
+	{
+		string entranceText = entrance == DBNull.Value ? string.Empty : Convert.ToString(entrance).Trim();
+		string exitText = exit == DBNull.Value ? string.Empty : Convert.ToString(exit).Trim();
+		if (entranceText.Length == 0 && exitText.Length == 0)
+		{
+			return string.Empty;
+		}
+		if (exitText.Length == 0 || exitText == entranceText)
+		{
+			return entranceText;
+		}
+		return entranceText + " - " + exitText;
+	}
+
+	private static string UniqueColumnName(DataTable table, string preferredName)
+	{
+		string baseName = string.IsNullOrWhiteSpace(preferredName) ? "Motivo" : preferredName.Trim();
+		string name = baseName;
+		int suffix = 2;
+		while (table.Columns.Contains(name))
+		{
+			name = baseName + "_" + suffix++;
+		}
+		return name;
 	}
 
 	private static PostgreSqlParameterValue Text(string name, string value)

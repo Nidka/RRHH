@@ -7,6 +7,7 @@
     <TargetFramework>net48</TargetFramework>
     <PlatformTarget>x86</PlatformTarget>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+	<NoWarn>$(NoWarn);CS0436</NoWarn>
   </PropertyGroup>
   <PropertyGroup>
     <LangVersion>12.0</LangVersion>

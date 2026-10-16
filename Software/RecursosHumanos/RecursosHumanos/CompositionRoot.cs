@@ -37,6 +37,12 @@ internal static class CompositionRoot
 		return new ObtenerAccesoUsuario(new PostgreSqlAccesoUsuarioRepository(Database.Value));
 	}
 
+	public static bool EstablecerContrasenaUsuario(string login, string password)
+	{
+		return new PostgreSqlAccesoUsuarioRepository(Database.Value)
+			.EstablecerContrasena(login, password);
+	}
+
 	/// <summary>Crea un formulario FrmMant* de catálogo con su presenter conectado.</summary>
 	public static TForm CrearCatalogo<TForm>(TipoCatalogo tipo)
 		where TForm : Form, IFormularioCatalogo, new()

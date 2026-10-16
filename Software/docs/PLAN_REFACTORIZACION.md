@@ -1,123 +1,80 @@
-# Plan de refactorización
+# Plan de refactorizacion
 
-Orden en que se migran las pantallas a la arquitectura MVP por capas
-([ARQUITECTURA.md](ARQUITECTURA.md)) y a PostgreSQL. Se basa en un
-inventario del código hecho el 2026-10-13: 73 formularios,
-`ClassRRHH` y `BD/schema.sql`.
+La aplicacion recuperada ya dispone de una ruta operativa PostgreSQL. El plan
+siguiente separa ese resultado funcional de la modernizacion estructural que
+el equipo puede continuar sin bloquear el uso del sistema.
 
 ## Estado
 
-| # | Etapa | Estado |
+| Area | Estado operativo | Refactor estructural |
 |---|---|---|
-| 1 | Catálogos simples | ✔ Hecho |
-| 1b | Claves y secuencias en PostgreSQL | Pendiente |
-| 2 | Empleados | Pendiente |
-| 3 | Permisos | Pendiente |
-| 4 | Asistencia | Pendiente |
-| 5 | Legajo | Pendiente |
-| 6 | Ficha social | Pendiente |
-| 7 | Reportes | Pendiente |
-| — | Seguridad del login | Pendiente (obligatorio antes de producción) |
+| Login y autorizacion | Hecho y probado | Agregar bloqueo, auditoria y MFA/SSO |
+| Catalogos | PostgreSQL funcional | Migrar todos a presenters/repositorios |
+| Empleados y ubigeo | PostgreSQL funcional | Dividir formulario principal |
+| Permisos | PostgreSQL funcional | Optimizar consultas especializadas |
+| Asistencia | PostgreSQL funcional | Caracterizar escrituras y rendimiento |
+| Legajo y documentos | PostgreSQL funcional | Repositorios por agregado |
+| Ficha social | PostgreSQL funcional | Separar sus subvistas |
+| Reportes | Datos PostgreSQL | Retirar TableAdapters de diseno |
+| Integridad del esquema | Parcial | Sanear duplicados y agregar restricciones |
 
-## Diagnóstico
+## Base implementada
 
-- **Catálogos compartidos.** `TipoTrabajador` se usa 28 veces en los
-  formularios, `Motivo_Perm` 22 y `Horario` 11, casi siempre para llenar
-  combos. Mientras sigan en LINQ-to-SQL, las pantallas que los usan no pueden
-  dejar SQL Server.
-- **`RRHHClass` está migrada a medias.** Las consultas simples ya usan
-  PostgreSQL. Siguen en SQL Server 29 procedimientos `spRRHH_*` que **no
-  existen en PostgreSQL**: fichas, reportes, consultas de asistencia,
-  planilla, estadística de permisos y horas extras.
-- **El esquema PostgreSQL no tiene claves.** No hay claves primarias,
-  foráneas ni secuencias. Los códigos se generan como "máximo + 1" y hay filas
-  duplicadas. En los catálogos migrados, el repositorio revisa las
-  referencias antes de borrar; en el resto del sistema, el borrado de
-  registros en uso no se detecta.
-- **Columnas inexistentes.** `TipoDocID`, `TipoEstudio` y `TipoInstitucion`
-  mostraban una columna "Abreviatura" que no existe en PostgreSQL. Desde la
-  etapa 1 se oculta.
+- `RRHH.PostgreSql` centraliza configuracion, conexiones, SQL parametrizado y
+  transacciones.
+- `PostgreSqlLegacyMapper` permite que los formularios decompilados trabajen
+  con PostgreSQL sin el `GenericMapper` SQL Server.
+- `PostgreSqlLegacyContext` reemplaza los procedimientos del
+  `dcGRLLDataContext` usados por los modulos activos.
+- `RRHHClass` implementa en PostgreSQL consultas, escrituras y conjuntos de
+  datos para reportes.
+- `PostgreSqlUbigeoControl` reemplaza el selector que abria SQL Server.
+- `AsistenciaAccess` usa Access solo como entrada de los relojes y PostgreSQL
+  como destino.
 
-## Etapas
+## Siguientes iteraciones
 
-### 1. Catálogos simples ✔
+### 1. Integridad y rendimiento
 
-Los 10 mantenimientos de código + descripción usan un componente genérico
-(`CatalogoPresenter`, `PostgreSqlCatalogoRepository`, `VistaCatalogoGrid`):
-`FrmMantEstCivil`, `FrmMantCargos`, `FrmMantGrupoSanguineo`,
-`FrmMantNacionalidades`, `FrmMantRegimen`, `FrmMantTipoDocIdent`,
-`FrmMantTipoEstudio`, `FrmMantTipoInst`, `FrmMantTipoPerm` y
-`FrmMantTipoTrab`.
+- Medir duplicados por clave natural en QA.
+- Agregar indices para busquedas de empleados, permisos y asistencia.
+- Incorporar claves primarias/foraneas mediante migraciones idempotentes.
+- Reemplazar consultas genericas costosas por consultas dedicadas.
 
-**Pendiente de esta etapa:**
+### 2. Casos de uso por modulo
 
-- Exponer una consulta de solo lectura para los combos y reemplazar los
-  `TipoTrabajadorMapper`, `TipoPermisoMapper` y demás usos en otras pantallas.
-- Migrar los catálogos con reglas propias, cada uno con su propio presenter:
-  `FrmMantHorarios`, `FrmMantMotivo`, `FrmMotivoPermiso` y `FrmFeriado`.
+- Extraer repositorios y servicios para empleados, permisos y asistencia.
+- Mantener los formularios como vistas pasivas.
+- Agregar pruebas de escritura y concurrencia antes de retirar cada mapper de
+  compatibilidad.
 
-### 1b. Claves y secuencias en PostgreSQL (en paralelo)
+### 3. Formularios grandes
 
-Restaurar claves primarias, secuencias (`GENERATED ... AS IDENTITY`) y claves
-foráneas, empezando por los catálogos. Antes hay que limpiar los duplicados
-existentes. Al terminar, los repositorios dejan de usar "máximo + 1" con
-bloqueo de tabla, y la revisión de referencias de `MapeosCatalogo` queda
-como respaldo (la revisión en código no evita que otra sesión inserte una
-referencia al mismo tiempo; la clave foránea sí).
+- Dividir `FrmMantEmpleado_Basico` en datos personales, vinculo laboral y
+  ubicacion.
+- Dividir `FrmFichaSocial` en vivienda, salud, familia y aspectos
+  socioeconomicos.
+- Eliminar codigo decompilado no alcanzable despues de tener cobertura.
 
-### 2. Empleados
+### 4. Reportes
 
-`FrmMantEmpleado_Basico` y `FrmBuscarPersona`. Es la entidad central. Su
-acceso a datos ya está casi todo en PostgreSQL, a través de `RRHHClass`
-(22 y 14 llamadas).
+- Mantener los nombres de tablas y columnas esperados por los `.repx`.
+- Retirar los `TableAdapter` SQL Server que solo permanecen en el disenador.
+- Crear pruebas de humo que llamen `CreateDocument()` con datos anonimizados.
 
-### 3. Permisos
+### 5. Plataforma
 
-`FrmPermiso`, `FrmConsultaPermisos` y los motivos. Dependen de los catálogos
-y de los empleados.
+- Evaluar una version soportada de DevExpress.
+- Reescribir los controles restantes de `GRLL.dll` y retirar el binario
+  heredado cuando ya no tenga consumidores.
+- Separar la importacion Access como adaptador opcional por sede.
 
-### 4. Asistencia (riesgo alto)
+## Criterio por cambio
 
-Horarios, asignación de horarios, asistencia manual, importación y
-consultas. Para la importación hay un refactor previo en
-[`../referencia/AsistenciaImport`](../referencia/README.md). Antes hay que
-reescribir en SQL parametrizado los procedimientos de asistencia
-(`spRRHH_GetAsistencias`, `spRRHH_RepAsisdiarria`,
-`spRRHH_RepPlanillaAsistencias`, `spRRHH_ObtenerHorasExtras`, …) y validarlos
-contra resultados conocidos del sistema original.
+Cada pull request debe:
 
-### 5. Legajo
-
-Estudios, experiencia laboral, capacitaciones, títulos, familiares,
-documentos, resoluciones y rotaciones. Son pantallas pequeñas (450 a 1.900
-líneas) que dependen de los empleados.
-
-### 6. Ficha social (riesgo alto)
-
-`FrmFichaSocial` tiene 14.370 líneas y usa 37 mappers. Se divide en varias
-vistas (vivienda, salud, dinámica familiar, aspectos socioeconómicos), cada
-una con su propio presenter.
-
-### 7. Reportes (riesgo alto)
-
-`DataSet1`, `Report_*` y `XtraReport*`. Dependen de 15 procedimientos
-`spRRHH_Report*` y `spRRHH_Ficha_*`. Se migran a clases `XxxReportQuery`
-cuando sus datos de origen ya están migrados.
-
-### Seguridad del login
-
-El login actual no verifica la contraseña del usuario final: selecciona el
-perfil de un usuario activo. Antes de producción hay que implementar una
-identidad verificable (Active Directory/OIDC o credenciales con hash
-moderno). Ver [POSTGRESQL_MIGRATION.md](POSTGRESQL_MIGRATION.md).
-
-## Cómo medir el avance
-
-```powershell
-graphify update Software
-```
-
-En `Software/graphify-out/GRAPH_REPORT.md`, las conexiones de
-`dcGRLLDataContext` y `GenericMapper` deben bajar con cada etapa. La etapa
-termina cuando sus pantallas cumplen la definición de terminado de
-ARQUITECTURA.md (sección 9).
+1. compilar `Software/RRHH.sln` en x86;
+2. aprobar `RRHH.Tests`;
+3. ejecutar `scripts/check-postgresql.cmd -Modules` cuando cambie SQL;
+4. no versionar `.env`, dumps, binarios ni datos personales;
+5. incluir una migracion idempotente cuando cambie el esquema.

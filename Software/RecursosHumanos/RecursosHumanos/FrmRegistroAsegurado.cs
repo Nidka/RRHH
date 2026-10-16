@@ -1495,7 +1495,6 @@ public class FrmRegistroAsegurado : FrmConsulta
 		dataRow["DescripEstCivil"] = "(Seleccionar)";
 		dataTable.Rows.InsertAt(dataRow, 0);
 		UcCBEstadoCivil.DataSource = dataTable;
-		UcUbigeoCmbDirec.Conexion = rRHHClass.ObjCnn;
 		UcUbigeoCmbDirec.GetDpto();
 		UcComboBoxTDI.ValueMember = "TipoDocID";
 		UcComboBoxTDI.DisplayMember = "Descripcion";

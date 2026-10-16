@@ -96,11 +96,27 @@
       "grll.common.rutinas": {
         "type": "Project"
       },
+      "rrhh.application": {
+        "type": "Project",
+        "dependencies": {
+          "RRHH.Domain": "[1.0.0, )"
+        }
+      },
+      "rrhh.domain": {
+        "type": "Project"
+      },
       "rrhh.postgresql": {
         "type": "Project",
         "dependencies": {
           "Npgsql": "[4.1.14, )",
+          "RRHH.Application": "[1.0.0, )",
           "System.Memory": "[4.5.5, )"
+        }
+      },
+      "rrhh.presentation": {
+        "type": "Project",
+        "dependencies": {
+          "RRHH.Application": "[1.0.0, )"
         }
       },
       "seguridad": {

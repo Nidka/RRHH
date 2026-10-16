@@ -1,12 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data.Linq;
-using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Windows.Forms;
@@ -69,8 +66,6 @@ public class FrmMantDocFile : FrmConsulta
 
 	[AccessedThroughProperty("PictureBox4")]
 	private PictureBox _PictureBox4;
-
-	public dcGRLLDataContext y;
 
 	protected override Button cmdCerrar
 	{
@@ -343,7 +338,6 @@ public class FrmMantDocFile : FrmConsulta
 	{
 		base.Load += FrmMantDocFile_Load;
 		__ENCAddToList(this);
-		y = new dcGRLLDataContext(clsConexion.Conexion);
 		InitializeComponent();
 	}
 
@@ -672,18 +666,13 @@ public class FrmMantDocFile : FrmConsulta
 					{
 						DocumentoMapper.Instance().Delete(documento);
 					}
-					catch (SqlException ex)
+					catch (Exception ex)
 					{
 						ProjectData.SetProjectError(ex);
-						SqlException ex2 = ex;
-						if (ex2.Number == 547)
-						{
-							Interaction.MsgBox("Se hace referencia a este registro en otra tabla.", MsgBoxStyle.Critical);
-							e.Handled = true;
-							ProjectData.ClearProjectError();
-							return;
-						}
+						Interaction.MsgBox("No se pudo eliminar el documento. Puede estar siendo usado por otro registro.\r\n" + ex.Message, MsgBoxStyle.Critical);
+						e.Handled = true;
 						ProjectData.ClearProjectError();
+						return;
 					}
 				}
 			}
@@ -710,11 +699,8 @@ public class FrmMantDocFile : FrmConsulta
 	{
 		if (obj.idDocumento == 0)
 		{
-			Table<Documento> documento = y.Documento;
-			ParameterExpression parameterExpression = Expression.Parameter(typeof(Documento), "n");
-			int num = y.Documento.Select(n => n.idDocumento).Max();
-			num = Conversions.ToInteger(decimal.Add(decimal.Parse(Conversions.ToString(num)), 1m).ToString().PadLeft(4, '0'));
-			obj.idDocumento = num;
+			List<Documento> documentos = DocumentoMapper.Instance().SelectAll();
+			obj.idDocumento = documentos.Count == 0 ? 1 : documentos.Max(n => n.idDocumento) + 1;
 			DocumentoMapper.Instance().Insert(obj);
 			MessageBox.Show("Se insertÃ³ el registro :" + ObtenerMensaje(obj), "", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
 		}
@@ -776,10 +762,10 @@ public class FrmMantDocFile : FrmConsulta
 
 	private void llenardata()
 	{
-		Table<Documento> documento = y.Documento;
-		ParameterExpression parameterExpression = Expression.Parameter(typeof(Documento), "n");
 		string filter = UcTxtCampoBusca.Text ?? string.Empty;
-		IQueryable<Documento> dataSource = y.Documento.Where(n => n.DescripDocumento != null && n.DescripDocumento.Contains(filter));
+		List<Documento> dataSource = DocumentoMapper.Instance().SelectAll()
+			.Where(n => n.DescripDocumento != null && n.DescripDocumento.IndexOf(filter, StringComparison.CurrentCultureIgnoreCase) >= 0)
+			.ToList();
 		GridControl1.DataSource = dataSource;
 		DataNavigator1.DataSource = dataSource;
 	}

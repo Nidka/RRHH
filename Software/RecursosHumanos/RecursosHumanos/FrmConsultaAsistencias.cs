@@ -753,9 +753,6 @@ public class FrmConsultaAsistencias : FrmConsulta
 				{
 					break;
 				}
-				RRHH_TempFecha rRHH_TempFecha = new RRHH_TempFecha();
-				rRHH_TempFecha.Fecha = UcFechas1.Rango.Desde.AddDays(num2);
-				RRHH_TempFechaMapper.Instance().Insert(rRHH_TempFecha);
 				text = text + Conversions.ToString(UcFechas1.Rango.Desde.AddDays(num2)) + "] , [";
 				if ((UcFechas1.Rango.Desde.AddDays(num2).DayOfWeek == DayOfWeek.Saturday) | (UcFechas1.Rango.Desde.AddDays(num2).DayOfWeek == DayOfWeek.Sunday))
 				{
@@ -783,7 +780,7 @@ public class FrmConsultaAsistencias : FrmConsulta
 			if (text2.Length > 0)
 			{
 				text2 = text2.Substring(0, text2.Length - 1);
-				dcGRLLDataContext dcGrll = Module1.DcGrll;
+				PostgreSqlLegacyContext dcGrll = Module1.DcGrll;
 				string fI = fi;
 				string obj = ff;
 				int? anio = 2011;
