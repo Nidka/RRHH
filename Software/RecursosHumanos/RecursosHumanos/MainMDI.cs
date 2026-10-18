@@ -2623,7 +2623,7 @@ public class MainMDI : Form
 	{
 		if (ObjFrmMotivoPermiso == null || (ObjFrmMotivoPermiso.IsDisposed ? true : false))
 		{
-			ObjFrmMotivoPermiso = new FrmMotivoPermiso();
+			ObjFrmMotivoPermiso = CompositionRoot.CrearMotivosPermiso();
 		}
 		else
 		{
@@ -2651,7 +2651,7 @@ public class MainMDI : Form
 	{
 		if (ObjFrmMotivoPermiso == null || (ObjFrmMotivoPermiso.IsDisposed ? true : false))
 		{
-			ObjFrmMotivoPermiso = new FrmMotivoPermiso();
+			ObjFrmMotivoPermiso = CompositionRoot.CrearMotivosPermiso();
 		}
 		else
 		{

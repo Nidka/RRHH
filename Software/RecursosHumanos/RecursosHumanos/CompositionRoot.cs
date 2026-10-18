@@ -11,6 +11,10 @@ using RRHH.PostgreSql.Catalogos;
 using RRHH.PostgreSql.Seguridad;
 using RRHH.Presentation.Asistencia;
 using RRHH.Presentation.Catalogos;
+using RRHH.Application.Permisos;
+using RRHH.Domain.Permisos;
+using RRHH.PostgreSql.Permisos;
+using RRHH.Presentation.Permisos;
 
 namespace RecursosHumanos;
 
@@ -61,6 +65,32 @@ internal static class CompositionRoot
 			new EliminarItemCatalogo(repository));
 		return form;
 	}
+    /// <summary>Compone consulta y editor de motivos; evita crear dependencias desde las vistas.</summary>
+    public static FrmMotivoPermiso CrearMotivosPermiso()
+    {
+        int.TryParse(RRHH.IdROl, out int rol);
+        var acceso = new AccesoMotivosPermiso(rol);
+        var repository = new PostgreSqlMotivoPermisoRepository(Database.Value);
+        var tipos = new PostgreSqlCatalogoRepository(Database.Value, MapeosCatalogo.Para(TipoCatalogo.TipoPermiso));
+        var form = new FrmMotivoPermiso();
+        form.ConfigurarEditor((tipo, id) =>
+        {
+            using (var editor = CrearEditorMotivoPermiso(repository, acceso, tipo, id))
+                return editor.ShowDialog(form) == DialogResult.OK;
+        });
+        _ = new MotivosPermisoPresenter(form, new ListarCatalogo(tipos),
+            new ListarMotivosPermiso(repository, acceso), new EliminarMotivoPermiso(repository, acceso));
+        return form;
+    }
+
+    private static FrmMantMotivo CrearEditorMotivoPermiso(IMotivoPermisoRepository repository,
+        AccesoMotivosPermiso acceso, int tipo, int? id)
+    {
+        var form = new FrmMantMotivo { idTipo = tipo, idMotivo = id ?? 0 };
+        _ = new MotivoPermisoEditorPresenter(form, new ObtenerMotivoPermiso(repository, acceso),
+            new GuardarMotivoPermiso(repository, acceso));
+        return form;
+    }
 
 	/// <summary>Crea el formulario de gestión de feriados con su presenter conectado.</summary>
 	public static FrmFeriado CrearFeriado()

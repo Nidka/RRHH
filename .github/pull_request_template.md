@@ -25,6 +25,7 @@ Indicar entorno, versión, comandos/casos, resultados y rutas/enlaces. Si algo n
 
 - [ ] Criterios de aceptación revisados.
 - [ ] Arquitectura y plan técnico respetados, si corresponde.
+- [ ] Comentarios XML del código nuevo/modificado actualizados: responsabilidad, contratos y restricciones relevantes; no aplica si no cambia código.
 - [ ] Clasificación del mantenimiento, patrones y principios sustentados en código concreto.
 - [ ] Compilación/pruebas y QA aplicables documentados; para solo documentación, marcar no aplica con motivo.
 - [ ] Sin secretos, datos personales ni dependencias licenciadas.

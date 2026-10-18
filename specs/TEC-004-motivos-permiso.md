@@ -1,10 +1,10 @@
 # TEC-004: refactorizar consulta y mantenimiento de motivos
 
-- Estado: Plan inicial; implementación no iniciada.
+- Estado: Publicado en [PR #2 en borrador](https://github.com/Nidka/RRHH/pull/2); pendientes QA WinForms, revisión de Frank e integración de TEC-004. Base inicial `f713383`; main `6f7feb8` incorporado mediante `9a00a4a`.
 - Responsable: Evelyn Victoria Rodriguez Cardozo.
 - Revisor: Frank Piero Mantilla Arqueros.
 - Rama: `refactor/tec-004-motivos-permiso`.
-- Base actual: `eeeb817` (16/10/2026); el diagnóstico inicial se preparó con `0a4b6a8`. Caracterizar la versión nueva según [primera prueba](../docs/t2/PRIMERA_PRUEBA.md) y actualizar el diagnóstico antes de programar.
+- Línea base de trabajo: `f713383` (organización), sobre código `eeeb817`; diagnóstico inicial `0a4b6a8`. Caracterización estática de la versión nueva registrada en [aporte TEC-004](../docs/t2/aportes/TEC-004/CARACTERIZACION.md); ejecución de la [primera prueba](../docs/t2/PRIMERA_PRUEBA.md) WinForms pendiente.
 - Trazabilidad: paquete técnico del [plan de equipo](../docs/t2/PLAN_EQUIPO.md); enlazar issue/PR y RF/CR aplicables al iniciar.
 
 ## Actualización operativa del 16/10/2026
@@ -87,8 +87,22 @@ Conservar referencia del commit anterior. Separar scripts de datos de vistas/cas
 
 ## Seguimiento
 
-- Caracterización: pendiente.
-- Decisiones y supuestos: los indicados arriba, pendientes de resolver.
-- Código/pruebas/QA: pendientes.
-- PR, commits y evidencias: pendientes.
-- IA: plan inicial preparado con asistencia de IA; implementación y verificaciones deberán registrar su uso real y revisión humana.
+- Caracterización: inspección estática de formularios, puente y esquema en `f713383`; observación WinForms pendiente.
+- Decisiones, código y trazabilidad: [aporte consolidado](../docs/t2/aportes/TEC-004/README.md), con archivos, técnicas, principios/patrones, límites, QA y reversión. Extraer clases/métodos, introducir interfaz e inyección por constructor, trasladar lógica fuera de formularios y centralizar recarga.
+- Código: módulo completo por capas, ambas entradas de MainMDI conectadas; no se cambió el esquema compartido.
+- Pruebas: 130/130 aprobadas tras combinar con TEC-003 en arnés .NET 8, incluidas 14 contra PostgreSQL local ficticio; capas y tests también compilan net48, 0 advertencias/errores. QA/compilación del ejecutable Windows pendientes. Evidencias enlazadas en el aporte.
+- Diagramas: antes/después/dependencias y flujos funcionales; seis SVG renderizados. Diferenciar fuente inferida, catálogo observado y propuesta futura.
+- RF-04/05: avance parcial; falta acordar duplicados por descripción, validar política de borrado y comprobar QA. No se cierran.
+- Commits: implementación `01db40b`, XML `fe1a00a`, incorporación de main `9a00a4a`. [PR #2 en borrador](https://github.com/Nidka/RRHH/pull/2), publicación autorizada por Evelyn el 18/10/2026; revisión humana de Frank pendiente. Base documental y TEC-003 ya integrados en main mediante PR #1.
+- IA: análisis, implementación, pruebas, diagramas y documentación asistidos por Codex; resultados automáticos reales. Validación humana de Evelyn y revisión de Frank pendientes.
+
+## Decisiones de implementación de esta iteración
+
+- Mantenimiento principal preventivo: MVP, casos de uso y Repository; SRP, DRY y DIP/IoC. Se separan correcciones: no escribir en Load, alta en tabla vacía, conservar campos no editados y tratar selección ausente.
+- Contrato actual comprobado en código: rol 10 filtra modalidad P, 14 filtra C, 13 consulta sin filtro de modalidad; no se añade filtro Activo que no existe en la consulta vigente. Otros roles no reciben una autorización nueva por este refactor.
+- Edición modifica descripción/abreviatura/salario; tipo, modalidad y Activo se conservan. Cargar el editor es solo lectura.
+- Eliminación: impedir borrado de motivos referenciados en Permiso o Permiso_Aud para conservar histórico. Decisión técnica conservadora a validar en revisión; no se inventa baja lógica.
+- IDs: utilizar default/identidad si Kadin ya lo incorporó. Mientras no exista, MAX+1 dentro de bloqueo transaccional de tabla; el bloqueo serializa las altas de este repositorio, no sustituye PK/UNIQUE ni coordina todos los escritores legados.
+- Concurrencia de borrado: bloqueo de escrituras relacionadas durante comprobación/borrado. No impide referencias huérfanas creadas después del commit por otros escritores sin validación. Es transitorio; FK e integridad global dependen de TEC-002.
+- Catálogo desplegado: consulta READ ONLY confirma IDs duplicados en TipoPermiso/Motivo_Perm; rechazar mutaciones ambiguas y coordinar saneamiento con Kadin. No se modificó ni deduplicó la instancia. Secuencias desalineadas que generarían ID repetido revierten la fila insertada.
+- Proveedor observado: PostgreSqlLegacyMapper/PostgreSqlLegacyContext actuales; no atribuir al original SQL Server las regresiones del puente.

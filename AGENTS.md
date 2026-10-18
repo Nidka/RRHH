@@ -36,6 +36,14 @@ La arquitectura tiene una sola fuente: `Software/docs/ARQUITECTURA.md`. Si se pr
 - Antes de una refactorización funcional, registrar comportamiento actual, alcance, archivos/capas, riesgos, pasos, regresión y reversión en su spec. Reutilizar lo existente.
 - `Software/referencia/` es material de consulta, fuera de la solución principal. No presentarlo como una funcionalidad integrada.
 
+## Documentación del código
+
+- Mantener documentación junto al código nuevo o modificado. En este proyecto C# se usan comentarios XML `///` (el equivalente a KDoc de Kotlin), en español y coherentes con el comportamiento real.
+- Documentar la responsabilidad de tipos públicos nuevos y el contrato de interfaces, casos de uso y métodos públicos con reglas relevantes. Usar `<summary>`; añadir `<param>`, `<returns>`, `<exception>` y `<remarks>` cuando aclaren nulabilidad, resultados, errores, efectos de escritura, transacciones o límites de concurrencia.
+- Explicar decisiones y restricciones que no se deducen del nombre. Actualizar la documentación al cambiar el contrato; usar `<inheritdoc/>` cuando corresponda reutilizarlo en una implementación. No prometer garantías que el código no ofrece.
+- Evitar comentarios que repitan asignaciones, getters/setters o pasos evidentes. No documentar cada miembro trivial ni reescribir el diseñador o proyectos congelados para añadir comentarios.
+- La revisión del PR incluye comprobar esta documentación. Los comentarios explican el código; spec, diagramas y pruebas registran diseño y evidencia en sus rutas existentes, sin crear documentos duplicados.
+
 ## IA y trabajo colaborativo
 
 - Respetar los paquetes TEC-001…004 y sus specs: cada integrante implementa y hace sus commits; no sustituir el reparto de código por solo redacción o exposición de cambios anteriores.

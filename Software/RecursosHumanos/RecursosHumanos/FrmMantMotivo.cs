@@ -3,18 +3,19 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 using DevExpress.XtraEditors;
 using GRLL.Common;
 using Microsoft.VisualBasic.CompilerServices;
 using RecursosHumanos.My.Resources;
+using RRHH.Application.Permisos;
+using RRHH.Presentation.Permisos;
 
 namespace RecursosHumanos;
 
 [DesignerGenerated]
-public class FrmMantMotivo : FrmConsulta
+public class FrmMantMotivo : FrmConsulta, IMotivoPermisoEditorView
 {
 	private static List<WeakReference> __ENCList = new List<WeakReference>();
 
@@ -147,6 +148,9 @@ public class FrmMantMotivo : FrmConsulta
 		base.Load += FrmMantMotivo_Load;
 		__ENCAddToList(this);
 		InitializeComponent();
+		CheckEdit1.Properties.AllowGrayed = true;
+		UcTxtMotivo.MaxLength = 50;
+		UcTxtAbreviatura.MaxLength = 3;
 	}
 
 	[DebuggerNonUserCode]
@@ -354,47 +358,30 @@ public class FrmMantMotivo : FrmConsulta
 		this.PerformLayout();
 	}
 
-	private void FrmMantMotivo_Load(object sender, EventArgs e)
-	{
-		if ((idMotivo != 0 && idTipo != 0) ? true : false)
-		{
-			Motivo_Perm motivo_Perm = Motivo_PermMapper.Instance().SelectBy([SpecialName] (Motivo_Perm V) => V.idMotivo == idMotivo).First();
-			UcTxtMotivo.Text = motivo_Perm.Descrip_Motivo;
-			CheckEdit1.EditValue = motivo_Perm.Salario;
-			UcTxtAbreviatura.Text = motivo_Perm.Abrev;
-			Motivo_PermMapper.Instance().Update(motivo_Perm);
-		}
-	}
+    public event EventHandler CargarSolicitado;
+    public event EventHandler GuardarSolicitado;
+    public int IdMotivo => idMotivo;
+    public int IdTipoPermiso => idTipo;
+    public string Descripcion => UcTxtMotivo.Text;
+    public string Abreviatura => UcTxtAbreviatura.Text;
+    public bool? Salario => CheckEdit1.EditValue as bool?;
 
-	private void Button1_Click(object sender, EventArgs e)
-	{
-		Motivo_Perm motivo_Perm = new Motivo_Perm();
-		motivo_Perm.Descrip_Motivo = UcTxtMotivo.Text;
-		object editValue = CheckEdit1.EditValue;
-		bool? flag = default(bool?);
-		motivo_Perm.Salario = ((editValue != null) ? ((bool?)editValue) : flag);
-		motivo_Perm.idTipoPermiso = idTipo;
-		motivo_Perm.Abrev = UcTxtAbreviatura.Text.Trim();
-		if (Conversions.ToDouble(RRHH.IdROl) == 10.0)
-		{
-			motivo_Perm.TipoModalidad = 'P';
-		}
-		else if (Conversions.ToDouble(RRHH.IdROl) == 14.0)
-		{
-			motivo_Perm.TipoModalidad = 'C';
-		}
-		motivo_Perm.Activo = true;
-		if (idMotivo == 0)
-		{
-			int num = Motivo_PermMapper.Instance().SelectAll().Max([SpecialName] (Motivo_Perm v) => v.idMotivo);
-			motivo_Perm.idMotivo = checked(num + 1);
-			Motivo_PermMapper.Instance().Insert(motivo_Perm);
-		}
-		else
-		{
-			motivo_Perm.idMotivo = idMotivo;
-			Motivo_PermMapper.Instance().Update(motivo_Perm);
-		}
-		DialogResult = DialogResult.OK;
-	}
+    public void MostrarMotivo(MotivoPermisoDto motivo)
+    {
+        UcTxtMotivo.Text = motivo.Descripcion ?? string.Empty;
+        UcTxtAbreviatura.Text = motivo.Abreviatura ?? string.Empty;
+        CheckEdit1.EditValue = motivo.Salario;
+    }
+
+    public void MostrarError(string mensaje) => MessageBox.Show(this, mensaje, "Motivo de permiso", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+    public void HabilitarGuardar(bool habilitado) => Button1.Enabled = habilitado;
+    public void CerrarGuardado()
+    {
+        DialogResult = DialogResult.OK;
+        Close();
+    }
+
+    // Cargar y cancelar no realizan escrituras. El presenter atiende GuardarSolicitado.
+    private void FrmMantMotivo_Load(object sender, EventArgs e) => CargarSolicitado?.Invoke(this, EventArgs.Empty);
+    private void Button1_Click(object sender, EventArgs e) => GuardarSolicitado?.Invoke(this, EventArgs.Empty);
 }
