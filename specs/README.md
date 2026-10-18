@@ -22,7 +22,7 @@ y registra sus commits/PR. No copiar otro plan para reiniciar el mismo trabajo.
 
 | ID | Responsable | Plan |
 |---|---|---|
-| TEC-001 | Jorge | [Horarios](TEC-001-horarios.md) |
+| TEC-001 | Evelyn, continuación del encargo inicial de Jorge/Kike | [Horarios](TEC-001-horarios.md) |
 | TEC-002 | Kadin | [Integridad y despliegue BD](TEC-002-integridad-bd.md) |
 | TEC-003 | Frank | [Feriados](TEC-003-feriados.md) |
 | TEC-004 | Evelyn | [Motivos de permiso](TEC-004-motivos-permiso.md) |

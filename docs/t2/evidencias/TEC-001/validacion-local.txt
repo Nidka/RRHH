@@ -1,0 +1,56 @@
+TEC-001 / CR-TEC-001 — Validación local de horarios
+Fecha: 18/10/2026.
+Responsable de la continuación: Evelyn Victoria Rodriguez Cardozo.
+Preparación e implementación asistidas por IA; revisión humana ajena pendiente.
+Base: fd12b80. La asignación inicial a Jorge/Kike no se acredita como autoría de este cambio.
+Entorno: macOS 26.0.1 arm64; .NET SDK 8.0.132; PostgreSQL 14 local.
+
+1. COMPILACIÓN NATIVA DE CAPAS NET48
+Comando desde raíz (dotnet corresponde al SDK instalado):
+dotnet build Software/RRHH.Tests/RRHH.Tests.csproj --no-restore --disable-build-servers -p:NuGetAudit=false -p:UseSharedCompilation=false -m:1
+Resultado real:
+RRHH.Domain, RRHH.Application, RRHH.Presentation, RRHH.PostgreSql y RRHH.Tests compilados.
+Compilación correcta. 0 Advertencia(s). 0 Errores.
+
+2. EJECUCIÓN DE PRUEBAS EN MAC
+Harness temporal net8, fuera del repositorio, con Compile Include de las fuentes
+reales de los cinco proyectos, excluyendo bin/obj. Las cuatro capas mantienen
+ensamblados separados para ejecutar las pruebas de dependencias. Se utilizan
+las versiones ya fijadas de xUnit, Test SDK y Npgsql; no se cambia el target
+net48 ni las dependencias del proyecto productivo. BD/schema.sql se consulta
+directamente desde la fuente versionada.
+
+Comando ejecutado:
+dotnet test /tmp/rrhh-tec001-check/Tests/RRHH.Tests.csproj --no-restore --disable-build-servers -p:UseSharedCompilation=false -m:1 --logger 'trx;LogFileName=tec001-local.trx' --results-directory /tmp/rrhh-tec001-check/results
+RRHH_TEST_POSTGRES_CONNECTION apuntó exclusivamente a 127.0.0.1:55487,
+base desechable rrhh_tec004_tests (reutiliza el aislamiento local de TEC-004).
+No se usa .env ni un destino remoto en las fixtures de integración.
+
+Resultado real:
+Correctas! Con error: 0; Superado: 167; Omitido: 0; Total: 167.
+37 casos nuevos de horarios: 12 de dominio, 11 de casos/presenters y 14 de PG.
+Las 130 pruebas anteriores de otras capas/módulos también pasaron.
+
+Casos de horarios comprobados:
+- Rechazo de horas vacías, nulas, negativas, >=24h, minutos inválidos y fracciones.
+- Formato invariable en es-PE, en-US y fr-FR; jornada nocturna sin orden impuesto.
+- Descripción vacía compatible; longitud máxima 20; Estado nullable.
+- Carga solo lectura; selección ausente; cancelación sin guardado; recarga solo al guardar.
+- Fallos de consulta/guardado; registro eliminado; guardado único del editor.
+- Alta en tabla vacía; identidad ALWAYS y secuencia default; default cero y secuencia desalineada con/sin PK se rechazan con reversión.
+- Preservación de SgtDia en edición y lectura de horas históricas inválidas.
+- Bloqueo de borrado por Empleado, HorarioTemporal, Asistencia y Marcacion.
+- FK adicional traducida a RegistroEnUsoException; códigos duplicados sin escritura.
+- Ocho altas concurrentes sin colisiones en el esquema local sin secuencia.
+- Texto con comilla almacenado como dato; registro inexistente no simula éxito.
+
+3. LÍMITES Y PENDIENTES
+No se ejecutó WinForms ni el build completo x86 en Windows; faltan DLL
+licenciadas en lib/legacy y las herramientas/plataforma de ejecución.
+No son capturas ni resultados del ejecutable original recibido.
+Falta QA visual de controles/máscaras y navegación desde ambos menús, revisión
+humana ajena y prueba del esquema acordado con Kadin antes de escribir en QA compartida.
+No se modificó esquema ni se limpiaron datos de la instancia compartida.
+Sin FK, los bloqueos de la operación no impiden que un escritor legado cree
+referencias huérfanas o IDs ambiguos después del commit: la integridad TEC-002
+sigue siendo una tarea separada.

@@ -12,7 +12,7 @@ La programación hacia T3 sigue [PLAN_REFACTORIZACION.md](../../Software/docs/PL
 
 Esta es la distribución vigente de implementación hacia T2, solicitada por
 Evelyn. Reemplaza las propuestas anteriores de asignar solo pruebas/combos.
-TEC-003 está integrado en main; TEC-004 está preparado para revisión en borrador. Los estados de cada paquete se registran en la tabla CR-TEC; TEC-002 tiene el despliegue informado y mantiene pendientes integridad/IDs y QA. Cada integrante implementa
+TEC-003 y TEC-004 están integrados en main; Evelyn asume ahora TEC-001. Los estados de cada paquete se registran en la tabla CR-TEC; TEC-002 tiene el despliegue informado y mantiene pendientes integridad/IDs y QA. Cada integrante implementa
 su parte y hace sus propios commits; no se redistribuye la autoría del cambio
 `0a4b6a8` ni del avance de conexión `eeeb817`. La fecha de entrega aún debe confirmarse.
 
@@ -20,7 +20,7 @@ su parte y hace sus propios commits; no se redistribuye la autoría del cambio
 
 | Paquete / responsable | Parte concreta que va a modificar | Plan propio | Rama / revisor |
 |---|---|---|---|
-| TEC-001 · Jorge Enrique Cano Asto | Listado y mantenimiento de horarios: `FrmHorarios.cs` y `FrmMantHorarios.cs`; extraer lógica a capas y repositorio PostgreSQL | [Plan de horarios](../../specs/TEC-001-horarios.md) | `refactor/tec-001-horarios` / Evelyn |
+| TEC-001 · Evelyn (continuación del encargo inicial de Jorge/Kike) | Listado y mantenimiento de horarios: `FrmHorarios.cs` y `FrmMantHorarios.cs`; extraer lógica a capas y repositorio PostgreSQL | [Plan de horarios](../../specs/TEC-001-horarios.md) | `refactor/tec-001-horarios-evelyn` / revisión ajena pendiente |
 | TEC-002 · Francisco Kadin Valera Lizarraga | Perfilado, migraciones de IDs/claves de Horario, RRHH_Feriado y Motivo_Perm, más despliegue QA. FK solo con datos y dependencias verificadas | [Plan de BD](../../specs/TEC-002-integridad-bd.md) | `infra/tec-002-integridad-bd` / Jorge |
 | TEC-003 · Frank Piero Mantilla Arqueros | `FrmFeriado.cs`: listar/agregar/eliminar; sustituir acoplamiento al puente PostgreSQL por capas específicas | [Plan de feriados](../../specs/TEC-003-feriados.md) | `refactor/tec-003-feriados` / Kadin |
 | TEC-004 · Evelyn Victoria Rodriguez Cardozo | `FrmMotivoPermiso.cs` y `FrmMantMotivo.cs`: consulta/alta/edición/borrado por capas, sin actualización al abrir el editor | [Plan de motivos](../../specs/TEC-004-motivos-permiso.md) | `refactor/tec-004-motivos-permiso` / Frank |
@@ -40,12 +40,19 @@ Los responsables y revisores son los de la tabla de paquetes anterior.
 
 | Solicitud | Paquete / resultado | RF relacionado | Mantenimiento inicial | Prioridad | Riesgo | Estado |
 |---|---|---|---|---|---|---|
-| CR-TEC-001 | TEC-001, horarios por capas/PostgreSQL | RF-01/02, preparación | Preventivo; correcciones separadas si se demuestran | Alta | Medio | En planificación; implementación no iniciada |
+| CR-TEC-001 | TEC-001, horarios por capas/PostgreSQL | RF-01/02, preparación | Preventivo; correcciones de validación, selección y referencias delimitadas en spec | Alta | Medio | Continuación implementada por Evelyn; verificaciones registradas en spec; QA Windows y revisión humana pendientes |
 | CR-TEC-002 | TEC-002, integridad/IDs y QA | Transversal a los tres módulos | Preventivo en integridad; adaptativo en el despliegue informado | Alta | Alto | Despliegue informado y conexión verificada; integridad/IDs y QA pendientes |
 | CR-TEC-003 | TEC-003, feriados por capas/PostgreSQL | RF-17, preparación | Preventivo; correctivo separado si se reproduce defecto | Alta | Medio | Integrado mediante PR #1 en main (`6f7feb8`); evidencias y límites en TEC-003 |
-| CR-TEC-004 | TEC-004, motivos por capas/PostgreSQL | RF-04/05; apoyo a 03/06/18 | Preventivo; correcciones del código base separadas | Alta | Alto | [PR #2 en borrador](https://github.com/Nidka/RRHH/pull/2); 130 pruebas combinadas. QA Windows, integridad BD y revisión de Frank pendientes |
+| CR-TEC-004 | TEC-004, motivos por capas/PostgreSQL | RF-04/05; apoyo a 03/06/18 | Preventivo; correcciones del código base separadas | Alta | Alto | Integrado mediante [PR #2](https://github.com/Nidka/RRHH/pull/2), main `06ca7f6`; validación previa de 130 pruebas. QA Windows e integridad BD pendientes |
 
 Cadena de trazabilidad de cada trabajo:
+
+Actualización 18/10/2026: Evelyn asume TEC-001 pendiente del encargo inicial
+de Jorge/Kike. La autoría se registra con su identidad, sin atribuirle el
+cambio a Jorge. Solicitó integración directa a `main` para esta continuación
+y el ajuste documental T2-04; se registra como excepción explícita al flujo
+de PR, sin fingir aprobación ajena ni dar por ejecutado QA Windows. Las
+reglas habituales de revisión se conservan para los demás cambios.
 
 `Evidencia anterior → diagnóstico → RF (si aplica) → CR-TEC → spec TEC → rama → commits → PR/revisión → pruebas → evidencia posterior → informe/exposición`
 

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 using DevExpress.XtraEditors;
@@ -11,14 +10,16 @@ using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Base;
 using DevExpress.XtraGrid.Views.Grid;
-using GRLL.Common;
 using Microsoft.VisualBasic.CompilerServices;
 using RecursosHumanos.My.Resources;
+using RRHH.Application.Asistencia;
+using RRHH.Presentation.Asistencia;
 
 namespace RecursosHumanos;
 
+/// <summary>Vista pasiva del listado; delega operaciones y navegación al presenter compuesto.</summary>
 [DesignerGenerated]
-public class FrmHorarios : FrmConsulta
+public class FrmHorarios : FrmConsulta, IHorariosView
 {
 	private static List<WeakReference> __ENCList = new List<WeakReference>();
 
@@ -548,58 +549,55 @@ public class FrmHorarios : FrmConsulta
 		this.PerformLayout();
 	}
 
-	private void FrmHorarios_Load(object sender, EventArgs e)
-	{
-		LlenaHorario();
-	}
+    public event EventHandler CargarSolicitado;
+    public event EventHandler AgregarSolicitado;
+    public event EventHandler EditarSolicitado;
+    public event EventHandler EliminarSolicitado;
+    private Func<int?, bool> _abrirEditor;
 
-	private void BtnAgregar_Click(object sender, EventArgs e)
-	{
-		FrmMantHorarios frmMantHorarios = new FrmMantHorarios();
-		frmMantHorarios.ShowDialog();
-		if (frmMantHorarios.DialogResult == DialogResult.OK)
-		{
-			LlenaHorario();
-		}
-	}
+    public int? HorarioSeleccionado => GridViewHorarios.FocusedRowHandle < 0 ? null :
+        (GridViewHorarios.GetFocusedRow() as HorarioDto)?.Id;
 
-	private void LlenaHorario()
-	{
-		List<Horario> dataSource = HorarioMapper.Instance().SelectAll().ToList();
-		DGVHorarios.DataSource = dataSource;
-	}
+    /// <summary>Recibe navegación desde CompositionRoot; la vista no construye dependencias.</summary>
+    internal void ConfigurarEditor(Func<int?, bool> abrirEditor) =>
+        _abrirEditor = abrirEditor ?? throw new ArgumentNullException(nameof(abrirEditor));
 
-	private void BtnMod_Click(object sender, EventArgs e)
-	{
-		FrmMantHorarios frmMantHorarios = new FrmMantHorarios();
-		int focusedRowHandle = GridViewHorarios.FocusedRowHandle;
-		frmMantHorarios.CodHorario = Conversions.ToInteger(GridViewHorarios.GetRowCellValue(focusedRowHandle, "idHorario"));
-		frmMantHorarios.ShowDialog();
-		if (frmMantHorarios.DialogResult == DialogResult.OK)
-		{
-			LlenaHorario();
-		}
-	}
+    /// <inheritdoc/>
+    public bool AbrirEditor(int? id) => _abrirEditor != null ? _abrirEditor(id) :
+        throw new InvalidOperationException("Abra horarios desde el menú principal.");
 
-	private void BtnEliminar_Click(object sender, EventArgs e)
-	{
-		int focusedRowHandle = GridViewHorarios.FocusedRowHandle;
-		if (focusedRowHandle < 0)
-		{
-			MessageBox.Show("Primero debe Seleccionar un Registro");
-		}
-		else if (MessageBox.Show(Conversions.ToString(Operators.ConcatenateObject("Desea eliminar el Horario: ", GridViewHorarios.GetRowCellValue(focusedRowHandle, "Descrip_Horario"))), "Alerta", MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation) == DialogResult.OK)
-		{
-			int count = EmpleadoMapper.Instance().SelectBy([SpecialName] (Empleado em) => Operators.ConditionalCompareObjectEqual(em.idHorario, GridViewHorarios.GetRowCellValue(focusedRowHandle, "idHorario"), TextCompare: false)).Count;
-			if (count > 0)
-			{
-				MessageBox.Show("No se puede Eliminar el Horario, porque existen Empleados en ese Horario", "", MessageBoxButtons.OK, MessageBoxIcon.Hand);
-				return;
-			}
-			Horario horario = new Horario();
-			horario.idHorario = Conversions.ToInteger(GridViewHorarios.GetRowCellValue(focusedRowHandle, "idHorario"));
-			HorarioMapper.Instance().Delete(horario);
-			LlenaHorario();
-		}
-	}
+    /// <inheritdoc/>
+    public void MostrarHorarios(IReadOnlyList<HorarioDto> horarios)
+    {
+        GridColumn1.FieldName = nameof(HorarioDto.Id);
+        GridColumn6.FieldName = nameof(HorarioDto.Descripcion);
+        GridColumn2.FieldName = nameof(HorarioDto.Ingreso1);
+        GridColumn4.FieldName = nameof(HorarioDto.Salida1);
+        GridColumn5.FieldName = nameof(HorarioDto.Ingreso2);
+        GridColumn3.FieldName = nameof(HorarioDto.Salida2);
+        GridColumn7.FieldName = nameof(HorarioDto.Estado);
+        DGVHorarios.DataSource = new BindingList<HorarioDto>(new List<HorarioDto>(horarios));
+    }
+
+    /// <inheritdoc/>
+    public void HabilitarAcciones(bool habilitadas)
+    {
+        BtnAgregar.Enabled = habilitadas;
+        BtnMod.Enabled = habilitadas;
+        BtnEliminar.Enabled = habilitadas;
+    }
+
+    /// <inheritdoc/>
+    public bool ConfirmarEliminacion() => MessageBox.Show(this,
+        "¿Desea eliminar el horario seleccionado?", "Horarios",
+        MessageBoxButtons.OKCancel, MessageBoxIcon.Question) == DialogResult.OK;
+
+    /// <inheritdoc/>
+    public void MostrarError(string mensaje) => MessageBox.Show(this, mensaje,
+        "Horarios", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+
+    private void FrmHorarios_Load(object sender, EventArgs e) => CargarSolicitado?.Invoke(this, EventArgs.Empty);
+    private void BtnAgregar_Click(object sender, EventArgs e) => AgregarSolicitado?.Invoke(this, EventArgs.Empty);
+    private void BtnMod_Click(object sender, EventArgs e) => EditarSolicitado?.Invoke(this, EventArgs.Empty);
+    private void BtnEliminar_Click(object sender, EventArgs e) => EliminarSolicitado?.Invoke(this, EventArgs.Empty);
 }

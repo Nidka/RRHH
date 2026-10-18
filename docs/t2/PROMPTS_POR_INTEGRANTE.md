@@ -21,18 +21,22 @@ hace qué; no reemplazan las reglas comunes.
 
 | Integrante | Diagramas a producir y sustentar |
 |---|---|
-| Jorge | Arquitectura actual/objetivo y flujo de horarios, según el paquete asignado |
+| Jorge | Arquitectura actual/objetivo y propuestas de diagnóstico; el paquete horarios continúa con Evelyn |
 | Kadin | Elabora mapa global, componentes en Modelio y cinco flujos en Bizagi por encargo de Evelyn; conserva además el análisis de datos de su paquete |
 | Frank | Feriados antes/después; aporta exploración de asistencia/reportes a Evelyn |
-| Evelyn | Motivos antes/después; coordina mapa, módulos y los cinco flujos globales |
+| Evelyn | Motivos y horarios antes/después; coordina mapa, módulos y los cinco flujos globales que elabora Kadin |
 
 Para cada diagrama incluir alcance, fuente/versión, autor, fecha, leyenda observado/inferido/propuesto y vínculos a evidencia. Acompañar los flujos con entradas/procesos/salidas y reglas. El flujo de BD apoya a los módulos consumidores; no reemplaza los cinco flujos funcionales requeridos. Un diagrama hipotético no cumple por sí solo la evidencia funcional observada.
 
-## Prompt de Jorge
+## Continuación de TEC-001, asumida por Evelyn
+
+Desde el 18/10/2026 Evelyn asume este paquete inicialmente asignado a
+Jorge/Kike. El bloque siguiente refleja esa continuación; no reasigna sus
+tareas de diagnóstico/arquitectura ni atribuye a Jorge los cambios de Evelyn.
 
 ```text
-Soy Jorge Enrique Cano Asto. Mi rol es responsable de TEC-001, solicitud CR-TEC-001.
-Mi rama: refactor/tec-001-horarios.
+Soy Evelyn Victoria Rodriguez Cardozo. Asumo la continuación de TEC-001, solicitud CR-TEC-001, inicialmente asignada a Jorge/Kike.
+Mi rama: refactor/tec-001-horarios-evelyn.
 Mi spec: specs/TEC-001-horarios.md.
 Mi revisor humano: Evelyn Victoria Rodriguez Cardozo.
 
@@ -60,7 +64,7 @@ Mi paquete de código es listado y mantenimiento de horarios: FrmHorarios.cs y F
 
 Mis diagramas: arquitectura actual/objetivo diferenciadas y flujo de consulta/alta/edición/borrado de horarios antes/después. No duplico los globales T2-04, que coordina Evelyn y elabora Kadin. Cada elemento tiene fuente o marca de hipótesis. Mi análisis alimenta ingeniería inversa técnica y propuestas de refactorización; explica SRP, DRY e inyección donde realmente se apliquen.
 
-Coordina con Kadin el contrato de IDs de Horario. No cambies sus migraciones. Limita mis ediciones de MainMDI/CompositionRoot a conectar horarios y documenta ese punto compartido. Mi revisor es Evelyn; prepara material para que ella compruebe el recorrido y pruebas, no una aprobación simulada.
+Coordina con Kadin el contrato de IDs de Horario. No cambies sus migraciones. Limita mis ediciones de MainMDI/CompositionRoot a conectar horarios y documenta ese punto compartido. La revisión humana de esta continuación está pendiente de asignar a otra persona. Evelyn solicitó integrar directamente esta tarea en main; no inventes aprobación ajena ni resultados de QA Windows.
 ```
 
 ## Prompt de Kadin

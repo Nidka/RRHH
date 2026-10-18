@@ -92,6 +92,27 @@ internal static class CompositionRoot
         return form;
     }
 
+    /// <summary>Compone listado y editor modal de horarios sobre un repositorio específico.</summary>
+    public static FrmHorarios CrearHorarios()
+    {
+        var repository = new PostgreSqlHorarioRepository(Database.Value);
+        var form = new FrmHorarios();
+        form.ConfigurarEditor(id =>
+        {
+            using (var editor = CrearEditorHorario(repository, id))
+                return editor.ShowDialog(form) == DialogResult.OK;
+        });
+        _ = new HorariosPresenter(form, new ListarHorarios(repository), new EliminarHorario(repository));
+        return form;
+    }
+
+    private static FrmMantHorarios CrearEditorHorario(IHorarioRepository repository, int? id)
+    {
+        var form = new FrmMantHorarios { CodHorario = id ?? 0 };
+        _ = new HorarioEditorPresenter(form, new ObtenerHorario(repository), new GuardarHorario(repository));
+        return form;
+    }
+
 	/// <summary>Crea el formulario de gestión de feriados con su presenter conectado.</summary>
 	public static FrmFeriado CrearFeriado()
 	{

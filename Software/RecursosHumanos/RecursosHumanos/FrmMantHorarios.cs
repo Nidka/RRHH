@@ -3,20 +3,21 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Forms;
-using ClassRRHH;
 using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Mask;
 using GRLL.Common;
 using Microsoft.VisualBasic.CompilerServices;
 using RecursosHumanos.My.Resources;
+using RRHH.Application.Asistencia;
+using RRHH.Presentation.Asistencia;
 
 namespace RecursosHumanos;
 
+/// <summary>Vista pasiva del editor de horarios; conserva sus controles y recursos originales.</summary>
 [DesignerGenerated]
-public class FrmMantHorarios : FrmConsulta
+public class FrmMantHorarios : FrmConsulta, IHorarioEditorView
 {
 	private static List<WeakReference> __ENCList = new List<WeakReference>();
 
@@ -273,6 +274,10 @@ public class FrmMantHorarios : FrmConsulta
 		base.Load += FrmMantHorarios_Load;
 		__ENCAddToList(this);
 		InitializeComponent();
+        btnGrabar.Enabled = false;
+        CheckEquipoMarcacion.EditValue = false;
+        CheckEquipoMarcacion.Enabled = false;
+        CheckEquipoMarcacion.Properties.Caption = "Sincronización no disponible";
 	}
 
 	[DebuggerNonUserCode]
@@ -580,60 +585,41 @@ public class FrmMantHorarios : FrmConsulta
 		this.PerformLayout();
 	}
 
-	private void FrmMantHorarios_Load(object sender, EventArgs e)
-	{
-		if (CodHorario != 0)
-		{
-			Horario horario = HorarioMapper.Instance().SelectBy([SpecialName] (Horario h) => h.idHorario == CodHorario).First();
-			UcTxtDescripcion.Text = horario.Descrip_Horario;
-			CheckEdit1.EditValue = horario.Estado;
-			Txt_HE.Text = horario.Ingreso1;
-			Txt_HS.Text = horario.Salida2;
-			Txt_SR.Text = horario.Salida1;
-			Txt_ER.Text = horario.Ingreso2;
-		}
-	}
+    public event EventHandler CargarSolicitado;
+    public event EventHandler GuardarSolicitado;
+    public int IdHorario => CodHorario;
+    public string Descripcion => UcTxtDescripcion.Text;
+    public string Ingreso1 => Txt_HE.Text;
+    public string Salida1 => Txt_SR.Text;
+    public string Ingreso2 => Txt_ER.Text;
+    public string Salida2 => Txt_HS.Text;
+    public bool? Estado => CheckEdit1.EditValue as bool?;
 
-	private void btnGrabar_Click(object sender, EventArgs e)
-	{
-		if ((Txt_HE.Text.Length == 0) | (Txt_HS.Text.Length == 0) | (Txt_SR.Text.Length == 0) | (Txt_ER.Text.Length == 0))
-		{
-			MessageBox.Show("Debe Ingresar un Horario Válido", "", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-			return;
-		}
-		Horario horario = new Horario();
-		horario.Descrip_Horario = UcTxtDescripcion.Text.Trim();
-		object editValue = CheckEdit1.EditValue;
-		bool? flag = default(bool?);
-		horario.Estado = ((editValue != null) ? ((bool?)editValue) : flag);
-		horario.Ingreso1 = Txt_HE.Text.Trim();
-		horario.Salida2 = Txt_HS.Text.Trim();
-		horario.Salida1 = Txt_SR.Text.Trim();
-		horario.Ingreso2 = Txt_ER.Text.Trim();
-		if (CodHorario == 0)
-		{
-			int idHorario;
-			if (HorarioMapper.Instance().SelectAll().Count == 0)
-			{
-				idHorario = 1;
-			}
-			else
-			{
-				idHorario = HorarioMapper.Instance().SelectAll().Max([SpecialName] (Horario v) => v.idHorario);
-				idHorario = checked(idHorario + 1);
-			}
-			horario.idHorario = idHorario;
-			HorarioMapper.Instance().Insert(horario);
-			if (CheckEquipoMarcacion.CheckState == CheckState.Checked)
-			{
-				AsistenciaAccess asistenciaAccess = new AsistenciaAccess();
-			}
-		}
-		else
-		{
-			horario.idHorario = CodHorario;
-			HorarioMapper.Instance().Update(horario);
-		}
-		DialogResult = DialogResult.OK;
-	}
+    /// <inheritdoc/>
+    public void MostrarHorario(HorarioDto horario)
+    {
+        UcTxtDescripcion.Text = horario.Descripcion ?? string.Empty;
+        CheckEdit1.EditValue = horario.Estado;
+        Txt_HE.Text = horario.Ingreso1 ?? string.Empty;
+        Txt_SR.Text = horario.Salida1 ?? string.Empty;
+        Txt_ER.Text = horario.Ingreso2 ?? string.Empty;
+        Txt_HS.Text = horario.Salida2 ?? string.Empty;
+    }
+
+    /// <inheritdoc/>
+    public void HabilitarGuardar(bool habilitado) => btnGrabar.Enabled = habilitado;
+
+    /// <inheritdoc/>
+    public void MostrarError(string mensaje) => MessageBox.Show(this, mensaje,
+        "Horario", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+
+    /// <inheritdoc/>
+    public void CerrarGuardado()
+    {
+        DialogResult = DialogResult.OK;
+        Close();
+    }
+
+    private void FrmMantHorarios_Load(object sender, EventArgs e) => CargarSolicitado?.Invoke(this, EventArgs.Empty);
+    private void btnGrabar_Click(object sender, EventArgs e) => GuardarSolicitado?.Invoke(this, EventArgs.Empty);
 }
