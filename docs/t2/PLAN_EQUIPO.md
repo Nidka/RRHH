@@ -195,7 +195,7 @@ académico de abajo; se alimentan de estos cambios reales.
 | 1 · T2-01 Línea base y recuperación técnica | Jorge | Kadin | T2-00 | Inventario de original y reconstruido, herramientas/pasos reales, dependencias y límites; commit y archivos de origen identificados | Pendiente |
 | 1 · T2-02 Exploración funcional | Frank | Evelyn | Acceso al ejecutable original | Capturas y casos de menús, asistencia, permisos, licencias, vacaciones y reportes; registrar flujos inaccesibles sin inventarlos | Pendiente |
 | 1 · T2-03 Diagnóstico BD | Kadin | Jorge | Esquema disponible; T2-01 para contraste | Entidades/relaciones, claves faltantes y riesgos; distinguir schema.sql de instancia activa y SQL Server original | Pendiente |
-| 2 · T2-04 Mapas y flujos | Frank | Jorge | T2-02; puede iniciar con hipótesis | Mapa, diagrama de módulos, cinco flujos requeridos y entradas/procesos/salidas; referencias a evidencias | Pendiente |
+| 2 · T2-04 Mapas y flujos | Kadin elabora; Evelyn coordina | Evelyn; apoyo técnico del equipo | T2-02; puede iniciar con hipótesis | Mapa global, componentes en Modelio y cinco flujos en Bizagi; fuentes, entradas/procesos/salidas y contraste en Windows | Encargo por texto; recepción, contraste e incorporación pendientes |
 | 2 · T2-05 Diagnóstico y refactorización | Jorge | Kadin | T2-01/02/03 | Problemas con evidencia/impacto/recomendación y ≥4 propuestas con principio/beneficio/RF; distinguir original y migración | Pendiente |
 | 2 · T2-06 Matrices RF y CR | Evelyn | Frank | Puede iniciar con enunciado; cerrar con T2-04/05 | 18 RF y 18 CR sin omisiones; todos los campos requeridos, responsable y estado; revisar criterios con equipo | Borrador preparado; revisión pendiente |
 | 3 · T2-07 Plan de mantenimiento | Evelyn | Jorge | T2-03/05/06 | Objetivo, alcance, estado, cuatro tipos de mantenimiento, riesgos, estrategias, responsables, cronograma y aceptación | Borrador preparado; revisión pendiente |
@@ -206,14 +206,21 @@ académico de abajo; se alimentan de estos cambios reales.
 
 Nombres completos en [README](README.md). Cada responsable puede pedir ayuda, pero conserva la responsabilidad de validar y explicar su entregable. No se atribuye al responsable un cambio generado localmente hasta que lo revise y lo incorpore mediante su trabajo real.
 
-Para T2-04, Frank coordina la cobertura y los enlaces. Jorge produce mapa,
-módulos y arquitectura; Kadin, ER y despliegue; Frank, feriados/asistencia/
-reportes; Evelyn, motivos/permisos/licencias/vacaciones. Cada uno prepara
-también el flujo antes/después de su paquete y lo acompaña de fuentes y
-entradas/procesos/salidas. El reparto detallado está en los prompts y no
-autoriza ampliar la implementación a todos esos módulos. Si un flujo no se
-puede reconstruir, documentar búsqueda y limitación; una propuesta no se
-presenta como funcionamiento observado.
+Actualización T2-04 (18/10/2026): Evelyn coordina y encarga a Kadin la
+elaboración de los diagramas mediante instrucciones compartidas por texto.
+El mapa inventaría las opciones de todo el aplicativo recibido; los módulos
+se representan con componentes lógicos en Modelio y los cinco flujos
+principales (asistencia, permisos, licencias, vacaciones y reportes) en Bizagi.
+La vista global abarca también lo que no se refactorizó. Cada módulo se
+acompaña de entradas, procesos, salidas y reglas identificadas. Conservar
+fuente/versión y certeza: licencias/vacaciones siguen inferidas hasta
+contrastarlas; el reporte detallado es el de permisos/licencias y no acredita
+todos los reportes. Kadin entrega los modelos editables y exportaciones a
+Evelyn; ella coordina revisión e incorporación al informe y al repositorio.
+No necesita publicar personalmente los archivos para entregárselos. El
+antes/después técnico de cada paquete se conserva aparte de este análisis
+AS-IS. Los borradores automáticos de T2-04 se retiraron a pedido de Evelyn;
+no se presentan como diagramas finales ni evidencias de Windows.
 
 ## Tareas complementarias del informe
 

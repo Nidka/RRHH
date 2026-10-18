@@ -14,16 +14,19 @@ Usar IDs `EV-FUN-001`, `EV-TEC-001`, `EV-BD-001`, `EV-QA-001` según procedencia
 | Cobertura | Responsable | Material mínimo |
 |---|---|---|
 | Exploración | Frank | Pantallas, menús, botones, entradas/salidas, restricciones, mensajes y comportamientos inesperados |
-| Flujos funcionales | Frank, revisión Jorge | Asistencia, permisos, licencias, vacaciones y reportes; si no es accesible, documentar búsqueda y limitación |
+| Flujos funcionales | Kadin elabora; Evelyn coordina y revisa | Asistencia, permisos, licencias, vacaciones y reportes en Bizagi; módulos en Modelio; si no es accesible, documentar búsqueda y limitación |
 | Ingeniería técnica | Jorge | Archivos originales, dependencias, configuración saneada, herramientas/pasos, entidades y arquitectura |
 | Base de datos | Kadin | Esquema real disponible, relaciones, riesgos y runbook/despliegue cuando ocurra |
 | Reconstrucción | Frank, revisión Kadin | Build/test en Windows, QA de catálogos y resultados; no confundir pruebas unitarias con integración |
 | Colaboración y trazabilidad | Evelyn | Tareas, ramas, PR y revisiones reales vinculados a entregables |
 
 El reparto de autoría de diagramas y los prompts completos para cada IDE
-están en [PROMPTS_POR_INTEGRANTE.md](PROMPTS_POR_INTEGRANTE.md). Frank
-coordina los flujos globales con los aportes de Jorge, Kadin y Evelyn. Los
-archivos se guardan por paquete en `docs/t2/diagramas/TEC-NNN/`; cada uno
+están en [PROMPTS_POR_INTEGRANTE.md](PROMPTS_POR_INTEGRANTE.md). Evelyn
+coordina los diagramas globales y los encarga a Kadin por texto, según el
+[plan T2-04](PLAN_EQUIPO.md#responsables-y-revisión-cruzada). Kadin puede
+entregarle los editables y exportaciones directamente: Evelyn los revisa e
+incorpora al informe y al repositorio. No se requieren borradores auxiliares.
+Los archivos de refactor se guardan en `docs/t2/diagramas/TEC-NNN/`; cada uno
 identifica fuente, versión y certeza (observado/inferido/propuesto). Las
 evidencias se guardan por paquete para evitar colisiones de nombres entre
 ramas. No crear diagramas de supuestos como si fueran capturas del sistema.
@@ -38,7 +41,7 @@ Evelyn integra; cada responsable entrega su sección y evidencia, y revisa la ve
 | 2. Resumen ejecutivo | Evelyn | Hallazgos reales y alcance T2 |
 | 3. Sistema recibido | Jorge | Propósito, entorno y distinción original/reconstrucción |
 | 4. Exploración funcional | Frank | Capturas y descripciones vinculadas |
-| 5. Ingeniería inversa funcional | Frank | Mapa, módulos, cinco flujos, reglas y entradas/procesos/salidas |
+| 5. Ingeniería inversa funcional | Evelyn, con exploración de Frank | Mapa, módulos, cinco flujos, reglas y entradas/procesos/salidas |
 | 6. Ingeniería inversa técnica | Jorge y Kadin | Inventario, BD, componentes, método y limitaciones |
 | 7. Diagnóstico | Jorge | Cada problema con evidencia, impacto y recomendación |
 | 8. Requerimientos del usuario | Evelyn | Los 18 RF clasificados por módulo |

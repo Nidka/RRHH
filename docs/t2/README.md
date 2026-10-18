@@ -27,6 +27,13 @@ ese procedimiento, sin cambiar el reparto de módulos.
 
 ## Ruta de lectura
 
+**Diagramas globales (T2-04):** Evelyn coordina y encarga a Kadin su
+elaboración en Bizagi (flujos) y Modelio (módulos). El alcance y la entrega
+están en [PLAN_EQUIPO.md](PLAN_EQUIPO.md#responsables-y-revisión-cruzada).
+Las instrucciones se comparten manualmente; los diagramas finales se
+incorporarán al informe y al repositorio tras revisión. Licencias y
+vacaciones conservan su condición de hipótesis hasta contrastarlas.
+
 1. [Plan de equipo y orden de trabajo](PLAN_EQUIPO.md).
 2. [Primera prueba y estado actual](PRIMERA_PRUEBA.md); [estado anterior de arquitectura](ESTADO_0a4b6a8.md) como referencia histórica.
 3. [Matriz de requerimientos](MATRIZ_REQUERIMIENTOS.csv) y [control inicial de cambios](CONTROL_CAMBIOS.csv).

@@ -1,5 +1,10 @@
 # Flujos funcionales relacionados con permisos, licencias y vacaciones
 
+**Antecedente del paquete TEC-004.** Los diagramas globales AS-IS T2-04
+se encargan a Kadin en Bizagi/Modelio según el [plan](../../PLAN_EQUIPO.md#responsables-y-revisión-cruzada).
+Las propuestas futuras de este documento no representan funcionalidades
+observadas del original ni sustituyen esos entregables.
+
 Responsable: Evelyn Victoria Rodriguez Cardozo. Análisis asistido por IA, 17/10/2026, fuentes de f713383. No se modifican estos módulos como parte del refactor de motivos. Los diagramas se etiquetan según la evidencia disponible; requieren contraste con aplicativo/área usuaria para cerrar ingeniería inversa funcional.
 
 ## Permisos: flujo inferido del código

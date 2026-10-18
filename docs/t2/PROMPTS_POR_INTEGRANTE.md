@@ -4,7 +4,7 @@ Copiar **un bloque completo**, el del integrante correspondiente, en la IA de su
 
 **Base del equipo:** `origin/docs/t2-organizacion-specs` mientras estos planes no estén integrados en main. Después de `git fetch origin`, crear cada rama de tarea desde esa base compartida. Si ya existe una rama con cambios, conservarla y coordinar la incorporación de los documentos. Integrar primero el PR de organización antes de los PR de implementación. No indicar que los archivos están en main hasta integrarlos realmente.
 
-Cada persona es responsable de comprender, validar y explicar el trabajo asistido por IA. Los prompts no acreditan avance ni aprobación del docente. Se conserva el reparto de código vigente; los diagramas globales se reparten para cubrir los pendientes de T2.
+Cada persona es responsable de comprender, validar y explicar el trabajo asistido por IA. Los prompts no acreditan avance ni aprobación del docente. Actualización 18/10/2026: Evelyn coordina los diagramas globales T2-04 y encarga su elaboración a Kadin mediante instrucciones por texto. Él entrega los editables y exportaciones; Evelyn coordina revisión e incorporación al informe y repositorio. Alcance en [PLAN_EQUIPO.md](PLAN_EQUIPO.md#responsables-y-revisión-cruzada).
 
 **Situación de BD:** desplegada según Evelyn; conexión/esquema comprobados por psql. Antes de cambiar código, todos siguen [PRIMERA_PRUEBA.md](PRIMERA_PRUEBA.md) en Windows y registran sus resultados. El login RRHH requiere credenciales de aplicación diferentes de las de conexión.
 
@@ -21,10 +21,10 @@ hace qué; no reemplazan las reglas comunes.
 
 | Integrante | Diagramas a producir y sustentar |
 |---|---|
-| Jorge | Mapa del sistema, módulos, arquitectura actual/objetivo y flujo de horarios |
-| Kadin | Entidad-relación con nivel de certeza y despliegue real/propuesto |
-| Frank | Feriados antes/después, registro/consulta de asistencia y reportes |
-| Evelyn | Motivos antes/después, permisos, licencias y vacaciones |
+| Jorge | Arquitectura actual/objetivo y flujo de horarios, según el paquete asignado |
+| Kadin | Elabora mapa global, componentes en Modelio y cinco flujos en Bizagi por encargo de Evelyn; conserva además el análisis de datos de su paquete |
+| Frank | Feriados antes/después; aporta exploración de asistencia/reportes a Evelyn |
+| Evelyn | Motivos antes/después; coordina mapa, módulos y los cinco flujos globales |
 
 Para cada diagrama incluir alcance, fuente/versión, autor, fecha, leyenda observado/inferido/propuesto y vínculos a evidencia. Acompañar los flujos con entradas/procesos/salidas y reglas. El flujo de BD apoya a los módulos consumidores; no reemplaza los cinco flujos funcionales requeridos. Un diagrama hipotético no cumple por sí solo la evidencia funcional observada.
 
@@ -58,7 +58,7 @@ Mi alcance particular:
 
 Mi paquete de código es listado y mantenimiento de horarios: FrmHorarios.cs y FrmMantHorarios.cs, con sus casos de uso, repositorio, presenters, composición y pruebas. Completa ambas vistas; no refactorices solo el editor dejando el listado acoplado al mapper genérico. No implementar aún turnos por periodos/histórico (RF-01/02), ni sincronización de equipos sin contrato.
 
-Mis diagramas: mapa general del sistema, diagrama de módulos, arquitectura actual/objetivo diferenciadas y flujo de consulta/alta/edición/borrado de horarios antes/después. Cada elemento del mapa tiene fuente o marca de hipótesis. Mi análisis alimenta ingeniería inversa técnica y propuestas de refactorización; explica SRP, DRY e inyección donde realmente se apliquen.
+Mis diagramas: arquitectura actual/objetivo diferenciadas y flujo de consulta/alta/edición/borrado de horarios antes/después. No duplico los globales T2-04, que coordina Evelyn y elabora Kadin. Cada elemento tiene fuente o marca de hipótesis. Mi análisis alimenta ingeniería inversa técnica y propuestas de refactorización; explica SRP, DRY e inyección donde realmente se apliquen.
 
 Coordina con Kadin el contrato de IDs de Horario. No cambies sus migraciones. Limita mis ediciones de MainMDI/CompositionRoot a conectar horarios y documenta ese punto compartido. Mi revisor es Evelyn; prepara material para que ella compruebe el recorrido y pruebas, no una aprobación simulada.
 ```
@@ -93,7 +93,7 @@ Mi alcance particular:
 
 Mi paquete es diagnóstico, integridad/IDs y despliegue QA de BD, delimitado a Horario, RRHH_Feriado y Motivo_Perm y las dependencias verificadas. El despliegue ya fue informado como completado; comprueba su estado, documenta su evidencia y continúa integridad/IDs sin redesplegar por rutina. Primero publica el contrato de tablas/columnas/IDs y compatibilidad que necesitan los otros tres; no esperes a desplegar para documentarlo. Prepara migraciones numeradas con precondiciones, secuencias/identidad por encima de IDs existentes, PK/FK aplicables y restauración. No elimines duplicados ni datos reales automáticamente, ni reconstruyas toda la base.
 
-Mis diagramas: entidad-relación del alcance y dependencias relevantes, distinguiendo FK realmente declaradas de relaciones inferidas; diagrama de despliegue según entorno confirmado, o propuesta etiquetada si aún no se despliega. Entrega diccionario de datos acotado, perfilado saneado, plan/migraciones, pruebas de concurrencia/integridad y runbook reproducible. Si faltan claves en las tablas destino, difiere la FK y documenta su riesgo.
+Mis diagramas técnicos: entidad-relación del alcance y dependencias relevantes, distinguiendo FK realmente declaradas de relaciones inferidas; despliegue según entorno confirmado o propuesta etiquetada. Entrego diccionario de datos acotado, perfilado saneado, plan/migraciones, pruebas de concurrencia/integridad y runbook reproducible. Si faltan claves, difiero la FK y documento el riesgo. Además, Evelyn me encarga T2-04 por texto: mapa global, componentes en Modelio y cinco flujos en Bizagi. Le entrego editables/exportaciones para revisión e incorporación, sin ampliar la implementación de BD a esos módulos.
 
 Coordina IDs con Jorge/Frank/Evelyn. No edites sus pantallas ni declares un despliegue por crear scripts. Mi revisor es Jorge; prepara las comprobaciones y restauración para que revise el resultado real.
 ```
@@ -128,7 +128,7 @@ Mi alcance particular:
 
 Mi paquete de código es FrmFeriado.cs: listado, alta, duplicación de día y borrado, con dominio, casos, repositorio, presenter, composición y pruebas. Sustituye el acoplamiento a RRHHClass/mappers de compatibilidad por un flujo con casos de uso/repositorio específico; coordina con Kadin IDs, representación de fecha y garantía concurrente. No marques RF-17 completo: el cálculo del reporte general queda fuera de este cambio.
 
-Mis diagramas: flujo de feriados antes/después; flujo general de registro/consulta de asistencia y flujo de reportes, reconstruidos de las pantallas y dependencias disponibles. Los dos últimos son análisis funcional para T2, no permiso para migrar esos módulos. Documenta entradas/procesos/salidas y reglas observadas. Coordino la exploración global: enlazo los flujos de permisos/licencias/vacaciones de Evelyn y mapas de Jorge; no los fabrico si aún no llegaron.
+Mis diagramas: flujo de feriados antes/después. Mantengo la exploración funcional y aporto fuentes, entradas/procesos/salidas y evidencia de asistencia/reportes a Evelyn, quien coordina los diagramas globales T2-04. Esto no autoriza migrar esos módulos ni fabricar recorridos no comprobados.
 
 Entrega capturas reales disponibles y protocolo de exploración para las pendientes; diagnóstico y prueba de regresión. Limita mis ediciones de MainMDI/CompositionRoot a feriados. Mi revisor es Kadin: debe comprobar persistencia e integridad, no solo leer el código.
 ```
@@ -163,7 +163,7 @@ Mi alcance particular:
 
 Mi paquete de código es FrmMotivoPermiso.cs y FrmMantMotivo.cs: listado por tipo/modalidad, alta/edición y borrado seguro por capas. Quita escrituras al abrir el editor y centraliza recargas. Caracteriza los roles y el contrato de spRRHH_getMotivo_perm, ahora implementado en PostgreSqlLegacyContext, antes de sustituirlo; no inventes su filtro ni supongas equivalencia con el SQL Server original sin evidencia. Coordina IDs/referencias con Kadin y conserva campos no editados. No migres el registro de permisos ni licencias completas en este paquete.
 
-Mis diagramas: flujo de motivos antes/después y flujos funcionales de permisos, licencias y vacaciones a partir de evidencia del sistema. Esos flujos amplios son análisis, no implementación. Si no hay un flujo accesible de vacaciones/licencias, registra qué buscaste, limitación y preguntas pendientes; cualquier propuesta futura va separada y etiquetada.
+Mis diagramas: flujo de motivos antes/después. Coordino los globales T2-04 y encargo a Kadin por texto el mapa, módulos y flujos de asistencia, permisos, licencias, vacaciones y reportes. Reviso los editables/exportaciones que me entregue e incorporo el material aceptado al informe y repositorio; alcance en PLAN_EQUIPO.md. Estos flujos son análisis, no implementación. Si no hay un recorrido accesible de vacaciones/licencias, registro búsqueda, limitación y preguntas pendientes; las propuestas futuras van separadas y etiquetadas.
 
 Además reviso las matrices de 18 RF y 18 CR, las cuatro CR-TEC, el plan y la cobertura de los 16 apartados del informe. Integra los aportes reales de los otros tres con enlaces; marca lo que todavía no entregaron sin inventarlo ni apropiarte de sus cambios. Conserva las responsabilidades del equipo. Limita MainMDI/CompositionRoot a motivos. Mi revisor es Frank. Prepara material para explicar mi cambio y la trazabilidad, además de integrar el informe.
 ```
