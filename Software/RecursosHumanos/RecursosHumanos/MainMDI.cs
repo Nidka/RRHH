@@ -2580,7 +2580,7 @@ public class MainMDI : Form
 	{
 		if (ObjHorario == null || (ObjHorario.IsDisposed ? true : false))
 		{
-			ObjHorario = new FrmHorarios();
+			ObjHorario = CompositionRoot.CrearHorarios();
 		}
 		else
 		{
@@ -2751,7 +2751,7 @@ public class MainMDI : Form
 	{
 		if (ObjHorario == null || (ObjHorario.IsDisposed ? true : false))
 		{
-			ObjHorario = new FrmHorarios();
+			ObjHorario = CompositionRoot.CrearHorarios();
 		}
 		else
 		{

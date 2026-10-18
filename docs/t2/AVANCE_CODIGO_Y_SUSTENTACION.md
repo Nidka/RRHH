@@ -4,6 +4,15 @@
 
 ## Qué podemos afirmar hoy
 
+Actualización TEC-001 (18/10/2026): Evelyn asumió la continuación de horarios
+inicialmente asignada a Jorge/Kike. Listado y editor ahora delegan en MVP,
+casos y repositorio PostgreSQL; ambas entradas MainMDI usan CompositionRoot.
+Antes/después, principios y límites en la [spec](../../specs/TEC-001-horarios.md#antesdespués-para-sustentación).
+Build de capas/tests net48 sin errores/advertencias y 167 pruebas ejecutadas
+en harness net8 con PG local (37 nuevas de horarios); [evidencia](evidencias/TEC-001/validacion-local.txt).
+QA Windows y revisión ajena siguen pendientes. La integración directa fue
+solicitada expresamente por Evelyn; no se registra como PR aprobado.
+
 Hay cambios de código en `0a4b6a8` respecto de `e725cd6`, además de documentación. Esta comparación acredita diferencias en Git; falta incorporar resultados de ejecución en Windows/QA. Los responsables de explicar o continuar un cambio no son necesariamente quienes lo escribieron: registrar autoría real según commits, PR y revisión humana.
 
 La pauta T2 no obliga a implementar los 18 RF. El sílabo también contempla mantenimiento preventivo, refactorización, SRP/DRY, abierto/cerrado e inversión de control antes de T2. Por ello presentaremos el avance técnico existente con antes/después, principio, tipo de mantenimiento, beneficio, pruebas y pendientes, además de las nueve actividades de la pauta. No sustituir esa explicación por definiciones teóricas.
@@ -48,22 +57,26 @@ Reemplaza la propuesta anterior de combos/pruebas como trabajo principal.
 Esta sección inicial describe el avance recibido; no es el reparto de nueva
 implementación ni acredita autoría individual de ese avance.
 
-- Jorge: [TEC-001, horarios](../../specs/TEC-001-horarios.md), listado y editor completos.
+- Evelyn, continuación del encargo inicial de Jorge/Kike: [TEC-001, horarios](../../specs/TEC-001-horarios.md), listado y editor completos.
 - Kadin: [TEC-002, BD](../../specs/TEC-002-integridad-bd.md), integridad/IDs de tablas acordadas y despliegue QA.
 - Frank: [TEC-003, feriados](../../specs/TEC-003-feriados.md), listado, alta y borrado por capas.
 - Evelyn: [TEC-004, motivos](../../specs/TEC-004-motivos-permiso.md), listado y editor por capas.
 
 Cada paquete incluye caracterización, código, pruebas, revisión y evidencia
 para exponer. El responsable completa su spec y hace commits propios. Los
-cuatro planes están preparados; sus implementaciones no han comenzado aquí.
+estados vigentes están en las specs y el plan: TEC-003/004 integrados,
+TEC-001 implementado en esta continuación y TEC-002 con integridad/QA pendientes.
 
 ## Situación de verificaciones
 
 - Comparación estática `git diff e725cd6 0a4b6a8`: realizada para Estado Civil y login, junto a lectura de las capas/pruebas.
 - Actualización 18/10/2026: SDK .NET 8 instalado; capas/tests compilan net48 y la suite combinada corre en arnés .NET 8. Ejecutable y QA WinForms siguen pendientes en Windows.
 - QA y capturas antes/después: pendientes de los responsables.
-- Implementación TEC-001…004: no iniciada.
+- Implementación TEC-001: código y verificación local completados en esta continuación; faltan QA Windows y revisión ajena. TEC-003/004 ya integrados; TEC-002 conserva sus pendientes en su spec.
 
-## Avance de TEC-004 para revisión (18/10/2026)
+## Antecedente de TEC-004 para revisión (18/10/2026)
+
+Actualización: ese aporte quedó integrado mediante PR #2 en `06ca7f6`;
+la descripción siguiente conserva el estado de su preparación y sus límites.
 
 [Aporte de Evelyn](aportes/TEC-004/README.md): motivos migrados a MVP/casos/Repository, correcciones separadas, antes/después y seis diagramas SVG. 130 pruebas aprobadas en .NET 8 portable tras incorporar main/TEC-003 (`9a00a4a`), incluidas 14 con PostgreSQL local; capas/tests compilan net48. Ejecutable/QA Windows y revisión de Frank pendientes. IDs duplicados observados en el catálogo desplegado requieren coordinación con Kadin. RF-04/05 permanecen parciales; sin integración a main.

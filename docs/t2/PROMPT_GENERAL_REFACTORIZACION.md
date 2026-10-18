@@ -126,9 +126,13 @@ declares aprobado. No cierres el cambio solo porque compile.
 Genera los diagramas de mi rol según PROMPTS_POR_INTEGRANTE.md. Para mi
 refactor incluye flujo actual/propuesto y responsabilidades/dependencias
 que ayuden a explicarlo; evita duplicar diagramas globales de otro autor.
-Usa Mermaid en Markdown, con fuente, commit, autor, alcance y leyenda de
-observado/inferido/propuesto. Revisa coherencia y sintaxis; declara si no
-pudiste renderizarlo. No presentes dibujos propuestos como funcionamiento observado.
+Los diagramas globales T2-04 los coordina Evelyn y los encarga a Kadin por
+texto: flujos en Bizagi y módulos como componentes en Modelio. Consulta
+PLAN_EQUIPO.md para su alcance y entrega. Mermaid sirve para anexos técnicos del refactor;
+no sustituye los entregables en las herramientas indicadas por el docente.
+Incluye fuente, commit, autor, alcance y leyenda observado/inferido/propuesto.
+Revisa coherencia y sintaxis; declara si no pudiste renderizarlo. No presentes
+dibujos propuestos como funcionamiento observado.
 Guarda diagramas en docs/t2/diagramas/<ID>/, análisis en docs/t2/aportes/<ID>/
 y evidencias reales en docs/t2/evidencias/<ID>/. No inventes capturas.
 Relaciona problemas y decisiones con el informe y RF, sin cerrar un RF

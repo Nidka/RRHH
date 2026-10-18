@@ -104,6 +104,12 @@ Ante un fallo antes de `COMMIT`, PostgreSQL revierte la migración completa. Si
 se requiere retirar solo su estructura antes de recibir nuevas escrituras, use
 `20261018_02_integrity_ids.rollback.sql`; conserva todas las filas.
 
+La reversión estructural no registra qué objetos existían antes: retira los
+objetos con esos nombres y las identidades de las cuatro columnas. Se ensayó
+desde el fixture sin claves/identidades previas. Si el destino ya tenía una PK
+o identidad compatible, no usarla como inversa diferencial: recuperar desde
+el respaldo en otro destino y contrastar la estructura anterior.
+
 Después de habilitar escrituras, la recuperación segura es restaurar el dump
 previo en otra BD, validar conteos y cambiar la configuración durante una
 ventana controlada. La reversión SQL no elimina filas nuevas ni reconstruye el

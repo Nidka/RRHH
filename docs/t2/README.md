@@ -1,15 +1,15 @@
 # T2: organización y evidencias
 
-Base compartida revisada: main `6f7feb8` (18/10/2026), con la organización y TEC-003 integrados; TEC-004 publicado en [PR #2 en borrador](https://github.com/Nidka/RRHH/pull/2). La T2 evalúa diagnóstico, ingeniería inversa y planificación; los 18 RF se analizan aunque su implementación completa se evalúe progresivamente en T3/final.
+Base compartida de esta continuación: main `fd12b80` (18/10/2026), con TEC-003 y TEC-004 integrados mediante PR #1 y [PR #2](https://github.com/Nidka/RRHH/pull/2). Evelyn asume la continuación TEC-001 de horarios; resultados y pendientes en su [spec](../../specs/TEC-001-horarios.md). La T2 evalúa diagnóstico, ingeniería inversa y planificación; los 18 RF se analizan aunque su implementación completa se evalúe progresivamente en T3/final.
 
 **Primero probar la aplicación:** [PRIMERA_PRUEBA.md](PRIMERA_PRUEBA.md) documenta `.env`, ejecutable x86, login RRHH, recorrido inicial y evidencia de conexión. Kadin ya desplegó la BD según informó Evelyn; las pruebas de cada módulo y la integridad aún deben registrarse.
 
 ## Equipo
 
-- Jorge Enrique Cano Asto: refactor de horarios; arquitectura y propuestas.
+- Jorge Enrique Cano Asto: arquitectura y propuestas; su encargo inicial de horarios continúa con Evelyn desde el 18/10/2026.
 - Francisco Kadin Valera Lizarraga: integridad/IDs de BD y validación del entorno ya desplegado.
 - Frank Piero Mantilla Arqueros: refactor de feriados; exploración y caracterización.
-- Evelyn Victoria Rodriguez Cardozo: refactor de motivos de permiso; coordinación y matrices.
+- Evelyn Victoria Rodriguez Cardozo: motivos de permiso, continuación de horarios TEC-001, coordinación y matrices.
 
 Evelyn confirmó su identidad y, el 16/10/2026, informó que Kadin completó el despliegue de BD. El reparto nuevo por módulo está en el plan de equipo y sus cuatro specs; no acredita aceptación individual ni trabajo ya realizado. Cada responsable produce sus evidencias y cada revisor valida una contribución ajena.
 
@@ -26,6 +26,13 @@ de nuestros paquetes. Los prompts personales y las specs se ejecutan con
 ese procedimiento, sin cambiar el reparto de módulos.
 
 ## Ruta de lectura
+
+**Diagramas globales (T2-04):** Evelyn coordina y encarga a Kadin su
+elaboración en Bizagi (flujos) y Modelio (módulos). El alcance y la entrega
+están en [PLAN_EQUIPO.md](PLAN_EQUIPO.md#responsables-y-revisión-cruzada).
+Las instrucciones se comparten manualmente; los diagramas finales se
+incorporarán al informe y al repositorio tras revisión. Licencias y
+vacaciones conservan su condición de hipótesis hasta contrastarlas.
 
 1. [Plan de equipo y orden de trabajo](PLAN_EQUIPO.md).
 2. [Primera prueba y estado actual](PRIMERA_PRUEBA.md); [estado anterior de arquitectura](ESTADO_0a4b6a8.md) como referencia histórica.

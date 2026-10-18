@@ -1,15 +1,51 @@
 # TEC-001: refactorizar listado y mantenimiento de horarios
 
-- Estado: Plan inicial; implementación no iniciada.
-- Responsable: Jorge Enrique Cano Asto.
-- Revisor: Evelyn Victoria Rodriguez Cardozo.
-- Rama: `refactor/tec-001-horarios`.
+- Estado: Implementado y verificado en capas/PG local; QA Windows y revisión humana pendientes.
+- Responsable de esta continuación: Evelyn Victoria Rodriguez Cardozo. La asignación inicial fue para Jorge Enrique Cano Asto (Kike); no se le atribuye código de esta continuación.
+- Revisor humano: pendiente de asignar, distinto de Evelyn. Integración directa a `main` solicitada expresamente por Evelyn en esta sesión; no equivale a revisión ajena aprobada.
+- Rama: `refactor/tec-001-horarios-evelyn`.
 - Base actual: `eeeb817` (16/10/2026); el diagnóstico inicial se preparó con `0a4b6a8`. Caracterizar la versión nueva según [primera prueba](../docs/t2/PRIMERA_PRUEBA.md) y actualizar el diagnóstico antes de programar.
 - Trazabilidad: paquete técnico del [plan de equipo](../docs/t2/PLAN_EQUIPO.md); enlazar issue/PR y RF/CR aplicables al iniciar.
 
-## Actualización operativa del 16/10/2026
+## Continuación del 18/10/2026: diseño previo a implementación
 
-La BD ya fue desplegada por Kadin según informó Evelyn. Conexión y metadatos se comprobaron por psql; la prueba WinForms sigue pendiente. `eeeb817` añade `.env`, contraseña de usuario RRHH y puentes PostgreSqlLegacyMapper/PostgreSqlLegacyContext. Los nombres XxxMapper del diagnóstico inicial ya no prueban uso de SQL Server: revisar su resolución y proveedor actual. El objetivo del paquete es refactorizar hacia responsabilidades/casos de uso específicos sobre la ruta nueva, conservando su comportamiento caracterizado.
+Base de código: `fd12b80`, sobre `main` con TEC-003/004 integrados.
+Caracterización estática de `FrmHorarios` y `FrmMantHorarios`; WinForms en
+Windows pendiente. El listado usa HorarioMapper; editar no comprueba fila;
+el editor calcula MAX+1; el borrado solo comprueba Empleado. En schema.sql
+también referencian horarios HorarioTemporal.HorarioAsignado,
+Asistencia.idHorario y Marcacion.idHorario. El botón de sincronización
+solo construye AsistenciaAccess y no llama ninguna operación.
+
+- Mantenimiento preventivo: separar vista/presenter/casos/repositorio, DIP
+  mediante IHorarioRepository e IoC en CompositionRoot. MVP y Repository
+  resuelven los acoplamientos; no se añaden patrones por cantidad.
+- DRY: validación/formato horario centralizados en Horario; recarga única
+  del listado tras guardar o eliminar.
+- Comportamiento conservado: cuatro horas, descripción (máximo 20 según
+  esquema; se admite vacía como antes), Estado nullable, navegación modal,
+  cancelación sin escritura; no imponer orden de horas para no romper
+  jornadas nocturnas. SgtDia no se modifica al editar; en alta conserva el
+  comportamiento del esquema, sin inventar cálculo de día siguiente.
+- Correcciones delimitadas: rechazar horas fuera de 00:00:00…23:59:59,
+  manejar selección inexistente, impedir borrado con las cuatro referencias,
+  abortar códigos duplicados, y deshabilitar la sincronización que no tiene
+  implementación. Se prueban separadas de la reorganización estructural.
+- Persistencia: consultas tipadas; altas con default/identidad si existe,
+  respaldo MAX+1 bajo bloqueo de tabla mientras TEC-002 no esté integrado.
+  No se cambia esquema ni se aplican migraciones en la BD compartida.
+- Compatibilidad: lectura de horas históricas como texto en DTO; validación
+  de horas tipadas solo al guardar, para permitir corregir datos anteriores.
+- Pruebas: dominio (horas/culturas/nocturnidad), casos/presenters (carga,
+  cancelación, errores y campos conservados), repositorio en PG local
+  desechable (identidad/default, concurrencia, duplicados, referencias y
+  preservación de SgtDia), build de capas net48. UI y build completo Windows
+  siguen pendientes y no se declararán aprobados desde el Mac.
+- Reversión: revertir el commit de esta tarea. No hay cambios de esquema ni
+  conversión masiva de filas; registros nuevos permanecen compatibles con
+  las columnas heredadas. Coordinar retorno con Kadin si su esquema cambia.
+
+Antecedente del 16/10/2026: la BD ya fue desplegada por Kadin según informó Evelyn. Conexión y metadatos se comprobaron por psql; la prueba WinForms sigue pendiente. `eeeb817` añade `.env`, contraseña de usuario RRHH y puentes PostgreSqlLegacyMapper/PostgreSqlLegacyContext. Los nombres XxxMapper del diagnóstico inicial ya no prueban uso de SQL Server: revisar su resolución y proveedor actual. El objetivo del paquete es refactorizar hacia responsabilidades/casos de uso específicos sobre la ruta nueva, conservando su comportamiento caracterizado.
 
 ## Problema y evidencia inicial (base anterior; revalidar)
 
@@ -90,8 +126,25 @@ Conservar referencia del commit anterior. Separar scripts de datos de vistas/cas
 
 ## Seguimiento
 
-- Caracterización: pendiente.
-- Decisiones y supuestos: los indicados arriba, pendientes de resolver.
-- Código/pruebas/QA: pendientes.
-- PR, commits y evidencias: pendientes.
-- IA: plan inicial preparado con asistencia de IA; implementación y verificaciones deberán registrar su uso real y revisión humana.
+- Caracterización: estática sobre `fd12b80`; falta contraste del ejecutable en Windows.
+- Código: listado y editor migrados completos, con ambas entradas MainMDI compuestas. Implementación con asistencia de IA bajo la identidad de Evelyn, no de Jorge/Kike.
+- Resultado: 167 pruebas correctas, 0 fallidas, 0 omitidas, incluidas 37 nuevas de horarios (14 de integración PG). Ejecución en harness temporal net8 con las fuentes reales y cuatro ensamblados de capas separados. No equivale a ejecutar WinForms/net48 en Windows.
+- Build: Domain, Application, Presentation, PostgreSql y Tests compilaron para net48 con 0 errores y 0 advertencias.
+- Evidencia: [validación local TEC-001](../docs/t2/evidencias/TEC-001/validacion-local.txt).
+- BD: pruebas exclusivamente en instancia local desechable; no se aplicaron migraciones ni escrituras en la instancia compartida. El repositorio soporta identidad/default o esquema previo sin modificarlo.
+- Publicación: integración directa autorizada por Evelyn; no hay PR ni aprobación humana simulada. El commit de esta spec registra el cambio completo.
+- Pendientes: revisión ajena, build completo x86 y recorrido visual en Windows, prueba de controles/máscaras, carga/alta/edición/cancelación/borrado en QA y coordinación con TEC-002 antes de usar datos compartidos.
+
+## Antes/después para sustentación
+
+| Antes (`fd12b80`) | Después | Principio / beneficio |
+|---|---|---|
+| Los eventos de FrmHorarios/FrmMantHorarios consultan mappers y guardan directamente | Interfaces IHorariosView/IHorarioEditorView, HorariosPresenter/HorarioEditorPresenter y casos Listar/Obtener/Guardar/EliminarHorario | MVP y SRP: UI, coordinación y reglas se modifican por separado |
+| Formularios crean editor y calculan MAX+1 | CompositionRoot conecta editor modal; PostgreSqlHorarioRepository gestiona persistencia e IDs | DIP/IoC y Repository; presenter y casos se prueban con repositorio falso |
+| Cuatro textos solo se comprueban por longitud | Horario valida horas tipadas y formato invariable una sola vez | DRY; errores se detectan sin depender de controles o cultura |
+| Borrado revisa solo Empleado | Repositorio comprueba Empleado, HorarioTemporal, Asistencia y Marcacion dentro de transacción | Reduce riesgo de referencias huérfanas; FK y escritores externos conservan límites explícitos |
+
+Flujo técnico anterior: eventos WinForms → mappers/estado de datos compartido.
+Flujo nuevo: vista → presenter → caso de uso → IHorarioRepository → PostgreSQL.
+Cancelar no dispara guardado; cargar solo consulta; solo el evento Guardar
+escribe. RF-01/02 (periodos/histórico) siguen fuera del alcance.

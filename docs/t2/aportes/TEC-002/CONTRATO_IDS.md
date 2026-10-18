@@ -1,6 +1,7 @@
 # Contrato de IDs TEC-002
 
-Destinatarios: Jorge (TEC-001), Frank (TEC-003) y Evelyn (TEC-004).
+Destinatarios: Evelyn (continuación TEC-001 y TEC-004), Frank (TEC-003) y
+Jorge (asignación inicial TEC-001; apoyo/revisión según el plan vigente).
 Responsable: Kadin. Revisor: Jorge. Fecha: 18/10/2026.
 
 ## Contrato acordado para integración
@@ -23,8 +24,9 @@ requiere una decisión de negocio distinta y no forma parte de TEC-002.
 
 ## Instrucciones por paquete
 
-- Jorge: el repositorio nuevo de horarios debe omitir `idHorario` en altas y
-  obtenerlo con `RETURNING`. No usar `MAX+1`.
+- Evelyn, continuación TEC-001: el repositorio integrado de horarios detecta
+  identidad/default, omite `idHorario` en ese caso y lo obtiene con `RETURNING`.
+  El respaldo `MAX+1` previo a TEC-002 no debe utilizarse al disponer de identidad.
 - Frank: el código integrado de feriados sigue siendo compatible porque la
   identidad es `BY DEFAULT`, pero la siguiente modificación del repositorio
   debe omitir `idFeriado`; el índice único rechaza dos feriados el mismo día.

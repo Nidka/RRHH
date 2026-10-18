@@ -95,9 +95,12 @@ Conservar referencia del commit anterior. Separar scripts de datos de vistas/cas
 - Código/pruebas/QA: migración, reversión, perfilador y pruebas SQL locales
   aprobadas. Instancia compartida bloqueada por duplicación exacta al 100 %;
   saneamiento autorizado, QA WinForms Windows y restauración remota pendientes.
-- PR, commits y evidencias: pendientes.
+- PR y commits: [PR #8](https://github.com/Nidka/RRHH/pull/8), aporte de Kadin
+  `c7b2c08`; integración con `main` `138dbce` preparada por Evelyn. Validación
+  SQL de integración en `../docs/t2/evidencias/TEC-002/VALIDACION_INTEGRACION.md`.
 - IA: plan, scripts, documentos y ejecución local preparados con asistencia de
-  IA; requieren revisión humana de Kadin/Jorge antes del PR o despliegue.
+  IA; revisión humana de Kadin/Jorge no acreditada por esa asistencia. Evelyn
+  solicitó integrar el PR; no se fabrica una aprobación de revisión.
 
 ## Resultado del perfilado del 18/10/2026
 
