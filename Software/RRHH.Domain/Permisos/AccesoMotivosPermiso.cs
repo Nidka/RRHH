@@ -1,0 +1,32 @@
+using System;
+using RRHH.Domain.Comun;
+
+namespace RRHH.Domain.Permisos;
+
+/// <summary>Política caracterizada en FrmMotivoPermiso: 10=P, 14=C, 13=todas.</summary>
+public sealed class AccesoMotivosPermiso
+{
+    public bool Permitido { get; }
+    public string Modalidad { get; }
+
+    public AccesoMotivosPermiso(int rol)
+    {
+        Permitido = rol == 10 || rol == 14 || rol == 13;
+        Modalidad = rol == 10 ? "P" : rol == 14 ? "C" : null;
+    }
+
+    public void ExigirAcceso()
+    {
+        if (!Permitido)
+            throw new ReglaNegocioException("Su rol no tiene acceso al mantenimiento de motivos.");
+    }
+
+    public void ExigirAcceso(MotivoPermiso motivo)
+    {
+        ExigirAcceso();
+        if (motivo == null)
+            throw new ReglaNegocioException("El motivo ya no existe. Actualice el listado.");
+        if (Modalidad != null && !string.Equals(Modalidad, motivo.Modalidad, StringComparison.Ordinal))
+            throw new ReglaNegocioException("El motivo no pertenece a su modalidad.");
+    }
+}

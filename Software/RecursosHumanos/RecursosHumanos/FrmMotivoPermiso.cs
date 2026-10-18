@@ -14,11 +14,14 @@ using DevExpress.XtraGrid.Views.Grid;
 using GRLL.Common;
 using Microsoft.VisualBasic.CompilerServices;
 using RecursosHumanos.My.Resources;
+using RRHH.Application.Catalogos;
+using RRHH.Application.Permisos;
+using RRHH.Presentation.Permisos;
 
 namespace RecursosHumanos;
 
 [DesignerGenerated]
-public class FrmMotivoPermiso : FrmConsulta
+public class FrmMotivoPermiso : FrmConsulta, IMotivosPermisoView
 {
 	private static List<WeakReference> __ENCList = new List<WeakReference>();
 
@@ -483,160 +486,70 @@ public class FrmMotivoPermiso : FrmConsulta
 		this.PerformLayout();
 	}
 
-	private void GroupControl1_Paint(object sender, PaintEventArgs e)
-	{
-	}
+    public event EventHandler CargarSolicitado;
+    public event EventHandler TipoCambiado;
+    public event EventHandler AgregarSolicitado;
+    public event EventHandler EditarSolicitado;
+    public event EventHandler EliminarSolicitado;
 
-	private void FrmMotivoPermiso_Load(object sender, EventArgs e)
-	{
-		UcComboBox1.ValueMember = "idTipoPermiso";
-		UcComboBox1.DisplayMember = "DescripTipoPermiso";
-		List<TipoPermiso> list = TipoPermisoMapper.Instance().SelectAll();
-		list.Insert(0, new TipoPermiso
-		{
-			idTipoPermiso = 0,
-			DescripTipoPermiso = "(SELECCIONAR)"
-		});
-		UcComboBox1.DataSource = list;
-	}
+    private bool _mostrandoTipos;
+    private Func<int, int?, bool> _abrirEditor;
 
-	private void UcComboBox1_SelectedIndexChanged(object sender, EventArgs e)
-	{
-		ucComboBox ucComboBox = UcComboBox1;
-		int? num = default(int?);
-		if (Conversions.ToDouble(RRHH.IdROl) == 10.0)
-		{
-			GridControl gridControl = GridControl1;
-			PostgreSqlLegacyContext dcGrll = Module1.DcGrll;
-			object selectedValue = UcComboBox1.SelectedValue;
-			gridControl.DataSource = dcGrll.spRRHH_getMotivo_perm((selectedValue != null) ? ((int?)selectedValue) : num, 'P');
-		}
-		else if (Conversions.ToDouble(RRHH.IdROl) == 14.0)
-		{
-			GridControl gridControl2 = GridControl1;
-			PostgreSqlLegacyContext dcGrll2 = Module1.DcGrll;
-			object selectedValue2 = UcComboBox1.SelectedValue;
-			gridControl2.DataSource = dcGrll2.spRRHH_getMotivo_perm((selectedValue2 != null) ? ((int?)selectedValue2) : num, 'C');
-		}
-		else if (Conversions.ToDouble(RRHH.IdROl) == 13.0)
-		{
-			GridControl gridControl3 = GridControl1;
-			PostgreSqlLegacyContext dcGrll3 = Module1.DcGrll;
-			object selectedValue3 = UcComboBox1.SelectedValue;
-			char? tipoModalidad = default(char?);
-			gridControl3.DataSource = dcGrll3.spRRHH_getMotivo_perm((selectedValue3 != null) ? ((int?)selectedValue3) : num, tipoModalidad);
-		}
-		GridView1.Columns["idMotivo"].Visible = false;
-		GridView1.Columns["Descrip_Motivo"].Caption = "Motivo";
-		GridView1.Columns["idTipoPermiso"].Visible = false;
-		GridView1.Columns["DescripTipoPermiso"].Visible = false;
-		ucComboBox = null;
-	}
+    public int TipoPermisoSeleccionado => UcComboBox1.SelectedValue is int id ? id : 0;
+    public int? MotivoSeleccionado => (GridView1.GetFocusedRow() as MotivoPermisoDto)?.Id;
 
-	private void btnAgregar_Click(object sender, EventArgs e)
-	{
-		int focusedRowHandle = GridView1.FocusedRowHandle;
-		FrmMantMotivo frmMantMotivo = new FrmMantMotivo();
-		frmMantMotivo.idTipo = Conversions.ToInteger(UcComboBox1.SelectedValue);
-		frmMantMotivo.ShowDialog();
-		if (frmMantMotivo.DialogResult == DialogResult.OK)
-		{
-			int? num = default(int?);
-			if (Conversions.ToDouble(RRHH.IdROl) == 10.0)
-			{
-				GridControl gridControl = GridControl1;
-				PostgreSqlLegacyContext dcGrll = Module1.DcGrll;
-				object selectedValue = UcComboBox1.SelectedValue;
-				gridControl.DataSource = dcGrll.spRRHH_getMotivo_perm((selectedValue != null) ? ((int?)selectedValue) : num, 'P');
-			}
-			else if (Conversions.ToDouble(RRHH.IdROl) == 14.0)
-			{
-				GridControl gridControl2 = GridControl1;
-				PostgreSqlLegacyContext dcGrll2 = Module1.DcGrll;
-				object selectedValue2 = UcComboBox1.SelectedValue;
-				gridControl2.DataSource = dcGrll2.spRRHH_getMotivo_perm((selectedValue2 != null) ? ((int?)selectedValue2) : num, 'C');
-			}
-			else if (Conversions.ToDouble(RRHH.IdROl) == 13.0)
-			{
-				GridControl gridControl3 = GridControl1;
-				PostgreSqlLegacyContext dcGrll3 = Module1.DcGrll;
-				object selectedValue3 = UcComboBox1.SelectedValue;
-				char? tipoModalidad = default(char?);
-				gridControl3.DataSource = dcGrll3.spRRHH_getMotivo_perm((selectedValue3 != null) ? ((int?)selectedValue3) : num, tipoModalidad);
-			}
-		}
-	}
+    // La navegación se proporciona desde CompositionRoot; aquí solo se ejecuta.
+    internal void ConfigurarEditor(Func<int, int?, bool> abrirEditor) =>
+        _abrirEditor = abrirEditor ?? throw new ArgumentNullException(nameof(abrirEditor));
 
-	private void btnModificar_Click(object sender, EventArgs e)
-	{
-		int focusedRowHandle = GridView1.FocusedRowHandle;
-		FrmMantMotivo frmMantMotivo = new FrmMantMotivo();
-		frmMantMotivo.idTipo = Conversions.ToInteger(UcComboBox1.SelectedValue);
-		frmMantMotivo.idMotivo = Conversions.ToInteger(GridView1.GetRowCellValue(focusedRowHandle, "idMotivo"));
-		frmMantMotivo.ShowDialog();
-		if (frmMantMotivo.DialogResult == DialogResult.OK)
-		{
-			int? num = default(int?);
-			if (Conversions.ToDouble(RRHH.IdROl) == 10.0)
-			{
-				GridControl gridControl = GridControl1;
-				PostgreSqlLegacyContext dcGrll = Module1.DcGrll;
-				object selectedValue = UcComboBox1.SelectedValue;
-				gridControl.DataSource = dcGrll.spRRHH_getMotivo_perm((selectedValue != null) ? ((int?)selectedValue) : num, 'P');
-			}
-			else if (Conversions.ToDouble(RRHH.IdROl) == 14.0)
-			{
-				GridControl gridControl2 = GridControl1;
-				PostgreSqlLegacyContext dcGrll2 = Module1.DcGrll;
-				object selectedValue2 = UcComboBox1.SelectedValue;
-				gridControl2.DataSource = dcGrll2.spRRHH_getMotivo_perm((selectedValue2 != null) ? ((int?)selectedValue2) : num, 'C');
-			}
-			else if (Conversions.ToDouble(RRHH.IdROl) == 13.0)
-			{
-				GridControl gridControl3 = GridControl1;
-				PostgreSqlLegacyContext dcGrll3 = Module1.DcGrll;
-				object selectedValue3 = UcComboBox1.SelectedValue;
-				char? tipoModalidad = default(char?);
-				gridControl3.DataSource = dcGrll3.spRRHH_getMotivo_perm((selectedValue3 != null) ? ((int?)selectedValue3) : num, tipoModalidad);
-			}
-		}
-	}
+    public bool AbrirEditor(int tipoPermisoId, int? motivoId) =>
+        _abrirEditor != null ? _abrirEditor(tipoPermisoId, motivoId) :
+        throw new InvalidOperationException("Abra motivos desde la composición de la aplicación.");
 
-	private void btnEliminar_Click(object sender, EventArgs e)
-	{
-		int focusedRowHandle = GridView1.FocusedRowHandle;
-		if (focusedRowHandle < 0)
-		{
-			MessageBox.Show("Primero debe Seleccionar un Motivo.");
-		}
-		else if (MessageBox.Show(Conversions.ToString(Operators.ConcatenateObject("Desea eliminar el Registro: ", GridView1.GetRowCellValue(focusedRowHandle, "Descrip_Motivo"))), "Alerta", MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation) == DialogResult.OK)
-		{
-			Motivo_Perm motivo_Perm = new Motivo_Perm();
-			motivo_Perm.idMotivo = Conversions.ToInteger(GridView1.GetRowCellValue(focusedRowHandle, "idMotivo"));
-			Motivo_PermMapper.Instance().Delete(motivo_Perm);
-			int? num = default(int?);
-			if (Conversions.ToDouble(RRHH.IdROl) == 10.0)
-			{
-				GridControl gridControl = GridControl1;
-				PostgreSqlLegacyContext dcGrll = Module1.DcGrll;
-				object selectedValue = UcComboBox1.SelectedValue;
-				gridControl.DataSource = dcGrll.spRRHH_getMotivo_perm((selectedValue != null) ? ((int?)selectedValue) : num, 'P');
-			}
-			else if (Conversions.ToDouble(RRHH.IdROl) == 14.0)
-			{
-				GridControl gridControl2 = GridControl1;
-				PostgreSqlLegacyContext dcGrll2 = Module1.DcGrll;
-				object selectedValue2 = UcComboBox1.SelectedValue;
-				gridControl2.DataSource = dcGrll2.spRRHH_getMotivo_perm((selectedValue2 != null) ? ((int?)selectedValue2) : num, 'C');
-			}
-			else if (Conversions.ToDouble(RRHH.IdROl) == 13.0)
-			{
-				GridControl gridControl3 = GridControl1;
-				PostgreSqlLegacyContext dcGrll3 = Module1.DcGrll;
-				object selectedValue3 = UcComboBox1.SelectedValue;
-				char? tipoModalidad = default(char?);
-				gridControl3.DataSource = dcGrll3.spRRHH_getMotivo_perm((selectedValue3 != null) ? ((int?)selectedValue3) : num, tipoModalidad);
-			}
-		}
-	}
+    public void MostrarTipos(IList<ItemCatalogoDto> tipos)
+    {
+        _mostrandoTipos = true;
+        try
+        {
+            var filas = new List<ItemCatalogoDto>(tipos);
+            filas.Insert(0, new ItemCatalogoDto { Id = 0, Descripcion = "(SELECCIONAR)" });
+            UcComboBox1.ValueMember = nameof(ItemCatalogoDto.Id);
+            UcComboBox1.DisplayMember = nameof(ItemCatalogoDto.Descripcion);
+            UcComboBox1.DataSource = filas;
+            UcComboBox1.SelectedValue = 0;
+        }
+        finally { _mostrandoTipos = false; }
+    }
+
+    public void MostrarMotivos(IReadOnlyList<MotivoPermisoDto> motivos)
+    {
+        GridControl1.DataSource = new BindingList<MotivoPermisoDto>(new List<MotivoPermisoDto>(motivos));
+        GridView1.PopulateColumns();
+        foreach (string nombre in new[] { "Id", "TipoPermisoId", "DescripcionTipo", "Modalidad", "Activo" })
+            if (GridView1.Columns[nombre] != null) GridView1.Columns[nombre].Visible = false;
+        if (GridView1.Columns["Descripcion"] != null) GridView1.Columns["Descripcion"].Caption = "Motivo";
+        if (GridView1.Columns["Abreviatura"] != null) GridView1.Columns["Abreviatura"].Caption = "Abreviatura";
+    }
+
+    public void HabilitarAcciones(bool habilitadas)
+    {
+        btnAgregar.Enabled = habilitadas;
+        btnModificar.Enabled = habilitadas;
+        btnEliminar.Enabled = habilitadas;
+    }
+
+    public void MostrarError(string mensaje) => MessageBox.Show(this, mensaje, "Motivos de permiso", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+    public void MostrarInformacion(string mensaje) => MessageBox.Show(this, mensaje, "Motivos de permiso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+    public bool ConfirmarEliminacion() => MessageBox.Show(this, "¿Desea eliminar el motivo seleccionado?", "Motivos de permiso",
+        MessageBoxButtons.OKCancel, MessageBoxIcon.Question) == DialogResult.OK;
+
+    private void GroupControl1_Paint(object sender, PaintEventArgs e) { }
+    private void FrmMotivoPermiso_Load(object sender, EventArgs e) => CargarSolicitado?.Invoke(this, EventArgs.Empty);
+    private void UcComboBox1_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        if (!_mostrandoTipos) TipoCambiado?.Invoke(this, EventArgs.Empty);
+    }
+    private void btnAgregar_Click(object sender, EventArgs e) => AgregarSolicitado?.Invoke(this, EventArgs.Empty);
+    private void btnModificar_Click(object sender, EventArgs e) => EditarSolicitado?.Invoke(this, EventArgs.Empty);
+    private void btnEliminar_Click(object sender, EventArgs e) => EliminarSolicitado?.Invoke(this, EventArgs.Empty);
 }
