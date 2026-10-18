@@ -1,6 +1,6 @@
 # T2: organización y evidencias
 
-Base compartida revisada: main `6f7feb8` (18/10/2026), con la organización y TEC-003 integrados; TEC-004 en preparación de PR. La T2 evalúa diagnóstico, ingeniería inversa y planificación; los 18 RF se analizan aunque su implementación completa se evalúe progresivamente en T3/final.
+Base compartida revisada: main `6f7feb8` (18/10/2026), con la organización y TEC-003 integrados; TEC-004 publicado en [PR #2 en borrador](https://github.com/Nidka/RRHH/pull/2). La T2 evalúa diagnóstico, ingeniería inversa y planificación; los 18 RF se analizan aunque su implementación completa se evalúe progresivamente en T3/final.
 
 **Primero probar la aplicación:** [PRIMERA_PRUEBA.md](PRIMERA_PRUEBA.md) documenta `.env`, ejecutable x86, login RRHH, recorrido inicial y evidencia de conexión. Kadin ya desplegó la BD según informó Evelyn; las pruebas de cada módulo y la integridad aún deben registrarse.
 

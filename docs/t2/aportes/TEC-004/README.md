@@ -1,6 +1,6 @@
 # TEC-004 · Aporte de Evelyn: motivos de permiso
 
-Estado al 18/10/2026: código implementado en `refactor/tec-004-motivos-permiso`, pendiente de compilación/QA visual en Windows y revisión de Frank. Base de trabajo `f713383` (organización), código PostgreSQL previo `eeeb817`; implementación/pruebas en commit `01db40b`. Preparado para PR en borrador; QA Windows y revisión pendientes, sin integrar TEC-004 a main. Main actualizado `6f7feb8` incorporado en la rama mediante `9a00a4a`, conservando TEC-003. Este archivo reúne el avance; no reemplaza el informe final de T2.
+Estado al 18/10/2026: código implementado en `refactor/tec-004-motivos-permiso`, pendiente de compilación/QA visual en Windows y revisión de Frank. Base de trabajo `f713383` (organización), código PostgreSQL previo `eeeb817`; implementación/pruebas en commit `01db40b`. Publicado en [PR #2 en borrador](https://github.com/Nidka/RRHH/pull/2); QA Windows y revisión de Frank pendientes, sin integrar TEC-004 a main. Main actualizado `6f7feb8` incorporado en la rama mediante `9a00a4a`, conservando TEC-003. Este archivo reúne el avance; no reemplaza el informe final de T2.
 
 ## Qué se hizo y por qué
 
