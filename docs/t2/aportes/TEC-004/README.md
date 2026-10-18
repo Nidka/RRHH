@@ -1,6 +1,6 @@
 # TEC-004 · Aporte de Evelyn: motivos de permiso
 
-Estado al 17/10/2026: código implementado en `refactor/tec-004-motivos-permiso`, pendiente de compilación/QA visual en Windows y revisión de Frank. Base de trabajo `f713383` (organización), código PostgreSQL previo `eeeb817`; implementación/pruebas en commit `01db40b`. Sin publicación remota ni integración a main. Este archivo reúne el avance; no reemplaza el informe final de T2.
+Estado al 18/10/2026: código implementado en `refactor/tec-004-motivos-permiso`, pendiente de compilación/QA visual en Windows y revisión de Frank. Base de trabajo `f713383` (organización), código PostgreSQL previo `eeeb817`; implementación/pruebas en commit `01db40b`. Preparado para PR en borrador; QA Windows y revisión pendientes, sin integrar TEC-004 a main. Main actualizado `6f7feb8` incorporado en la rama mediante `9a00a4a`, conservando TEC-003. Este archivo reúne el avance; no reemplaza el informe final de T2.
 
 ## Qué se hizo y por qué
 
@@ -29,7 +29,7 @@ Mantenimiento principal **preventivo**: separación de responsabilidades, elimin
 - [Antes/después y dependencias](../../diagramas/TEC-004/MOTIVOS_ANTES_DESPUES.md): tres diagramas del paquete.
 - [Permisos/licencias/vacaciones](../../diagramas/TEC-004/FLUJOS_FUNCIONALES.md): código inferido, catálogos observados y propuesta futura diferenciados.
 - [SVG listos para diapositivas](../../diagramas/TEC-004/svg): seis diagramas exportados con Mermaid CLI 11; todos renderizados correctamente. Son diagramas, no capturas de aplicación.
-- [Salida de pruebas](../../evidencias/TEC-004/resultado-portable.txt) y [resumen](../../evidencias/TEC-004/resumen-portable.json): **108 aprobadas, 0 fallos, 0 omitidas**. Incluyen la suite previa y 14 pruebas de PostgreSQL local ficticio. Ejecutadas en macOS ARM, SDK 8.0.132, PostgreSQL 14.20, con fuentes reales enlazadas en cinco ensamblados .NET 8 separados. No prueban la ejecución net48 ni WinForms.
+- [Salida de pruebas](../../evidencias/TEC-004/resultado-portable.txt) y [resumen](../../evidencias/TEC-004/resumen-portable.json): **130 aprobadas, 0 fallos, 0 omitidas** el 18/10/2026 sobre código combinado `9a00a4a`. Incluyen la suite previa, feriados de Frank y 14 pruebas de PostgreSQL local ficticio. Ejecutadas en macOS ARM, SDK 8.0.132, PostgreSQL 14.20, con fuentes reales enlazadas en cinco ensamblados .NET 8 separados. No prueban la ejecución net48 ni WinForms.
 - [Compilación net48](../../evidencias/TEC-004/compilacion-net48.txt): Domain, Application, Presentation, PostgreSql y Tests compilan con 0 advertencias/errores. No incluye el ejecutable WinForms: aquí faltan las DLL licenciadas y Windows.
 - [Consulta desplegada de solo lectura](../../evidencias/TEC-004/catalogos-solo-lectura.txt): tipos/motivos con IDs repetidos y categorías de licencias/vacaciones. No contiene personas ni credenciales. No se modificó la instancia compartida.
 
@@ -41,7 +41,7 @@ Para repetir la verificación portable: SDK .NET 8 y Python 3; ejecutar `python3
 2. Identidad/default se respeta si existe. Sin ello, MAX+1 se serializa con bloqueo de tabla y se verifica unicidad del ID insertado; una secuencia desalineada revierte la fila. Las secuencias PostgreSQL pueden avanzar aunque haya rollback. Los escritores legados externos aún requieren PK/UNIQUE y coordinación de secuencias en TEC-002.
 3. Borrado bloquea escrituras de tablas relacionadas durante la comprobación y DELETE. Es transitorio y puede bloquear otras sesiones. **No sustituye las FK**: tras el commit, otro escritor sin validación puede crear una referencia huérfana. Kadin debe completar integridad declarativa. No afirmar garantía global de integridad.
 4. Confirmar política funcional de baja/borrado y duplicados por descripción con el equipo/área usuaria. Se bloquea borrado con histórico como decisión conservadora; no se implementó unicidad de descripción sin una regla acordada. Por eso RF-04/05 siguen parciales.
-5. Dos entradas de MainMDI pasan por CompositionRoot. Coordinar ese archivo compartido con Jorge/Frank antes de integrar sus ramas. La base documental todavía debe integrarse antes de cerrar el PR de código.
+5. Dos entradas de MainMDI pasan por CompositionRoot. Coordinar ese archivo compartido con Jorge/Frank antes de integrar sus ramas. La base documental ya está en main mediante PR #1. Main se incorporó a nuestra rama y los conflictos de composición/plan se resolvieron conservando ambos paquetes.
 
 ## QA Windows y revisión: siguiente paso verificable
 

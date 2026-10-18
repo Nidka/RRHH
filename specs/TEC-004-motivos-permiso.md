@@ -1,6 +1,6 @@
 # TEC-004: refactorizar consulta y mantenimiento de motivos
 
-- Estado: Implementación local y pruebas automáticas completadas; pendientes QA WinForms, revisión de Frank e integración. Base `f713383`.
+- Estado: Preparado para PR en borrador; pendientes QA WinForms, revisión de Frank e integración de TEC-004. Base inicial `f713383`; main `6f7feb8` incorporado mediante `9a00a4a`.
 - Responsable: Evelyn Victoria Rodriguez Cardozo.
 - Revisor: Frank Piero Mantilla Arqueros.
 - Rama: `refactor/tec-004-motivos-permiso`.
@@ -90,10 +90,10 @@ Conservar referencia del commit anterior. Separar scripts de datos de vistas/cas
 - Caracterización: inspección estática de formularios, puente y esquema en `f713383`; observación WinForms pendiente.
 - Decisiones, código y trazabilidad: [aporte consolidado](../docs/t2/aportes/TEC-004/README.md), con archivos, técnicas, principios/patrones, límites, QA y reversión. Extraer clases/métodos, introducir interfaz e inyección por constructor, trasladar lógica fuera de formularios y centralizar recarga.
 - Código: módulo completo por capas, ambas entradas de MainMDI conectadas; no se cambió el esquema compartido.
-- Pruebas: 108/108 aprobadas en arnés .NET 8, incluidas 14 contra PostgreSQL local ficticio; capas y tests también compilan net48, 0 advertencias/errores. QA/compilación del ejecutable Windows pendientes. Evidencias enlazadas en el aporte.
+- Pruebas: 130/130 aprobadas tras combinar con TEC-003 en arnés .NET 8, incluidas 14 contra PostgreSQL local ficticio; capas y tests también compilan net48, 0 advertencias/errores. QA/compilación del ejecutable Windows pendientes. Evidencias enlazadas en el aporte.
 - Diagramas: antes/después/dependencias y flujos funcionales; seis SVG renderizados. Diferenciar fuente inferida, catálogo observado y propuesta futura.
 - RF-04/05: avance parcial; falta acordar duplicados por descripción, validar política de borrado y comprobar QA. No se cierran.
-- Commit de código/pruebas: `01db40b`. PR pendiente; sin publicación remota ni aprobación humana atribuida. Base documental aún no integrada en main.
+- Commits: implementación `01db40b`, XML `fe1a00a`, incorporación de main `9a00a4a`. PR en preparación, publicación autorizada por Evelyn el 18/10/2026; revisión humana pendiente. Base documental y TEC-003 ya integrados en main mediante PR #1.
 - IA: análisis, implementación, pruebas, diagramas y documentación asistidos por Codex; resultados automáticos reales. Validación humana de Evelyn y revisión de Frank pendientes.
 
 ## Decisiones de implementación de esta iteración

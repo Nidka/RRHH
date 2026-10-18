@@ -1,6 +1,6 @@
 # T2: organización y evidencias
 
-Base actual revisada: `eeeb817` (16/10/2026). La T2 evalúa diagnóstico, ingeniería inversa y planificación; los 18 RF se analizan aunque su implementación completa se evalúe progresivamente en T3/final.
+Base compartida revisada: main `6f7feb8` (18/10/2026), con la organización y TEC-003 integrados; TEC-004 en preparación de PR. La T2 evalúa diagnóstico, ingeniería inversa y planificación; los 18 RF se analizan aunque su implementación completa se evalúe progresivamente en T3/final.
 
 **Primero probar la aplicación:** [PRIMERA_PRUEBA.md](PRIMERA_PRUEBA.md) documenta `.env`, ejecutable x86, login RRHH, recorrido inicial y evidencia de conexión. Kadin ya desplegó la BD según informó Evelyn; las pruebas de cada módulo y la integridad aún deben registrarse.
 
@@ -41,10 +41,10 @@ Las pautas provienen de los PDF facilitados: `Evaluación PrácticaT2.pdf` (pp. 
 
 ## Base compartida para empezar
 
-Mientras esta organización no se integre a `main`, usar
-`origin/docs/t2-organizacion-specs` como base de las cuatro ramas de tarea.
-Después de actualizar referencias, crear la rama personal desde esa base;
-si ya existe una rama con trabajo, conservarla y coordinar la incorporación
-de estos documentos. Los PR se revisan contra `main` y deben indicar esta
-dependencia; integrar primero el PR de organización para no mezclar su diff
-con los cambios de implementación.
+La organización ya está incorporada en `main` mediante PR #1, junto con
+TEC-003. Actualizar referencias y crear las nuevas ramas desde `origin/main`.
+Si la rama personal ya tiene trabajo, conservarlo e incorporar los cambios
+compartidos resolviendo conflictos sin sobrescribir otros paquetes. Los PR
+se revisan contra `main`; cada paquete conserva su aceptación y revisión.
+Las diapositivas se prepararán al final, cuando estén incorporados los
+aportes de todos, según indicó Evelyn.

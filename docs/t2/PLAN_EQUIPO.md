@@ -12,7 +12,7 @@ La programación hacia T3 sigue [PLAN_REFACTORIZACION.md](../../Software/docs/PL
 
 Esta es la distribución vigente de implementación hacia T2, solicitada por
 Evelyn. Reemplaza las propuestas anteriores de asignar solo pruebas/combos.
-Las refactorizaciones de pantalla están **pendientes de iniciar**; TEC-002 tiene el despliegue informado y mantiene pendientes integridad/IDs y QA. Cada integrante implementa
+TEC-003 está integrado en main; TEC-004 está preparado para revisión en borrador. Los estados de cada paquete se registran en la tabla CR-TEC; TEC-002 tiene el despliegue informado y mantiene pendientes integridad/IDs y QA. Cada integrante implementa
 su parte y hace sus propios commits; no se redistribuye la autoría del cambio
 `0a4b6a8` ni del avance de conexión `eeeb817`. La fecha de entrega aún debe confirmarse.
 
@@ -43,7 +43,7 @@ Los responsables y revisores son los de la tabla de paquetes anterior.
 | CR-TEC-001 | TEC-001, horarios por capas/PostgreSQL | RF-01/02, preparación | Preventivo; correcciones separadas si se demuestran | Alta | Medio | En planificación; implementación no iniciada |
 | CR-TEC-002 | TEC-002, integridad/IDs y QA | Transversal a los tres módulos | Preventivo en integridad; adaptativo en el despliegue informado | Alta | Alto | Despliegue informado y conexión verificada; integridad/IDs y QA pendientes |
 | CR-TEC-003 | TEC-003, feriados por capas/PostgreSQL | RF-17, preparación | Preventivo; correctivo separado si se reproduce defecto | Alta | Medio | Integrado mediante PR #1 en main (`6f7feb8`); evidencias y límites en TEC-003 |
-| CR-TEC-004 | TEC-004, motivos por capas/PostgreSQL | RF-04/05; apoyo a 03/06/18 | Preventivo; correcciones del código base separadas | Alta | Alto | [Implementación local y 108 pruebas](aportes/TEC-004/README.md); QA Windows, integridad BD y revisión pendientes |
+| CR-TEC-004 | TEC-004, motivos por capas/PostgreSQL | RF-04/05; apoyo a 03/06/18 | Preventivo; correcciones del código base separadas | Alta | Alto | [Preparado para revisión; 130 pruebas combinadas](aportes/TEC-004/README.md); QA Windows, integridad BD y revisión de Frank pendientes |
 
 Cadena de trazabilidad de cada trabajo:
 
