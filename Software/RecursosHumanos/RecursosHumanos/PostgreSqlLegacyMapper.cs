@@ -375,7 +375,6 @@ public sealed class RRHH_AcudeEnfermMapper : PostgreSqlLegacyMapper<RRHH_AcudeEn
 public sealed class RRHH_AseguradoMapper : PostgreSqlLegacyMapper<RRHH_Asegurado> { public static RRHH_AseguradoMapper Instance() => new RRHH_AseguradoMapper(); }
 public sealed class RRHH_AspSocioMapper : PostgreSqlLegacyMapper<RRHH_AspSocio> { public static RRHH_AspSocioMapper Instance() => new RRHH_AspSocioMapper(); }
 public sealed class RRHH_DinamicaFamiliarMapper : PostgreSqlLegacyMapper<RRHH_DinamicaFamiliar> { public static RRHH_DinamicaFamiliarMapper Instance() => new RRHH_DinamicaFamiliarMapper(); }
-public sealed class RRHH_FeriadoMapper : PostgreSqlLegacyMapper<RRHH_Feriado> { public static RRHH_FeriadoMapper Instance() => new RRHH_FeriadoMapper(); }
 public sealed class RRHH_FuncFamMapper : PostgreSqlLegacyMapper<RRHH_FuncFam> { public static RRHH_FuncFamMapper Instance() => new RRHH_FuncFamMapper(); }
 public sealed class RRHH_Preg1Mapper : PostgreSqlLegacyMapper<RRHH_Preg1> { public static RRHH_Preg1Mapper Instance() => new RRHH_Preg1Mapper(); }
 public sealed class RRHH_Preg2Mapper : PostgreSqlLegacyMapper<RRHH_Preg2> { public static RRHH_Preg2Mapper Instance() => new RRHH_Preg2Mapper(); }
