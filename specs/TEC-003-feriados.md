@@ -1,6 +1,6 @@
 # TEC-003: refactorizar gestión de feriados
 
-- Estado: En implementación (caracterización completada sobre `eeeb817`; código y pruebas en ejecución).
+- Estado: En revisión (implementación y pruebas completadas en `refactor/tec-003-feriados`; pendiente revisión humana de Kadin).
 - Responsable: Frank Piero Mantilla Arqueros.
 - Revisor: Francisco Kadin Valera Lizarraga.
 - Rama: `refactor/tec-003-feriados`.
@@ -117,6 +117,11 @@ En `eeeb817`, los mappers heredados ya no conectan a SQL Server: redirigen a `Po
 
 - **Caracterización (`eeeb817`):** Completada ([`ANALISIS_TEC_003.md`](../docs/t2/aportes/TEC-003/ANALISIS_TEC_003.md) y [`EVIDENCIAS_TEC_003.md`](../docs/t2/evidencias/TEC-003/EVIDENCIAS_TEC_003.md)).
 - **Diagramas T2 (`TEC-003`):** Completados en [`docs/t2/diagramas/TEC-003/`](../docs/t2/diagramas/TEC-003/).
-- **Código y pruebas unitarias:** En implementación y verificación en esta rama.
-- **Revisión humana:** Pendiente por Francisco Kadin Valera Lizarraga al abrir el PR.
+- **Código y pruebas unitarias:** Completados y verificados en Windows (`build.cmd` con `0 Error(s)` y `dotnet test` con `87/87 Passed`).
+- **Commits registrados en `refactor/tec-003-feriados`:**
+  - `1bdb274` — `docs(TEC-003): caracterizar feriados y completar plan`
+  - `cc74aa0` — `refactor(TEC-003): extraer casos de uso y persistencia de feriados`
+  - `f39f4b1` — `refactor(TEC-003): conectar vista y presenter de feriados`
+  - `dacb87f` — `test(TEC-003): cubrir duplicados y documentar QA`
+- **Revisión humana:** Pendiente por Francisco Kadin Valera Lizarraga en el Pull Request de `refactor/tec-003-feriados`.
 - **Registro de asistencia de IA:** Análisis estático, redacción de diagramas/documentación, implementación por capas MVP y pruebas unitarias asistidos por IA; verificado localmente en Windows con `build.cmd`, `check-postgresql.cmd -Modules` y `dotnet test` por el responsable Frank Piero Mantilla Arqueros.
