@@ -2637,7 +2637,7 @@ public class MainMDI : Form
 	{
 		if (ObjFrmFeriado == null || (ObjFrmFeriado.IsDisposed ? true : false))
 		{
-			ObjFrmFeriado = new FrmFeriado();
+			ObjFrmFeriado = CompositionRoot.CrearFeriado();
 		}
 		else
 		{
@@ -2679,7 +2679,7 @@ public class MainMDI : Form
 	{
 		if (ObjFrmFeriado == null || (ObjFrmFeriado.IsDisposed ? true : false))
 		{
-			ObjFrmFeriado = new FrmFeriado();
+			ObjFrmFeriado = CompositionRoot.CrearFeriado();
 		}
 		else
 		{

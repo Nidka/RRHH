@@ -1,12 +1,15 @@
 using System;
 using System.Threading;
 using System.Windows.Forms;
+using RRHH.Application.Asistencia;
 using RRHH.Application.Catalogos;
 using RRHH.Application.Seguridad;
 using RRHH.Domain.Catalogos;
 using RRHH.PostgreSql;
+using RRHH.PostgreSql.Asistencia;
 using RRHH.PostgreSql.Catalogos;
 using RRHH.PostgreSql.Seguridad;
+using RRHH.Presentation.Asistencia;
 using RRHH.Presentation.Catalogos;
 using RRHH.Application.Permisos;
 using RRHH.Domain.Permisos;
@@ -88,4 +91,17 @@ internal static class CompositionRoot
             new GuardarMotivoPermiso(repository, acceso));
         return form;
     }
+
+	/// <summary>Crea el formulario de gestión de feriados con su presenter conectado.</summary>
+	public static FrmFeriado CrearFeriado()
+	{
+		FrmFeriado form = new FrmFeriado();
+		IFeriadoRepository repository = new PostgreSqlFeriadoRepository(Database.Value);
+		_ = new FeriadoPresenter(
+			form,
+			new ListarFeriados(repository),
+			new RegistrarFeriado(repository),
+			new EliminarFeriado(repository));
+		return form;
+	}
 }
