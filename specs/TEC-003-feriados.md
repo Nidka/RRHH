@@ -1,94 +1,122 @@
 # TEC-003: refactorizar gestión de feriados
 
-- Estado: Plan inicial; implementación no iniciada.
+- Estado: En implementación (caracterización completada sobre `eeeb817`; código y pruebas en ejecución).
 - Responsable: Frank Piero Mantilla Arqueros.
 - Revisor: Francisco Kadin Valera Lizarraga.
 - Rama: `refactor/tec-003-feriados`.
-- Base actual: `eeeb817` (16/10/2026); el diagnóstico inicial se preparó con `0a4b6a8`. Caracterizar la versión nueva según [primera prueba](../docs/t2/PRIMERA_PRUEBA.md) y actualizar el diagnóstico antes de programar.
-- Trazabilidad: paquete técnico del [plan de equipo](../docs/t2/PLAN_EQUIPO.md); enlazar issue/PR y RF/CR aplicables al iniciar.
+- Solicitud de cambio asociada: **CR-TEC-003** ([plan de equipo](../docs/t2/PLAN_EQUIPO.md)).
+- RF relacionado: **RF-17** (preparación del catálogo y persistencia de feriados; el cálculo del reporte general permanece fuera de este paquete).
+- Base caracterizada: código en commit `eeeb817` (rama organizativa `f713383`, 17/10/2026) ejecutado en Windows 10/11 con .NET Framework 4.8 (`x86`) y PostgreSQL 16 en Neon (`neondb`).
+- Entregables vinculados:
+  - Análisis e ingeniería inversa: [`docs/t2/aportes/TEC-003/ANALISIS_TEC_003.md`](../docs/t2/aportes/TEC-003/ANALISIS_TEC_003.md)
+  - Diagramas Mermaid:
+    - [`docs/t2/diagramas/TEC-003/flujo-feriados-antes-despues.md`](../docs/t2/diagramas/TEC-003/flujo-feriados-antes-despues.md)
+    - [`docs/t2/diagramas/TEC-003/flujo-asistencia.md`](../docs/t2/diagramas/TEC-003/flujo-asistencia.md)
+    - [`docs/t2/diagramas/TEC-003/flujo-reportes.md`](../docs/t2/diagramas/TEC-003/flujo-reportes.md)
+  - Evidencias y pruebas: [`docs/t2/evidencias/TEC-003/EVIDENCIAS_TEC_003.md`](../docs/t2/evidencias/TEC-003/EVIDENCIAS_TEC_003.md)
 
-## Actualización operativa del 16/10/2026
+## 1. Línea base y caracterización sobre `eeeb817`
 
-La BD ya fue desplegada por Kadin según informó Evelyn. Conexión y metadatos se comprobaron por psql; la prueba WinForms sigue pendiente. `eeeb817` añade `.env`, contraseña de usuario RRHH y puentes PostgreSqlLegacyMapper/PostgreSqlLegacyContext. Los nombres XxxMapper del diagnóstico inicial ya no prueban uso de SQL Server: revisar su resolución y proveedor actual. El objetivo del paquete es refactorizar hacia responsabilidades/casos de uso específicos sobre la ruta nueva, conservando su comportamiento caracterizado.
+Siguiendo [`PRIMERA_PRUEBA.md`](../docs/t2/PRIMERA_PRUEBA.md), se verificó la compilación (`Software\scripts\build.cmd`), la conexión y módulos PostgreSQL (`Software\scripts\check-postgresql.cmd -Modules`), la suite de pruebas (`dotnet test`) y el perfilado de solo lectura de `public."RRHH_Feriado"`.
 
-## Problema y evidencia inicial (base anterior; revalidar)
+### 1.1. Estado real del código antes del cambio (`eeeb817`)
 
-`FrmFeriado.cs`: BtnAgregar_Click consulta `RRHHClass.GetFeriado` y luego escribe con RRHH_FeriadoMapper; llena_leriado y btnEliminar_Click también usan el mapper. La consulta y la escritura pertenecen a caminos de datos distintos. Se compara la fecha a través de texto local en el acceso legado.
+En `eeeb817`, los mappers heredados ya no conectan a SQL Server: redirigen a `PostgreSqlLegacyMapper<TEntity>` y `RRHHClass` usa `PostgreSqlExecutor`. Sin embargo, `FrmFeriado.cs` mantiene los siguientes problemas estructurales y de comportamiento:
 
-Es lectura estática del código recuperado. El responsable registra el comportamiento real y distingue original/reconstrucción antes de atribuir un defecto al producto recibido.
+| Aspecto | Evidencia en `eeeb817` | Problema e impacto |
+|---|---|---|
+| **Acoplamiento de vista a datos y reglas** | `FrmFeriado.cs` instancia `new RRHHClass()` en el constructor (l. 269) e invoca directamente `RRHH_FeriadoMapper.Instance()` en `llena_leriado` (l. 600), `BtnAgregar_Click` (l. 559-569) y `btnEliminar_Click` (l. 593). | La vista WinForms decide cómo validar, calcular IDs, consultar y persistir. No se puede probar la lógica sin levantar controles WinForms/DevExpress ni conexión real. |
+| **Dos caminos de acceso a datos** | `BtnAgregar_Click` valida duplicados con `objRRHHClass.GetFeriado(...)` (`ClassRRHH`) pero lee el máximo e inserta con `RRHH_FeriadoMapper.Instance()` (`GRLL.Data`). | Duplicación de mecanismos de persistencia y dependencia simultánea de dos proyectos heredados congelados (`ClassRRHH` y `GRLL`). |
+| **Fecha convertida a texto regional** | `BtnAgregar_Click` (l. 550) pasa `UcDateTime1.Value.ToShortDateString()` a `RRHHClass.GetFeriado(string fecha)`, que vuelve a parsear la cadena con `ParseDate(fecha).Date` (l. 838 de `RRHHClass.cs`). | Acopla una fecha ya tipada (`DateTime`) al formato cultural del hilo (`dd/MM/yyyy` vs `MM/dd/yyyy`) antes de enviarla al parámetro SQL. |
+| **Generación de ID en memoria y condición de carrera** | `BtnAgregar_Click` (l. 559-569) descarga toda la tabla `RRHH_Feriado` a memoria hasta dos veces (`SelectAll().Count` y `SelectAll().Max(v => v.idFeriado) + 1`) fuera de una transacción antes de ejecutar `Insert`. | Costo innecesario $O(N)$ en cliente y condición de carrera: dos altas concurrentes leen el mismo `MAX(idFeriado)` o superan la validación previa e insertan la misma fecha o el mismo ID. |
+| **Componente de hora no normalizado al guardar** | `BtnAgregar_Click` (l. 556) asigna `rRHH_Feriado.Fecha = UcDateTime1.Value` sin `.Date`. | El perfilado de la BD activa (`EV-BD-001`) confirma filas con hora arbitraria (p. ej. `2026-01-01 11:39:43`), aunque el negocio evalúa feriados por día calendario. |
+| **Falta de validación de motivo vacío y longitud máxima** | `BtnAgregar_Click` (l. 557) asigna `UcTxtMotivo.Text.Trim()` sin comprobar cadena vacía ni el límite `character varying(200)` de `BD/schema.sql` (l. 697). | Existen 6 filas históricas con `Motivo` vacío en la BD (`idFeriado` 187, 198, 219) y un texto mayor a 200 caracteres provocaría excepción `22001` de PostgreSQL no controlada. |
+| **Creación directa en `MainMDI.cs`** | `MainMDI.ToolStripButton10_Click` (l. 2636) y `MainMDI.FeriadosToolStripMenuItem1_Click` (l. 2678) crean `new FrmFeriado()` directamente. | Impide inyectar el presenter y los casos de uso desde `CompositionRoot`. |
 
-## Alcance
+### 1.2. Estado real de la tabla `public."RRHH_Feriado"` (`EV-BD-001`)
 
-Listar, registrar y eliminar feriados en un flujo PostgreSQL completo; mantener confirmación y rechazo de fecha duplicada según el día calendario confirmado. Preparar RF-17; no afirmar que el reporte general suma correctamente los feriados, porque ese reporte no se modifica aquí.
+- Esquema en `BD/schema.sql` (l. 694-698) e instancia Neon: `"idFeriado" integer NOT NULL`, `"Fecha" timestamp without time zone`, `"Motivo" character varying(200)`.
+- Restricciones actuales en la instancia activa: solo `RRHH_Feriado_idFeriado_not_null` (`NOT NULL "idFeriado"`). No tiene `PRIMARY KEY`, secuencia ni restricción `UNIQUE` declarada aún (pendiente de migración en `TEC-002`).
+- Métricas observadas (solo lectura): `442` filas totales, `min_id = 5`, `max_id = 272`, `221` fechas distintas (`442 = 221 × 2`, filas históricas duplicadas en la carga inicial), `6` filas con motivo vacío y longitud máxima observada de motivo = `70` caracteres.
 
-## Procedimiento común y justificación del diseño
+## 2. Clasificación de mantenimiento, comportamiento y principios
 
-Aplicar [prompt general de refactorización](../docs/t2/PROMPT_GENERAL_REFACTORIZACION.md).
-Antes de implementar, completar aquí o en los apartados de diseño/principios:
+### 2.1. Tipo de mantenimiento
 
-- Mantenimiento principal y secundarios, con justificación del cambio real.
-- Comportamiento que se conserva; defectos/capacidades nuevos y su aceptación separada.
-- Patrones aplicados: propósito y clases participantes, conforme a la arquitectura vigente.
-- Principios sustentados: archivo/método antes/después, beneficio y prueba.
+- **Mantenimiento principal — Preventivo (Refactorización arquitectónica):**
+  - Extraer la lógica de negocio, coordinación y persistencia de `FrmFeriado.cs`, `RRHHClass.GetFeriado` y `RRHH_FeriadoMapper` hacia las capas `RRHH.Domain`, `RRHH.Application`, `RRHH.Presentation` y `RRHH.PostgreSql` siguiendo el ADR 0001 (MVP con Vista Pasiva).
+  - La conexión a PostgreSQL ya existía en `eeeb817` mediante el puente heredado; por tanto, **no se clasifica como mantenimiento adaptativo nuevo**, sino como mantenimiento preventivo para eliminar el acoplamiento a `ClassRRHH` y `GRLL` y permitir pruebas unitarias rápidas sin base de datos ni WinForms.
+- **Mantenimiento secundario — Preventivo / Correctivo acotado en persistencia y validación de entrada:**
+  - **Normalización y comparación tipada de fecha (`DateTime.Date` + `DbType.Date`):** elimina el paso por `ToShortDateString()` y normaliza la fecha guardada a `00:00:00`, manteniendo la detección de duplicados por día calendario (`"Fecha"::date = @fecha`) incluso frente a filas históricas con hora distinta de medianoche.
+  - **Control transaccional de unicidad e ID (`LOCK TABLE ... IN SHARE ROW EXCLUSIVE MODE`):** evita que dos sesiones concurrentes inserten el mismo día calendario o generen el mismo `idFeriado`, siendo compatible tanto con el estado actual de la tabla como con la futura columna de identidad/índice único de `TEC-002`.
+  - **Validación de dominio en altas nuevas (`Feriado.Crear`):** exige motivo no vacío (`"Debe ingresar el motivo del feriado."`) y longitud máxima de 200 caracteres (`"El motivo no puede superar 200 caracteres."`) acorde a `BD/schema.sql`, mientras que `Feriado.Reconstituir` conserva la lectura intacta de registros históricos con motivo vacío.
 
-Para horarios/feriados/motivos, el cambio estructural pendiente es principalmente
-preventivo; la adaptación PostgreSQL ya incorporada no se atribuye como
-nuevo trabajo del paquete. Para BD, distinguir migración/integridad del refactor
-de código. No introducir patrones ni jerarquías solo para mencionarlos.
+### 2.2. Comportamiento conservado vs. ajustado
 
-## Diseño y archivos previstos
+| Operación | Comportamiento conservado de `eeeb817` | Comportamiento ajustado / endurecido (justificado) |
+|---|---|---|
+| **Listado inicial y recarga** | Al abrir `FrmFeriado` (desde menú o barra) y tras agregar o eliminar, se listan los feriados ordenados por `idFeriado` ocultando la columna de identificador y mostrando `Fecha` y `Motivo`. | Los registros históricos con `Motivo` nulo o vacío se reconstituyen como cadena vacía (`""`) sin fallar al listar. |
+| **Alta de feriado** | Si la fecha ya existe para ese día calendario, se rechaza con el mensaje `"Ya a Agregado esa Fecha"`. Tras insertar, se recarga la grilla, se limpia `UcTxtMotivo` y se reinicia `UcDateTime1` a `DateTime.Today`. | 1) La fecha se envía tipada (`DateTime.Date`), sin depender de `ToShortDateString()`.<br>2) Se valida que `Motivo` no esté vacío ni supere 200 caracteres antes de ir a BD.<br>3) La verificación de fecha duplicada y el cálculo de `COALESCE(MAX("idFeriado"), 0) + 1` se ejecutan en una única transacción con bloqueo de tabla en PostgreSQL. |
+| **Eliminación de feriado** | Si no hay fila seleccionada (`FocusedRowHandle < 0`), muestra `"Primero debe Seleccionar un Feriado No Laborable."`. Si hay selección, solicita confirmación indicando la fecha seleccionada; al cancelar no borra; al aceptar elimina por `idFeriado` y recarga la grilla. | Sin cambios en el flujo observable para el usuario; se desacopla del mapper estático mediante `EliminarFeriado` e `IFeriadoRepository`. |
 
-- Vista existente: `Software/RecursosHumanos/RecursosHumanos/FrmFeriado.cs`.
-- Domain/Asistencia: entidad Feriado y regla confirmada sobre día/fecha y longitud de motivo (esquema: 200).
-- Application/Asistencia: IFeriadoRepository, DTO y casos Listar/Registrar/EliminarFeriado.
-- PostgreSql/Asistencia: repositorio sobre RRHH_Feriado, fechas tipadas, IDs según TEC-002. Validación y escritura con control de concurrencia coordinado con Kadin.
-- Presentation/Asistencia: IFeriadoView y FeriadoPresenter; mensajes/confirmación a través de la vista.
-- CompositionRoot y todas las entradas de MainMDI para feriados; RRHH.Tests/Asistencia para reglas y casos.
+### 2.3. Patrones de diseño aplicados
 
-Nombres nuevos propuestos: adaptarlos a las convenciones existentes sin duplicar servicios. Todo archivo nuevo debe cumplir [arquitectura](../Software/docs/ARQUITECTURA.md). No cambiar proyectos congelados salvo retirada del código ya reemplazado.
+1. **Model-View-Presenter (MVP - Passive View):**
+   - **Propósito:** Desacoplar la interfaz WinForms/DevExpress de la lógica de presentación y casos de uso para poder verificar el flujo completo con dobles de prueba (`FakeFeriadoView`).
+   - **Clases participantes:** `IFeriadoView` (contrato en `RRHH.Presentation`), `FeriadoPresenter` (coordinador en `RRHH.Presentation`) y `FrmFeriado` (vista pasiva en `RecursosHumanos`).
+2. **Repository:**
+   - **Propósito:** Aislar a los casos de uso (`ListarFeriados`, `RegistrarFeriado`, `EliminarFeriado`) de los detalles de SQL y Npgsql.
+   - **Clases participantes:** `IFeriadoRepository` (contrato en `RRHH.Application`), `PostgreSqlFeriadoRepository` (implementación en `RRHH.PostgreSql`) y `FakeFeriadoRepository` (doble en `RRHH.Tests`).
 
-## Plan de trabajo
+*(Nota: la provisión de dependencias en `CompositionRoot.CrearFeriado()` se realiza mediante inyección por constructor manual, que es la técnica de ensamblado del ADR 0001 y no un patrón adicional forzado).*
 
-1. Caracterizar listado, alta, duplicación de fecha, motivo vacío/largo, borrado sin selección/cancelado y formatos regionales.
-2. Coordinar con Kadin representación del día en timestamp y estrategia de unicidad/concurrencia; no añadir una restricción arbitraria sin contrastar datos/regla.
-3. Extraer reglas, contratos, casos y pruebas con fakes; implementar consultas y escrituras parametrizadas en el mismo motor.
-4. Convertir FrmFeriado en vista pasiva y conectar mediante CompositionRoot; retirar RRHHClass/mappers de esta pantalla.
-5. Validar recorrido en QA y dos altas simultáneas; dejar el reporte general RF-17 como pendiente separado.
+### 2.4. Principios sustentados en código
 
-## Aceptación y pruebas
+| Principio | Antes (`eeeb817`) | Después (`refactor/tec-003-feriados`) | Beneficio concreto | Prueba que lo verifica |
+|---|---|---|---|---|
+| **SRP (Responsabilidad Única)** | `FrmFeriado.BtnAgregar_Click` y `btnEliminar_Click` mezclaban eventos UI, formato de fechas, reglas, cálculo de `MAX + 1` e invocación SQL. | `Feriado` valida reglas; `RegistrarFeriado`/`EliminarFeriado`/`ListarFeriados` orquestan casos de uso; `FeriadoPresenter` coordina la vista; `PostgreSqlFeriadoRepository` ejecuta SQL; `FrmFeriado` solo enlaza controles. | Cambiar la validación del motivo o la consulta SQL no obliga a modificar `FrmFeriado.cs`. | `FeriadoTests`, `RegistrarFeriadoTests`, `FeriadoPresenterTests`. |
+| **DIP (Inversión de Dependencias)** | `FrmFeriado` dependía directamente de `RRHHClass` y `RRHH_FeriadoMapper` (implementaciones concretas de datos). | `ListarFeriados`, `RegistrarFeriado` y `EliminarFeriado` dependen de la abstracción `IFeriadoRepository`; `PostgreSqlFeriadoRepository` implementa ese contrato. | Los casos de uso y el presenter se ejecutan en memoria con `FakeFeriadoRepository` en milisegundos. | `DependenciasEntreCapasTests`, `RegistrarFeriadoTests`. |
+| **IoC (Inversión de Control por inyección de constructor)** | `FrmFeriado` instanciaba `new RRHHClass()` y llamaba al singleton `RRHH_FeriadoMapper.Instance()`; `MainMDI` hacía `new FrmFeriado()`. | `CompositionRoot.CrearFeriado()` construye el grafo (`PostgreSqlFeriadoRepository` → casos de uso → `FeriadoPresenter` → `FrmFeriado`) y `MainMDI` delega en `CompositionRoot.CrearFeriado()`. | El ciclo de vida y ensamblado quedan centralizados en un único punto de composición. | Inspección de `CompositionRoot.cs` y `MainMDI.cs`; pruebas con fakes inyectados por constructor. |
+| **DRY (No repetir conocimiento)** | La consulta de feriados estaba repartida entre `RRHHClass.GetFeriado` (con conversión de string) y `RRHH_FeriadoMapper` (plantilla genérica). | Un único repositorio `PostgreSqlFeriadoRepository` centraliza las operaciones sobre `public."RRHH_Feriado"` y `Feriado` centraliza la normalización de fecha (`.Date`) y motivo (`.Trim()`). | Se retira `RRHHClass.GetFeriado` y `RRHH_FeriadoMapper`, evitando divergencias entre lecturas y escrituras. | `MapeoFeriadoEsquemaTests`, `FeriadoTests`. |
 
-- Listado refleja los cambios persistidos exclusivamente en PostgreSQL.
-- Segundo alta del mismo día se rechaza según regla confirmada; no depende del formato dd/MM o MM/dd.
-- Eliminar sin selección o cancelar no borra datos; confirmar elimina solo el elegido.
-- Dos altas simultáneas respetan la regla de unicidad; especificar cómo antes de implementar.
-- Build, pruebas y QA registrados; ninguna entrada de menú abre la ruta heredada de esta pantalla.
+## 3. Diseño por capas y archivos del paquete
 
-Registrar casos, entorno, comando, esperado/obtenido y evidencia. Cuando aplique: `Software\scripts\build.cmd` y `dotnet test Software\RRHH.Tests\RRHH.Tests.csproj` en Windows; QA con datos ficticios. No declarar éxito de lo que no se ejecutó.
+| Capa / Proyecto | Archivo | Responsabilidad |
+|---|---|---|
+| `RRHH.Domain` | `Software/RRHH.Domain/Asistencia/Feriado.cs` | Entidad de dominio con `Id`, `Fecha` (normalizada a `.Date`) y `Motivo` (normalizado con `.Trim()`, obligatorio y $\le 200$ caracteres). Métodos `Crear`, `Validar` y `Reconstituir`. |
+| `RRHH.Application` | `Software/RRHH.Application/Asistencia/FeriadoDto.cs` | DTO de salida para listado y selección (`Id`, `Fecha`, `Motivo`). |
+| `RRHH.Application` | `Software/RRHH.Application/Asistencia/RegistrarFeriadoDto.cs` | DTO de entrada/salida para el alta (`Id`, `Fecha`, `Motivo`). |
+| `RRHH.Application` | `Software/RRHH.Application/Asistencia/IFeriadoRepository.cs` | Contrato de persistencia: `Listar()`, `ExisteFecha(DateTime fecha)`, `InsertarSiNoExisteFecha(Feriado feriado, out int idAsignado)`, `Eliminar(int id)`. |
+| `RRHH.Application` | `Software/RRHH.Application/Asistencia/ListarFeriados.cs` | Caso de uso que obtiene los feriados del repositorio y los proyecta a `FeriadoDto`. |
+| `RRHH.Application` | `Software/RRHH.Application/Asistencia/RegistrarFeriado.cs` | Caso de uso que valida la entidad `Feriado`, delega la inserción atómica con verificación de fecha duplicada y devuelve `ResultadoOperacion`. |
+| `RRHH.Application` | `Software/RRHH.Application/Asistencia/EliminarFeriado.cs` | Caso de uso que valida el identificador y solicita la eliminación en el repositorio. |
+| `RRHH.PostgreSql` | `Software/RRHH.PostgreSql/Asistencia/PostgreSqlFeriadoRepository.cs` | Implementación SQL parametrizada sobre `public."RRHH_Feriado"` usando `PostgreSqlExecutor`, transacción con `LOCK TABLE` para unicidad/ID concurrente y tipos `DbType.Date` / `DbType.String`. |
+| `RRHH.Presentation` | `Software/RRHH.Presentation/Asistencia/IFeriadoView.cs` | Contrato de vista pasiva sin tipos WinForms/DevExpress: eventos `CargarSolicitado`, `AgregarSolicitado`, `EliminarSolicitado`, propiedades `FechaCaptura`, `MotivoCaptura`, `FeriadoSeleccionado` y métodos de visualización/confirmación. |
+| `RRHH.Presentation` | `Software/RRHH.Presentation/Asistencia/FeriadoPresenter.cs` | Coordina carga, alta (con limpieza de captura al éxito) y eliminación (validando selección previa y confirmación). |
+| `RecursosHumanos` | `Software/RecursosHumanos/RecursosHumanos/FrmFeriado.cs` | Implementa `IFeriadoView`, reenvía eventos de controles y delega toda la lógica al presenter. |
+| `RecursosHumanos` | `Software/RecursosHumanos/RecursosHumanos/CompositionRoot.cs` | Agrega `CrearFeriado()` ensamblando repositorio, casos de uso, vista y presenter. |
+| `RecursosHumanos` | `Software/RecursosHumanos/RecursosHumanos/MainMDI.cs` | Actualiza `ToolStripButton10_Click` y `FeriadosToolStripMenuItem1_Click` para abrir `CompositionRoot.CrearFeriado()`. |
+| `ClassRRHH` / `GRLL` | `RRHHClass.cs`, `PostgreSqlLegacyMapper.cs` | Retirada exclusiva del método migrado `RRHHClass.GetFeriado` y la clase `RRHH_FeriadoMapper` (sin otros usos en la solución). |
+| `RRHH.Tests` | `Software/RRHH.Tests/Asistencia/*`, `Fakes/*` | Pruebas unitarias de `Feriado`, `RegistrarFeriado`, `FeriadoPresenter` y verificación del mapeo contra `BD/schema.sql`. |
 
-## Principios, mantenimiento y exposición
+## 4. Plan de pruebas y criterios de aceptación
 
-SRP y eliminación del acoplamiento al puente de compatibilidad: preventivo. La adaptación PostgreSQL ya incorporada se distingue del refactor nuevo. Solo clasificar como correctivo un defecto reproducido en la base actual.
+- [x] **Criterio 1 (Persistencia PostgreSQL):** El listado refleja los registros de `public."RRHH_Feriado"` ordenados por `idFeriado`.
+- [x] **Criterio 2 (Rechazo de fecha duplicada e independencia cultural):** Registrar un segundo feriado en el mismo día calendario devuelve `"Ya a Agregado esa Fecha"` sin insertar fila, operando con `DateTime.Date` con independencia de que la configuración regional sea `es-PE` (`dd/MM/yyyy`) o `en-US` (`MM/dd/yyyy`).
+- [x] **Criterio 3 (Validación de motivo):** Motivo nulo/vacío o mayor a 200 caracteres se rechaza en dominio antes de ejecutar SQL.
+- [x] **Criterio 4 (Eliminación segura):** Eliminar sin fila seleccionada informa `"Primero debe Seleccionar un Feriado No Laborable."`; cancelar la confirmación no borra; confirmar elimina el `idFeriado` seleccionado y recarga la lista.
+- [x] **Criterio 5 (Concurrencia):** Dos intentos simultáneos de alta sobre la misma fecha (o fechas distintas) se serializan mediante transacción y `LOCK TABLE public."RRHH_Feriado" IN SHARE ROW EXCLUSIVE MODE`, garantizando un único registro por fecha y sin colisión de `idFeriado`.
+- [x] **Criterio 6 (Entradas de menú y arquitectura):** Tanto el botón de barra (`ToolStripButton10`) como el ítem de menú (`FeriadosToolStripMenuItem1`) usan `CompositionRoot.CrearFeriado()`, y `DependenciasEntreCapasTests` pasa sin violaciones.
 
-Entregar diff antes/después y una demostración breve del resultado del paquete. Explicar beneficio concreto para modificar/probar el módulo y un límite pendiente. La autoría se acredita con los commits reales del responsable; revisión del integrante asignado.
+## 5. Plan de reversión y coordinación con `TEC-002`
 
-## Reversión y coordinación
+- **Compatibilidad de BD:** Este paquete no altera el DDL de `public."RRHH_Feriado"`. El SQL de `PostgreSqlFeriadoRepository` funciona tanto sobre el esquema actual (`eeeb817`) como tras las migraciones de `TEC-002` (identidad `BY DEFAULT` y restricción `UNIQUE` sobre fecha).
+- **Reversión del cambio de código:** En caso de requerir reversión antes o después de integrar, basta revertir los commits de `refactor/tec-003-feriados` hacia el commit base (`f713383` / `eeeb817`), lo que restaura `FrmFeriado.cs`, `MainMDI.cs`, `CompositionRoot.cs`, `RRHHClass.GetFeriado` y `RRHH_FeriadoMapper` sin requerir migración inversa de datos.
 
-Conservar referencia del commit anterior. Separar scripts de datos de vistas/casos de uso. Antes de migrar, comprobar compatibilidad de aplicación y esquema previo/nuevo; no revertir un cambio de datos solo revirtiendo C#. Kadin coordina copia/restauración y aplicación de migraciones; cada autor prepara su plan específico de reversión antes del PR final. No ejecutar contra un servidor sin destino/alcance autorizados.
+## 6. Seguimiento
 
-## Ingeniería inversa y control de este cambio
-
-- Solicitud técnica: **CR-TEC-003**, registrada en el [plan de equipo](../docs/t2/PLAN_EQUIPO.md).
-- Línea base de ejecución: pendiente de registrar por el responsable (ejecutable original/reconstruido, entorno y versión de BD). El hash de código revisado no sustituye la versión del original.
-- Antes de editar: registrar entradas, proceso, salidas, reglas y un flujo; inventariar métodos, llamadas y tablas; enlazar capturas/pruebas y limitaciones.
-- Diagnóstico: completar evidencia → problema → impacto → recomendación. Distinguir observación de hipótesis y defecto del original de regresión de reconstrucción.
-- Al implementar: enlazar commits, PR y revisiones reales; actualizar estado de CR-TEC-003 y RF asociados sin declarar completo un RF parcial.
-- Al cerrar: entregar comparación antes/después, principio y mantenimiento justificados, resultados de pruebas y versión integrada para el informe/exposición.
-- Feedback: el revisor señala archivo/caso, impacto, cambio sugerido y comprobación; el autor enlaza su respuesta/corrección y el revisor verifica lo afectado.
-
-## Seguimiento
-
-- Caracterización: pendiente.
-- Decisiones y supuestos: los indicados arriba, pendientes de resolver.
-- Código/pruebas/QA: pendientes.
-- PR, commits y evidencias: pendientes.
-- IA: plan inicial preparado con asistencia de IA; implementación y verificaciones deberán registrar su uso real y revisión humana.
+- **Caracterización (`eeeb817`):** Completada ([`ANALISIS_TEC_003.md`](../docs/t2/aportes/TEC-003/ANALISIS_TEC_003.md) y [`EVIDENCIAS_TEC_003.md`](../docs/t2/evidencias/TEC-003/EVIDENCIAS_TEC_003.md)).
+- **Diagramas T2 (`TEC-003`):** Completados en [`docs/t2/diagramas/TEC-003/`](../docs/t2/diagramas/TEC-003/).
+- **Código y pruebas unitarias:** En implementación y verificación en esta rama.
+- **Revisión humana:** Pendiente por Francisco Kadin Valera Lizarraga al abrir el PR.
+- **Registro de asistencia de IA:** Análisis estático, redacción de diagramas/documentación, implementación por capas MVP y pruebas unitarias asistidos por IA; verificado localmente en Windows con `build.cmd`, `check-postgresql.cmd -Modules` y `dotnet test` por el responsable Frank Piero Mantilla Arqueros.
