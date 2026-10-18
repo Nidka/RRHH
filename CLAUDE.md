@@ -3,6 +3,11 @@
 Aplicación WinForms (.NET Framework 4.8, C# 12, DevExpress 11.2) recuperada
 por ingeniería inversa y en migración de SQL Server a PostgreSQL.
 
+Las reglas compartidas de tareas, evidencia, uso de IA y revisiones están en
+[`AGENTS.md`](AGENTS.md). Leer también el [plan T2](docs/t2/PLAN_EQUIPO.md)
+y la [spec de la tarea](specs/README.md) antes de implementar. La arquitectura
+detallada sigue siendo la fuente indicada abajo.
+
 - Arquitectura (obligatoria): `Software/docs/ARQUITECTURA.md`
 - Estado de la migración: `Software/docs/POSTGRESQL_MIGRATION.md`
 - Compilar: `Software\scripts\build.cmd`
@@ -37,7 +42,8 @@ por ingeniería inversa y en migración de SQL Server a PostgreSQL.
 ## Seguridad
 
 - Nunca escribir contraseñas ni cadenas de conexión en código, `app.config` o
-  Git. La conexión viene de `RRHH_POSTGRES_CONNECTION`.
+  Git. La conexión viene de `RRHH_POSTGRES_CONNECTION` o DB_* del entorno/
+  `.env` local ignorado. Ver `docs/t2/PRIMERA_PRUEBA.md` para el arranque.
 - No subir dumps con datos (`BD/CMI.sql`, `BD/dumps/`, `BD/private/`), `.bak` ni DLL
   licenciadas (`Software/lib/legacy`).
 
