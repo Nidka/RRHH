@@ -131,6 +131,19 @@ Consulte `CONTRIBUTING.md`, `Software/docs/ARQUITECTURA.md` y
 `Software/docs/POSTGRESQL_MIGRATION.md` antes de cambiar acceso a datos o
 formularios compartidos.
 
+## Equipo y preparación de T2
+
+- Jorge Enrique Cano Asto.
+- Francisco Kadin Valera Lizarraga.
+- Frank Piero Mantilla Arqueros.
+- Evelyn Victoria Rodriguez Cardozo.
+
+La organización, responsables, revisión cruzada, matrices RF/CR y evidencias
+están en [docs/t2/README.md](docs/t2/README.md). Las reglas para asistentes de
+IA están en [AGENTS.md](AGENTS.md), y las especificaciones de cambios en
+[specs/README.md](specs/README.md). El plan T2 complementa el plan técnico de
+refactorización existente; no implica implementar todos los RF en esta etapa.
+
 ## Alcance de la recuperacion
 
 El codigo proviene del IL de los ensamblados y de los PDB disponibles. Se

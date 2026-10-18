@@ -6,21 +6,23 @@ using System.Drawing;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Forms;
-using ClassRRHH;
 using DevExpress.LookAndFeel;
 using DevExpress.XtraEditors;
 using DevExpress.XtraGrid;
+using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Base;
 using DevExpress.XtraGrid.Views.Grid;
 using GRLL.Common;
 using Microsoft.VisualBasic;
 using Microsoft.VisualBasic.CompilerServices;
 using RecursosHumanos.My.Resources;
+using RRHH.Application.Asistencia;
+using RRHH.Presentation.Asistencia;
 
 namespace RecursosHumanos;
 
 [DesignerGenerated]
-public class FrmFeriado : FrmConsulta
+public class FrmFeriado : FrmConsulta, IFeriadoView
 {
 	private static List<WeakReference> __ENCList = new List<WeakReference>();
 
@@ -62,7 +64,11 @@ public class FrmFeriado : FrmConsulta
 	[AccessedThroughProperty("PopupContainerControl1")]
 	private PopupContainerControl _PopupContainerControl1;
 
-	private RRHHClass objRRHHClass;
+	public event EventHandler CargarSolicitado;
+
+	public event EventHandler AgregarSolicitado;
+
+	public event EventHandler EliminarSolicitado;
 
 	internal ucDateTime UcDateTime1
 	{
@@ -266,7 +272,6 @@ public class FrmFeriado : FrmConsulta
 	{
 		base.Load += FrmFeriado_Load;
 		__ENCAddToList(this);
-		objRRHHClass = new RRHHClass();
 		InitializeComponent();
 	}
 
@@ -545,58 +550,66 @@ public class FrmFeriado : FrmConsulta
 		this.PerformLayout();
 	}
 
+	public DateTime FechaCaptura => UcDateTime1.Value;
+
+	public string MotivoCaptura => UcTxtMotivo.Text;
+
+	public FeriadoDto FeriadoSeleccionado =>
+		GridView1.FocusedRowHandle < 0
+			? null
+			: GridView1.GetRow(GridView1.FocusedRowHandle) as FeriadoDto;
+
+	public void MostrarFeriados(IList<FeriadoDto> feriados)
+	{
+		GridControlFeriado.DataSource = feriados;
+		if (GridView1.Columns.Count == 0)
+		{
+			GridView1.PopulateColumns();
+		}
+		GridColumn columnaId = GridView1.Columns.ColumnByFieldName(nameof(FeriadoDto.Id));
+		if (columnaId != null)
+		{
+			columnaId.Visible = false;
+		}
+	}
+
+	public void ReiniciarCaptura(DateTime fechaPorDefecto)
+	{
+		UcTxtMotivo.Text = string.Empty;
+		UcDateTime1.Value = fechaPorDefecto;
+	}
+
+	public bool ConfirmarEliminacion(DateTime fecha)
+	{
+		return MessageBox.Show(
+			"Desea eliminar el Feriado con Fecha: " + Strings.FormatDateTime(fecha, DateFormat.ShortDate),
+			"Alerta",
+			MessageBoxButtons.OKCancel,
+			MessageBoxIcon.Exclamation) == DialogResult.OK;
+	}
+
+	public void MostrarAlerta(string mensaje)
+	{
+		MessageBox.Show(mensaje, "Alerta", MessageBoxButtons.OK, MessageBoxIcon.Hand);
+	}
+
+	public void MostrarMensaje(string mensaje)
+	{
+		MessageBox.Show(mensaje);
+	}
+
 	private void BtnAgregar_Click(object sender, EventArgs e)
 	{
-		if (objRRHHClass.GetFeriado(UcDateTime1.Value.ToShortDateString()).Rows.Count >= 1)
-		{
-			MessageBox.Show("Ya a Agregado esa Fecha", "Alerta", MessageBoxButtons.OK, MessageBoxIcon.Hand);
-			return;
-		}
-		RRHH_Feriado rRHH_Feriado = new RRHH_Feriado();
-		rRHH_Feriado.Fecha = UcDateTime1.Value;
-		rRHH_Feriado.Motivo = UcTxtMotivo.Text.Trim();
-		int idFeriado;
-		if (RRHH_FeriadoMapper.Instance().SelectAll().Count == 0)
-		{
-			idFeriado = 1;
-		}
-		else
-		{
-			idFeriado = RRHH_FeriadoMapper.Instance().SelectAll().Max([SpecialName] (RRHH_Feriado v) => v.idFeriado);
-			idFeriado = checked(idFeriado + 1);
-		}
-		rRHH_Feriado.idFeriado = idFeriado;
-		RRHH_FeriadoMapper.Instance().Insert(rRHH_Feriado);
-		llena_leriado();
-		UcTxtMotivo.Text = "";
-		UcDateTime1.Value = DateAndTime.Today;
+		AgregarSolicitado?.Invoke(this, EventArgs.Empty);
 	}
 
 	private void FrmFeriado_Load(object sender, EventArgs e)
 	{
-		llena_leriado();
-		GridView1.Columns["idFeriado"].Visible = false;
+		CargarSolicitado?.Invoke(this, EventArgs.Empty);
 	}
 
 	private void btnEliminar_Click(object sender, EventArgs e)
 	{
-		int focusedRowHandle = GridView1.FocusedRowHandle;
-		if (focusedRowHandle < 0)
-		{
-			MessageBox.Show("Primero debe Seleccionar un Feriado No Laborable.");
-		}
-		else if (MessageBox.Show("Desea eliminar el Feriado con Fecha: " + Strings.FormatDateTime(Conversions.ToDate(GridView1.GetRowCellValue(focusedRowHandle, "Fecha")), DateFormat.ShortDate), "Alerta", MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation) == DialogResult.OK)
-		{
-			int idFeriado = Conversions.ToInteger(GridView1.GetRowCellValue(focusedRowHandle, "idFeriado"));
-			RRHH_Feriado rRHH_Feriado = new RRHH_Feriado();
-			rRHH_Feriado.idFeriado = idFeriado;
-			RRHH_FeriadoMapper.Instance().Delete(rRHH_Feriado);
-			llena_leriado();
-		}
-	}
-
-	private void llena_leriado()
-	{
-		GridControlFeriado.DataSource = RRHH_FeriadoMapper.Instance().SelectAll();
+		EliminarSolicitado?.Invoke(this, EventArgs.Empty);
 	}
 }

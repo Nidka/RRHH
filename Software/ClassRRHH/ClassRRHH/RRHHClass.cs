@@ -832,13 +832,6 @@ ORDER BY "NombresC",a."Fecha";
 		return result;
 	}
 
-	public DataTable GetFeriado(string fecha)
-	{
-		return _database.Query(
-			"SELECT * FROM public.\"RRHH_Feriado\" WHERE \"Fecha\"::date = @fecha;",
-			new PostgreSqlParameterValue("fecha", ParseDate(fecha).Date, DbType.Date));
-	}
-
 	public DataTable spRRHH_RepPermisos(string fechaI, string fechaF, int? tipopermiso, int? motivo, int? idTipoTrabajador)
 	{
 		DataTable result = _database.Query("""

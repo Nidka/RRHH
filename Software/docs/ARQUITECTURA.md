@@ -17,6 +17,13 @@ sus alternativas están en [adr/0001-mvp-sobre-capas.md](adr/0001-mvp-sobre-capa
 
 ## 2. Situación de partida
 
+Esta sección describe la partida del diseño. Desde `eeeb817` hay carga de
+`.env`, autenticación con contraseña y puentes PostgreSQL locales para
+mappers/procedimientos; ver [primera prueba actual](../../docs/t2/PRIMERA_PRUEBA.md).
+La refactorización objetivo sigue vigente: no inferir SQL Server por el nombre
+de un mapper ni presentar la compatibilidad operativa como separación completa
+de responsabilidades.
+
 El código fue recuperado por ingeniería inversa de un sistema VB.NET de 2013.
 Su estructura actual:
 
@@ -201,8 +208,9 @@ public sealed class RegistrarPermiso
 7. Al portar un procedimiento `spRRHH_*` o una consulta LINQ-to-SQL, el
    comentario XML del método indica qué reemplaza:
    `/// Reemplaza spRRHH_Faltas (SQL Server).`
-8. La cadena de conexión solo viene de `RRHH_POSTGRES_CONNECTION`
-   (o del almacén de secretos en servidores). Nunca en `app.config` ni en Git;
+8. La cadena de conexión viene de `RRHH_POSTGRES_CONNECTION` o de variables
+   `DB_*`, con soporte de `.env` local ignorado desde `eeeb817`; en servidores
+   se utiliza el almacén de secretos. Nunca en `app.config` ni en Git.
    `PostgreSqlConnectionFactory` no lee `app.config`.
 
 ## 6. Composition root

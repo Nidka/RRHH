@@ -1,0 +1,32 @@
+Verificación de esquema por asistente IA, 16/10/2026, base de código eeeb817.
+Cliente: psql local macOS. Solo lectura; sin filas de personas ni cambios de datos.
+No sustituye pruebas WinForms/Npgsql.
+
+BEGIN
+  base  | conexion_ssl
+--------+--------------
+ neondb | f
+(1 row)
+
+  table_name
+--------------
+ Empleado
+ Horario
+ Motivo_Perm
+ Persona
+ RRHH_Feriado
+ Usuario
+(6 rows)
+
+ columna_passwordhash
+----------------------
+ t
+(1 row)
+
+ROLLBACK
+
+Comprobación adicional de conexión del cliente psql (endpoint/rol omitidos):
+You are connected to database "neondb" as user "[CONFIGURACION_LOCAL]" on host "[CONFIGURACION_LOCAL]" (address "2600:1f16:729:b915:bb3e:237c:b2ee:22a9") at port "5432".
+SSL connection (protocol: TLSv1.3, cipher: TLS_AES_256_GCM_SHA384, bits: 256, compression: off)
+
+El campo pg_stat_ssl anterior describe la sesión del servidor; con el endpoint pooler no se usa para certificar el cifrado del cliente. La conexión del cliente se documenta con conninfo.
