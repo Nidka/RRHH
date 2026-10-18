@@ -43,7 +43,7 @@ Los responsables y revisores son los de la tabla de paquetes anterior.
 | CR-TEC-001 | TEC-001, horarios por capas/PostgreSQL | RF-01/02, preparación | Preventivo; correcciones separadas si se demuestran | Alta | Medio | En planificación; implementación no iniciada |
 | CR-TEC-002 | TEC-002, integridad/IDs y QA | Transversal a los tres módulos | Preventivo en integridad; adaptativo en el despliegue informado | Alta | Alto | Despliegue informado y conexión verificada; integridad/IDs y QA pendientes |
 | CR-TEC-003 | TEC-003, feriados por capas/PostgreSQL | RF-17, preparación | Preventivo; correctivo separado si se reproduce defecto | Alta | Medio | En planificación; implementación no iniciada |
-| CR-TEC-004 | TEC-004, motivos por capas/PostgreSQL | RF-04/05; apoyo a 03/06/18 | Preventivo; correctivo separado si se reproduce defecto | Alta | Alto | En planificación; implementación no iniciada |
+| CR-TEC-004 | TEC-004, motivos por capas/PostgreSQL | RF-04/05; apoyo a 03/06/18 | Preventivo; correcciones del código base separadas | Alta | Alto | [Implementación local y 108 pruebas](aportes/TEC-004/README.md); QA Windows, integridad BD y revisión pendientes |
 
 Cadena de trazabilidad de cada trabajo:
 

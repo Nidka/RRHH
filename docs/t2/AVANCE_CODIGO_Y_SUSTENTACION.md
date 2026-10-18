@@ -63,3 +63,7 @@ cuatro planes están preparados; sus implementaciones no han comenzado aquí.
 - Compilación y ejecución de pruebas en este entorno: pendientes; macOS sin dotnet/msbuild y sin runtime Windows de la aplicación.
 - QA y capturas antes/después: pendientes de los responsables.
 - Implementación TEC-001…004: no iniciada.
+
+## Avance local de TEC-004 (17/10/2026)
+
+[Aporte de Evelyn](aportes/TEC-004/README.md): motivos migrados a MVP/casos/Repository, correcciones separadas, antes/después y seis diagramas SVG. 108 pruebas aprobadas en .NET 8 portable, incluidas 14 con PostgreSQL local; capas/tests compilan net48. Ejecutable/QA Windows y revisión de Frank pendientes. IDs duplicados observados en el catálogo desplegado requieren coordinación con Kadin. RF-04/05 permanecen parciales; sin integración a main.

@@ -1,0 +1,48 @@
+17/10/2026. Asistente IA. Solo lectura de catálogos de tipos/motivos; no se consultaron empleados, personas, credenciales ni permisos individuales. No es ejecución del formulario original.
+
+BEGIN
+ idTipoPermiso | DescripTipoPermiso
+---------------+--------------------
+             1 | PERMISO
+             1 | PERMISO
+             2 | Papeleta Salida
+             2 | Papeleta Salida
+             3 | LICENCIA
+             3 | LICENCIA
+(6 rows)
+
+ idMotivo |             Descrip_Motivo             | idTipoPermiso | TipoModalidad | Activo
+----------+----------------------------------------+---------------+---------------+--------
+        1 | PERMISO A CTA DE VACACIONES            |             1 | P             | t
+        1 | PERMISO A CTA DE VACACIONES            |             1 | P             | t
+        5 | VACACIONES                             |             1 | P             | t
+        5 | VACACIONES                             |             1 | P             | t
+        7 | LICENCIA OFICIALIZADA                  |             1 | P             | t
+        7 | LICENCIA OFICIALIZADA                  |             1 | P             | t
+        8 | LICENCIA NO OFICIALIZADA               |             1 | P             | t
+        8 | LICENCIA NO OFICIALIZADA               |             1 | P             | t
+       12 | LICENCIA SIN GOCE DE HABER             |             1 | P             | t
+       12 | LICENCIA SIN GOCE DE HABER             |             1 | P             | t
+       53 | PERMISO A CTA DE VACACIONES            |             1 | C             | t
+       53 | PERMISO A CTA DE VACACIONES            |             1 | C             | t
+       72 | VACACIONES                             |             1 | C             | t
+       72 | VACACIONES                             |             1 | C             | t
+       78 | VACACIONES                             |             1 | C             | t
+       78 | VACACIONES                             |             1 | C             | t
+      105 | LICENCIA SINDICAL                      |             1 | C             | t
+      105 | LICENCIA SINDICAL                      |             1 | C             | t
+      109 | LICENCIA SIN GOCE DE HABER             |             1 | C             | t
+      109 | LICENCIA SIN GOCE DE HABER             |             1 | C             | t
+      112 | ADELANTO DE VACACIONES                 |             1 | C             | t
+      112 | ADELANTO DE VACACIONES                 |             1 | C             | t
+      119 | 1/2 JORNADA VACACIONES                 |             1 | C             | t
+      119 | 1/2 JORNADA VACACIONES                 |             1 | C             | t
+      132 | LICENCIA POR PATERNIDAD - LEY N° 30807 |             3 | P             | t
+      132 | LICENCIA POR PATERNIDAD - LEY N° 30807 |             3 | P             | t
+      134 | LICENCIA SINDICAL                      |             3 | P             | t
+      134 | LICENCIA SINDICAL                      |             3 | P             | t
+      135 | LICENCIA SIN GOCE REMUNERACIONES       |             3 | P             | t
+      135 | LICENCIA SIN GOCE REMUNERACIONES       |             3 | P             | t
+(30 rows)
+
+ROLLBACK
