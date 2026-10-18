@@ -87,8 +87,52 @@ Conservar referencia del commit anterior. Separar scripts de datos de vistas/cas
 
 ## Seguimiento
 
-- Caracterización: pendiente.
-- Decisiones y supuestos: los indicados arriba, pendientes de resolver.
-- Código/pruebas/QA: pendientes.
+- Caracterización: realizada el 18/10/2026 en lectura sobre `06ca7f6`; evidencia
+  saneada en `../docs/t2/evidencias/TEC-002/DIAGNOSTICO_2026-10-18.md`.
+- Decisiones y supuestos: contrato `IDENTITY BY DEFAULT`, PK/FK sin cascada y
+  fecha de feriado única por día; compartido en
+  `../docs/t2/aportes/TEC-002/CONTRATO_IDS.md` para Jorge, Frank y Evelyn.
+- Código/pruebas/QA: migración, reversión, perfilador y pruebas SQL locales
+  aprobadas. Instancia compartida bloqueada por duplicación exacta al 100 %;
+  saneamiento autorizado, QA WinForms Windows y restauración remota pendientes.
 - PR, commits y evidencias: pendientes.
-- IA: plan inicial preparado con asistencia de IA; implementación y verificaciones deberán registrar su uso real y revisión humana.
+- IA: plan, scripts, documentos y ejecución local preparados con asistencia de
+  IA; requieren revisión humana de Kadin/Jorge antes del PR o despliegue.
+
+## Resultado del perfilado del 18/10/2026
+
+La instancia configurada es PostgreSQL 18.6 en Neon y la conexión técnica usa
+un rol propietario; no se confirmó que sea una QA ficticia. Por ello se usó
+solo `BEGIN READ ONLY`. Horario tiene 140 filas/70 IDs; RRHH_Feriado 442/221;
+Motivo_Perm 280/140; TipoPermiso 6/3. Cada ID aparece dos veces y las dos copias
+son idénticas, sin variantes de contenido. No se detectaron huérfanos en las
+ocho referencias inventariadas. No hay PK/FK/identidades en esas tablas.
+
+Existe una cuenta técnicamente elegible para RRHH, pero no se confirmó por
+canal humano su login, contraseña ni que represente un empleado ficticio. No se
+modificaron credenciales. La prueba de aplicación permanece pendiente.
+
+## Contrato y compatibilidad
+
+La migración `20261018_02_integrity_ids.sql` conserva IDs, crea PK e identidad
+`BY DEFAULT`, alinea secuencias por encima del máximo, añade las ocho FK
+verificadas y hace única la fecha calendario de feriado. Aborta de forma
+transaccional ante duplicados, nulos, huérfanos, defaults desconocidos o una PK
+incompatible. No corrige ni elimina datos.
+
+`BY DEFAULT` permite restaurar IDs explícitos y permite que el código integrado
+de feriados siga funcionando durante la transición. Los repositorios nuevos
+deben omitir el ID y usar `RETURNING`; después de una carga explícita se vuelve
+a ejecutar la migración para alinear secuencias.
+
+## Verificación ejecutada y pendientes
+
+En PostgreSQL local 14.23 con datos ficticios se aprobaron: migración limpia,
+4 PK, 4 identidades, 8 FK, fecha única, secuencias, repetición idempotente,
+rechazo de FK/fecha inválidas, dos inserts concurrentes con IDs distintos,
+aborto ante duplicado/huérfano y reversión conservando filas.
+
+Pendientes reales: aprobación y saneamiento de una copia restaurada, ensayo de
+backup/restore del destino autorizado, aplicación programada, exportación de
+`schema.sql`, build/tests/WinForms en Windows y revisión de Jorge. No se declara
+completado el despliegue de integridad mientras esos puntos sigan abiertos.
