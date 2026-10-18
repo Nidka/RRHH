@@ -4,6 +4,7 @@ using RRHH.Domain.Permisos;
 
 namespace RRHH.Application.Permisos;
 
+/// <summary>Consulta motivos aplicando la modalidad del rol sin ocultar registros inactivos.</summary>
 public sealed class ListarMotivosPermiso
 {
     private readonly IMotivoPermisoRepository _repository;
@@ -16,6 +17,9 @@ public sealed class ListarMotivosPermiso
         _acceso = acceso ?? throw new ArgumentNullException(nameof(acceso));
     }
 
+    /// <summary>Exige acceso y consulta el tipo seleccionado.</summary>
+    /// <returns>Lista vacía y sin consultar persistencia cuando no se seleccionó un tipo válido.</returns>
+    /// <exception cref="RRHH.Domain.Comun.ReglaNegocioException">El rol no tiene acceso al mantenimiento.</exception>
     public IReadOnlyList<MotivoPermisoDto> Ejecutar(int tipoPermisoId)
     {
         _acceso.ExigirAcceso();

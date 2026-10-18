@@ -25,6 +25,9 @@ public sealed class MotivoPermiso
         Activo = activo;
     }
 
+    /// <summary>Crea un motivo activo con descripción obligatoria y textos normalizados.</summary>
+    /// <remarks>Descripción hasta 50 caracteres y abreviatura hasta 3; salario y modalidad pueden ser null.</remarks>
+    /// <exception cref="ReglaNegocioException">Tipo inválido, descripción vacía o longitud excedida.</exception>
     public static MotivoPermiso Nuevo(int tipo, string descripcion, string abreviatura,
         bool? salario, string modalidad)
     {

@@ -2,6 +2,7 @@ using RRHH.Domain.Permisos;
 
 namespace RRHH.Application.Permisos;
 
+/// <summary>Datos de intercambio entre casos de uso y presentación; conserva campos nulos del catálogo heredado.</summary>
 public sealed class MotivoPermisoDto
 {
     public int Id { get; set; }

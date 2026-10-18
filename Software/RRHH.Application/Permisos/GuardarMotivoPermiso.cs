@@ -5,6 +5,7 @@ using RRHH.Domain.Permisos;
 
 namespace RRHH.Application.Permisos;
 
+/// <summary>Coordina alta o edición de motivos según el alcance del rol y las reglas del dominio.</summary>
 public sealed class GuardarMotivoPermiso
 {
     private readonly IMotivoPermisoRepository _repository;
@@ -16,6 +17,10 @@ public sealed class GuardarMotivoPermiso
         _acceso = acceso ?? throw new ArgumentNullException(nameof(acceso));
     }
 
+    /// <summary>Guarda únicamente campos editables; en altas toma la modalidad de la política de acceso.</summary>
+    /// <param name="dto">ID cero para alta; ID existente para edición. En éxito recibe ID y textos normalizados.</param>
+    /// <returns>Éxito o error de validación/acceso/conflicto; los errores de infraestructura se propagan.</returns>
+    /// <exception cref="ArgumentNullException">El DTO es null.</exception>
     public ResultadoOperacion Ejecutar(MotivoPermisoDto dto)
     {
         if (dto == null) throw new ArgumentNullException(nameof(dto));

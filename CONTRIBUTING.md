@@ -6,6 +6,10 @@ comportamiento conservado, arquitectura, patrones/principios, pruebas,
 diagramas y trazabilidad del cambio. Los prompts individuales remiten al
 mismo procedimiento.
 
+Mantener comentarios XML `///` en el código nuevo o modificado según
+[documentación del código](AGENTS.md#documentación-del-código). Documentar
+responsabilidades, contratos y restricciones relevantes y revisarlos en el PR.
+
 Antes de refactorizar, seguir [primera prueba](docs/t2/PRIMERA_PRUEBA.md)
 contra la base `eeeb817` o posterior y registrar el comportamiento del módulo.
 La BD ya fue desplegada según el equipo; las escrituras requieren confirmar

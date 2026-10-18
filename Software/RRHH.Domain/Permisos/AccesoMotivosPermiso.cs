@@ -15,12 +15,16 @@ public sealed class AccesoMotivosPermiso
         Modalidad = rol == 10 ? "P" : rol == 14 ? "C" : null;
     }
 
+    /// <summary>Comprueba que el rol puede usar el mantenimiento.</summary>
+    /// <exception cref="ReglaNegocioException">El rol no es 10, 14 ni 13.</exception>
     public void ExigirAcceso()
     {
         if (!Permitido)
             throw new ReglaNegocioException("Su rol no tiene acceso al mantenimiento de motivos.");
     }
 
+    /// <summary>Comprueba acceso, existencia del motivo y pertenencia a la modalidad autorizada.</summary>
+    /// <exception cref="ReglaNegocioException">Rol sin acceso, motivo null o modalidad ajena.</exception>
     public void ExigirAcceso(MotivoPermiso motivo)
     {
         ExigirAcceso();

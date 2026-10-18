@@ -100,6 +100,10 @@ RRHHClass o DataContext a código nuevo. Completa el caso de uso migrado.
 SQL con parámetros, fechas tipadas, entidades/DTO y transacciones donde
 corresponda. Maneja nulos, errores, cancelación, selección inválida y
 concurrencia según los riesgos reales. No inventes reglas de negocio.
+Aplica la sección Documentación del código de AGENTS.md: comentarios XML
+/// en español para tipos nuevos, contratos y operaciones relevantes.
+Explica propósito, nulos, resultados, errores, escrituras y límites cuando
+corresponda; actualiza los comentarios con el cambio y evita repetir lo obvio.
 No accedas a secretos de .env para mostrarlos en el chat o documentación;
 usa la configuración local sin volcarla. No escribas datos en un servidor
 sin destino/alcance autorizados ni ejecutes limpieza destructiva implícita.

@@ -5,6 +5,7 @@ using RRHH.Domain.Permisos;
 
 namespace RRHH.Application.Permisos;
 
+/// <summary>Solicita el borrado dentro de la modalidad autorizada y traduce rechazos de negocio al usuario.</summary>
 public sealed class EliminarMotivoPermiso
 {
     private readonly IMotivoPermisoRepository _repository;
@@ -16,6 +17,9 @@ public sealed class EliminarMotivoPermiso
         _acceso = acceso ?? throw new ArgumentNullException(nameof(acceso));
     }
 
+    /// <summary>Elimina el motivo seleccionado si el repositorio confirma acceso e inexistencia de referencias.</summary>
+    /// <returns>Éxito o rechazo por selección, acceso, registro inexistente o historial asociado.</returns>
+    /// <remarks>Los fallos de infraestructura se propagan al presenter; no se implementa baja lógica.</remarks>
     public ResultadoOperacion Ejecutar(int id)
     {
         try
