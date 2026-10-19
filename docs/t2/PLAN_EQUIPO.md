@@ -204,11 +204,11 @@ académico de abajo; se alimentan de estos cambios reales.
 | 1 · T2-03 Diagnóstico BD | Kadin | Jorge | Esquema disponible; T2-01 para contraste | Entidades/relaciones, claves faltantes y riesgos; distinguir schema.sql de instancia activa y SQL Server original | Perfilado agregado y diagramas entregados; revisión de Jorge y contraste con origen pendientes |
 | 2 · T2-04 Mapas y flujos | Kadin elabora; Evelyn coordina | Evelyn; apoyo técnico del equipo | T2-02; puede iniciar con hipótesis | Mapa global, componentes en Modelio y cinco flujos en Bizagi; fuentes, entradas/procesos/salidas y contraste en Windows | Encargo por texto; recepción, contraste e incorporación pendientes |
 | 2 · T2-05 Diagnóstico y refactorización | Jorge | Kadin | T2-01/02/03 | Problemas con evidencia/impacto/recomendación y ≥4 propuestas con principio/beneficio/RF; distinguir original y migración | Pendiente |
-| 2 · T2-06 Matrices RF y CR | Evelyn | Frank | Puede iniciar con enunciado; cerrar con T2-04/05 | 18 RF y 18 CR sin omisiones; todos los campos requeridos, responsable y estado; revisar criterios con equipo | Borrador preparado; revisión pendiente |
-| 3 · T2-07 Plan de mantenimiento | Evelyn | Jorge | T2-03/05/06 | Objetivo, alcance, estado, cuatro tipos de mantenimiento, riesgos, estrategias, responsables, cronograma y aceptación | Borrador preparado; revisión pendiente |
+| 2 · T2-06 Matrices RF y CR | Evelyn | Frank | Puede iniciar con enunciado; cerrar con T2-04/05 | 18 RF y 18 CR sin omisiones; mantenimiento justificado, dependencias, aceptación y fuentes; revisar con equipo | Desarrolladas en el informe externo; contrastar las matrices del repositorio antes de usarlas para nuevos cambios |
+| 3 · T2-07 Plan de mantenimiento | Evelyn | Jorge | T2-03/05/06 | Objetivo, alcance, estado, cuatro tipos de mantenimiento, riesgos, estrategias, responsables, cronograma y aceptación | Desarrollado en el informe externo; revisión final del equipo pendiente |
 | Paralelo · T2-08 Despliegue BD | Kadin | Frank | Entorno desplegado; confirmar aislamiento/datos de prueba | Runbook sin secretos, versión, esquema, acceso y restauración documentados | Runbook y pruebas locales listos; entorno compartido no confirmado como ficticio, login/QA/restauración pendientes |
 | 3 · T2-09 Verificación de reconstrucción | Frank | Kadin | Windows + dependencias; para QA requiere T2-08 o BD local ficticia | Resultados reales de build/test y recorrido de los diez catálogos; diferencias y fallos registrados | Pendiente |
-| 4 · T2-10 Informe y repositorio | Evelyn | Frank | T2-01…07; incorporar resultados 08/09 disponibles | Informe de 16 apartados, enlaces/evidencias, integrantes y colaboración; comprobar privacidad y acceso docente | Pendiente |
+| 4 · T2-10 Informe y repositorio | Evelyn | Frank | T2-01…07; incorporar resultados 08/09 disponibles | Informe de 16 apartados, enlaces/evidencias, integrantes y colaboración; comprobar privacidad y acceso docente | Informe elaborado y entregable por separado; Kadin incorpora imágenes y resultados Windows; revisión de contenido y acceso docente pendientes |
 | 5 · T2-11 Exposición y ensayo | Los cuatro; coordina Evelyn | Revisión cruzada del equipo | T2-10; duración de 20 minutos confirmada | Diapositivas visuales, demostración ensayada y preguntas cruzadas; todos explican decisiones y límites | Pendiente |
 
 Nombres completos en [README](README.md). Cada responsable puede pedir ayuda, pero conserva la responsabilidad de validar y explicar su entregable. No se atribuye al responsable un cambio generado localmente hasta que lo revise y lo incorpore mediante su trabajo real.
@@ -243,6 +243,10 @@ Crear un issue o registro equivalente con: ID, resultado esperado, responsable/r
 Cambios de código funcional requieren una spec y rama propia `feature/cr-NNN-descripcion` o `refactor/tec-NNN-descripcion`. No mezclar el despliegue, una nueva regla de negocio y la redacción del informe en el mismo PR.
 
 ## Cronograma documental, coordinado con los paquetes técnicos
+
+El informe se mantiene fuera del repositorio y Evelyn coordina su entrega.
+Las evidencias de desarrollo se conservan en sus rutas existentes; no crear
+copias del informe ni documentos auxiliares para repetir sus apartados.
 
 - Sesión 1: T2-00 y arranque paralelo de T2-01/02/03. Evelyn inicia matrices con el enunciado.
 - Sesión 2: T2-04 y T2-05 con revisión de evidencias; Kadin prepara/ejecuta T2-08 cuando disponga de destino autorizado.

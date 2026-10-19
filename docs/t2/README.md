@@ -27,6 +27,10 @@ ese procedimiento, sin cambiar el reparto de módulos.
 
 ## Ruta de lectura
 
+El informe académico se mantiene y entrega por separado, según indicó Evelyn.
+Kadin incorpora las imágenes y los resultados reales de Windows. Este
+repositorio conserva código, specs, matrices y evidencias de desarrollo.
+
 **Diagramas globales (T2-04):** Evelyn coordina y encarga a Kadin su
 elaboración en Bizagi (flujos) y Modelio (módulos). El alcance y la entrega
 están en [PLAN_EQUIPO.md](PLAN_EQUIPO.md#responsables-y-revisión-cruzada).
