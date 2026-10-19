@@ -1706,6 +1706,12 @@ public class FrmBuscarPersona : FrmConsulta
 				btnMarcacionAutorizada.Visible = false;
 				BtnSuspender.Visible = false;
 			}
+
+			// La aplicación original dejaba la grilla vacía hasta pulsar Buscar.
+			// Cargamos el personal activo al abrir este módulo.
+			llenarGrid();
+			GridView1.BestFitColumns();
+			DataNavigator1.DataSource = RuntimeHelpers.GetObjectValue(dgvEmpleado.DataSource);
 		}
 	}
 

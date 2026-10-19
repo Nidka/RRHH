@@ -9,8 +9,8 @@ param(
 $ErrorActionPreference = 'Stop'
 $softwareRoot = Split-Path -Parent $PSScriptRoot
 $executableCandidates = @(
-    (Join-Path $softwareRoot "RecursosHumanos\bin\$Configuration\net48\RecursosHumanos.exe"),
-    (Join-Path $softwareRoot "RecursosHumanos\bin\x86\$Configuration\net48\RecursosHumanos.exe")
+    (Join-Path $softwareRoot "RecursosHumanos\bin\x86\$Configuration\net48\RecursosHumanos.exe"),
+    (Join-Path $softwareRoot "RecursosHumanos\bin\$Configuration\net48\RecursosHumanos.exe")
 )
 $executable = $executableCandidates | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
 if ([string]::IsNullOrWhiteSpace($executable)) {

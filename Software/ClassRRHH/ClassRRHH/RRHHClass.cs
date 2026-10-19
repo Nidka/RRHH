@@ -60,9 +60,19 @@ public class RRHHClass
 
 	public object llena_Area()
 	{
-		return _database.Query(
-			"SELECT \"idAreaOrganiz\", \"AreaOrganizacional\" FROM public.\"EstructOrganiz\" " +
-			"WHERE \"Year\" = @year ORDER BY \"AreaOrganizacional\";",
+		return _database.Query(@"
+WITH areas AS (
+    SELECT DISTINCT ""Year"", ""idAreaOrganiz"" FROM public.""Empleado_Area"" WHERE ""Year"" = @year
+    UNION
+    SELECT DISTINCT ""Year"", ""idAreaOrganiz"" FROM public.""Empleado"" WHERE ""Year"" = @year
+)
+SELECT a.""idAreaOrganiz"",
+       COALESCE(MAX(eo.""AreaOrganizacional""), 'Area ' || a.""idAreaOrganiz""::text) AS ""AreaOrganizacional""
+FROM areas a
+LEFT JOIN public.""EstructOrganiz"" eo
+  ON eo.""Year"" = a.""Year"" AND eo.""idAreaOrganiz"" = a.""idAreaOrganiz""
+GROUP BY a.""idAreaOrganiz""
+ORDER BY ""AreaOrganizacional"";",
 			new PostgreSqlParameterValue("year", mAnio));
 	}
 
@@ -179,33 +189,43 @@ ORDER BY ea."Year" DESC;
 
 	public DataTable llenar_Areas_by_año(int Anio)
 	{
-		return _database.Query(
-			"SELECT \"Year\", \"idAreaOrganiz\", \"AreaOrganizacional\" FROM public.\"EstructOrganiz\" " +
-			"WHERE \"Year\" = @year ORDER BY \"AreaOrganizacional\";",
+		return _database.Query(@"
+WITH areas AS (
+    SELECT DISTINCT ""Year"", ""idAreaOrganiz"" FROM public.""Empleado_Area"" WHERE ""Year"" = @year
+    UNION
+    SELECT DISTINCT ""Year"", ""idAreaOrganiz"" FROM public.""Empleado"" WHERE ""Year"" = @year
+)
+SELECT a.""Year"", a.""idAreaOrganiz"",
+       COALESCE(MAX(eo.""AreaOrganizacional""), 'Area ' || a.""idAreaOrganiz""::text) AS ""AreaOrganizacional""
+FROM areas a
+LEFT JOIN public.""EstructOrganiz"" eo
+  ON eo.""Year"" = a.""Year"" AND eo.""idAreaOrganiz"" = a.""idAreaOrganiz""
+GROUP BY a.""Year"", a.""idAreaOrganiz""
+ORDER BY ""AreaOrganizacional"";",
 			new PostgreSqlParameterValue("year", Anio));
 	}
 
 	public DataTable buscar_empleado(int? codigo, string numdoc, string apellido, int? idTipoTrabajador, int activo, int idRol = 0)
 	{
 		const string sql = """
-SELECT
+SELECT DISTINCT
     e."IdTipoTrabajador",
     e."IdEmpleado" AS "Codigo",
     p."NumDocID" AS "DNI",
     btrim(concat_ws(' ', p."Apellido_Paterno", p."Apellido_Materno", p."Nombres")) AS "NombresCompletos",
-    eo."AreaOrganizacional",
+    COALESCE(eo."AreaOrganizacional", 'Area ' || COALESCE(ea."idAreaOrganiz", e."idAreaOrganiz")::text) AS "AreaOrganizacional",
     c."Cargo" AS "cargo"
 FROM public."Empleado" AS e
 INNER JOIN public."Persona" AS p ON p."IdPersona" = e."IdPersona"
-INNER JOIN public."Empleado_Area" AS ea ON ea."IdEmpleado" = e."IdEmpleado"
-INNER JOIN public."EstructOrganiz" AS eo
+LEFT JOIN public."Empleado_Area" AS ea
+    ON ea."IdEmpleado" = e."IdEmpleado" AND (@year IS NULL OR ea."Year" = @year)
+LEFT JOIN public."EstructOrganiz" AS eo
     ON eo."idAreaOrganiz" = ea."idAreaOrganiz" AND eo."Year" = ea."Year"
 LEFT JOIN public."Cargo" AS c ON c."IdCargo" = e."IdCargo"
 WHERE COALESCE(NULLIF(btrim(e."Estado"), ''), '0') = @estado
   AND (@apellido = '' OR btrim(concat_ws(' ', p."Apellido_Paterno", p."Apellido_Materno", p."Nombres")) ILIKE @apellido || '%')
   AND (@numeroDocumento = '' OR btrim(p."NumDocID") = btrim(@numeroDocumento))
   AND (@empleadoId IS NULL OR e."IdEmpleado" = @empleadoId)
-  AND (@year IS NULL OR ea."Year" = @year)
   AND (
       (@rol = 3 AND e."IdTipoTrabajador" = 2)
       OR (@rol = 4 AND e."IdTipoTrabajador" IN (1, 3, 4, 5))

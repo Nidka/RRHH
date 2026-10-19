@@ -10,6 +10,7 @@ using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Base;
 using DevExpress.XtraGrid.Views.Grid;
+using GRLL.Common;
 using Microsoft.VisualBasic.CompilerServices;
 using RecursosHumanos.My.Resources;
 using RRHH.Application.Asistencia;
