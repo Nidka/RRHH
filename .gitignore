@@ -4,6 +4,7 @@
 *.suo
 *.log
 .vs/
+.DS_Store
 
 # Dependencias antiguas/licenciadas: cada desarrollador las instala localmente
 Software/lib/legacy/*

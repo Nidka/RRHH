@@ -34,6 +34,8 @@ ramas. No crear diagramas de supuestos como si fueran capturas del sistema.
 ## Índice del informe
 
 Evelyn integra; cada responsable entrega su sección y evidencia, y revisa la versión final de su contenido.
+El Word se mantiene y entrega por separado, según indicó Evelyn; Kadin
+incorpora las imágenes y resultados de Windows en esa versión externa.
 
 | Apartado exigido | Autor principal | Cierre verificable |
 |---|---|---|
