@@ -280,3 +280,22 @@ pantalla, aplicar caracterización, spec, responsabilidades por capa, pruebas,
 QA y revisión en el orden técnico vigente. El avance existente debe
 demostrarse con código, clasificación de mantenimiento y pruebas, siguiendo
 la guía enlazada arriba.
+
+## Entregable documental T2-06: control SC para exposición (27/10/2026)
+
+[Aporte del integrante 4](aportes/T2-06/CONTROL_SC_Y_SUSTENTACION.md).
+Responsable propuesto de comprobación: Jorge Enrique Cano Asto; revisor de este
+aporte pendiente de confirmar, distinto del autor. Estado: borrador local
+preparado con asistencia de IA para revisión en RamaKike, sin aprobación humana.
+Aceptación: tres SC vinculadas a CR-TEC y specs, sustento de puntos 1–5,
+desarrollo del punto 6, referencias Git comprobables y distinción entre
+propuestas, evidencia histórica y pendientes. Comprobar enlaces y revisar
+coherencia con los otros tres aportes antes de incorporarlo al informe externo.
+No modifica el reparto de implementación ni cierra solicitudes técnicas/RF.
+
+Versión separada para entregar solo el punto 6:
+[Integrante 4: control del cambio y conclusiones](aportes/T2-06/INTEGRANTE_4_CONTROL_CAMBIO.md).
+Aceptación específica: mecanismo, registro SC-001, ficha de aprobación sin
+firma simulada, demostración propuesta, relación Git y conclusiones con
+[evidencia local del historial](aportes/T2-06/EVIDENCIA_GIT_SC-001.txt).
+Estado documental: preparado; comprobación de Jorge y revisión ajena pendientes.

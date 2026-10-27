@@ -59,3 +59,15 @@ compartidos resolviendo conflictos sin sobrescribir otros paquetes. Los PR
 se revisan contra `main`; cada paquete conserva su aceptación y revisión.
 Las diapositivas se prepararán al final, cuando estén incorporados los
 aportes de todos, según indicó Evelyn.
+
+## Registro SC para la exposición de control del cambio (27/10/2026)
+
+[Aporte del integrante 4 y sustento de los puntos 1–5](aportes/T2-06/CONTROL_SC_Y_SUSTENTACION.md).
+Relaciona SC-001/002/003 con los CR-TEC existentes y desarrolla aprobación,
+evidencia, Git, cierre y guion de exposición. Es una propuesta pendiente de
+revisión humana; no reemplaza las matrices ni acredita QA o aprobaciones nuevas.
+
+**Entrega exclusiva del integrante 4:** [Control del cambio y conclusiones](aportes/T2-06/INTEGRANTE_4_CONTROL_CAMBIO.md),
+con [evidencia Git local de SC-001](aportes/T2-06/EVIDENCIA_GIT_SC-001.txt).
+Desarrolla los seis criterios del punto 6; el documento anterior conserva
+el sustento auxiliar de los otros integrantes.
