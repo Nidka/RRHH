@@ -293,3 +293,15 @@ límites. Añadir después QA/revisión reales. No simular una demostración pen
 Limitación de preparación: la creación de docs/t2-06-control-sc-001 fue impedida
 por la restricción de escritura en .git. Se preparó este aporte como archivo local
 revisable. Posteriormente se creó RamaKike desde main mediante GitHub para publicar los documentos y solicitar revisión, sin merge.
+
+## SC-001 Control actualizado de publicación (29/10/2026)
+
+Se completaron registro, análisis de impacto, evaluación, planificación y control en las fichas enlazadas al inicio. Se mantiene SC-001 como selección propuesta y las tres prioridades altas. Se publicaron las siguientes ramas independientes bajo KikeCano03:
+
+| SC / rama | Commit documental inicial | PR hacia main | Estado de publicación |
+|---|---|---|---|
+| SC-001 | `279d8b6c049be1c0648327fbbd985cdacf5b9af2` | [PR #11](https://github.com/Nidka/RRHH/pull/11) | Abierto en borrador, sin merge; revisión humana pendiente |
+| SC-002 | `591b05b0df01cfdbc8da35913ae0d44571899afe` | [PR #12](https://github.com/Nidka/RRHH/pull/12) | Abierto en borrador, sin merge; revisión humana pendiente |
+| SC-003 | `f51c21fa5d5c85c49020080297f4703dcfd6a85d` | [PR #13](https://github.com/Nidka/RRHH/pull/13) | Abierto en borrador, sin merge; revisión humana pendiente |
+
+Este registro satisface la relación solicitud → rama → commit → PR con datos reales. Los SHA de código históricos permanecen separados de estos commits documentales. La última revisión de cada propuesta está en su pestaña Commits. No se creó versión final, ni se hizo merge, ni se emitió aprobación humana. El mecanismo, modelo de aprobación, demostración, condiciones y conclusiones vigentes se consolidan en [Control y trazabilidad](../../../cambios/CONTROL_Y_TRAZABILIDAD.md). Comprobación personal de Jorge y revisión del grupo pendientes.

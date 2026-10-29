@@ -1,7 +1,7 @@
 # Registro de solicitudes de cambio
 
 Fecha de preparación: 29/10/2026. Línea base local inspeccionada: `694a658`.
-Estado de esta preparación: documentación local revisable. Publicación de nuevas ramas y PR pendiente.
+Estado de esta preparación: documentación local revisable. Tres ramas y PR en borrador publicados para revisión; sin merge.
 
 ## Solicitudes registradas
 
@@ -29,7 +29,7 @@ SC-002 es una dependencia técnica importante: seleccionar horarios no autoriza 
 | SC-002 | Análisis y plan de integridad/IDs | Aprobar preparación y ensayos aislados con condiciones; bloquear intervención del destino hasta autorización | Pendiente |
 | SC-003 | Análisis y plan de motivos de permiso | Aprobar continuación/aceptación con condiciones | Pendiente |
 
-Estos nombres son los solicitados para publicación. Su existencia remota no se ha comprobado ni creado en esta sesión.
+Estos nombres son los solicitados para publicación. Las tres ramas se publicaron y sus PR en borrador se crearon el 29/10 bajo KikeCano03; enlaces reales en el control de trazabilidad.
 
 ## Fuentes
 
@@ -57,3 +57,12 @@ Análisis complementarios en sus ramas independientes:
 y [SC-003: motivos de permiso](https://github.com/Nidka/RRHH/blob/SC-003/docs/cambios/SC-003.md).
 Los enlaces remotos permiten revisar cada documento antes de integrar sus PR.
 No se deduce aprobación humana de su publicación.
+## Ramas y PR para revisión
+
+| SC / rama | Commit documental inicial | PR hacia main | Estado de publicación |
+|---|---|---|---|
+| SC-001 | `279d8b6c049be1c0648327fbbd985cdacf5b9af2` | [PR #11](https://github.com/Nidka/RRHH/pull/11) | Abierto en borrador, sin merge; revisión humana pendiente |
+| SC-002 | `591b05b0df01cfdbc8da35913ae0d44571899afe` | [PR #12](https://github.com/Nidka/RRHH/pull/12) | Abierto en borrador, sin merge; revisión humana pendiente |
+| SC-003 | `f51c21fa5d5c85c49020080297f4703dcfd6a85d` | [PR #13](https://github.com/Nidka/RRHH/pull/13) | Abierto en borrador, sin merge; revisión humana pendiente |
+
+Los tres PR se dejan abiertos por solicitud del usuario. Revisión y decisiones humanas pendientes; la publicación no acredita aceptación funcional.

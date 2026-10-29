@@ -1,7 +1,7 @@
 # Control del cambio y trazabilidad de solicitudes
 
 Actualización documental: 29/10/2026. Base local: `694a658`.
-Estado: preparado para revisión. Publicación en preparación bajo KikeCano03, por autorización expresa del usuario; los enlaces y SHA se registrarán tras comprobar la creación. El PR #10 fue consultado por API el 29/10: abierto, sin merge, rama RamaKike. Se conserva como antecedente y no se modifica.
+Estado: preparado para revisión. Tres ramas publicadas y PR en borrador creados bajo KikeCano03 por autorización expresa del usuario; SHA y enlaces reales en el apartado 5. El PR #10 fue consultado por API el 29/10: abierto, sin merge, rama RamaKike. Se conserva como antecedente y no se modifica.
 
 ## 1 Mecanismo de control
 
@@ -15,9 +15,9 @@ Separar estado del análisis documental, estado de implementación y estado de a
 
 | ID | Equivalencia | Prioridad actual del análisis | Estado documental nuevo | Aceptación técnica |
 |---|---|---|---|---|
-| SC-001 | CR-TEC-001 / TEC-001 | Alta | Preparado localmente | QA Windows y revisión humana pendientes |
-| SC-002 | CR-TEC-002 / TEC-002 | Alta | Preparado localmente | Copia/destino, saneamiento autorizado, restauración, despliegue y QA pendientes |
-| SC-003 | CR-TEC-004 / TEC-004 | Alta | Preparado localmente | Reglas/QA Windows/integridad y revisión pendientes |
+| SC-001 | CR-TEC-001 / TEC-001 | Alta | Publicado para revisión | QA Windows y revisión humana pendientes |
+| SC-002 | CR-TEC-002 / TEC-002 | Alta | Publicado para revisión | Copia/destino, saneamiento autorizado, restauración, despliegue y QA pendientes |
+| SC-003 | CR-TEC-004 / TEC-004 | Alta | Publicado para revisión | Reglas/QA Windows/integridad y revisión pendientes |
 
 Se propone SC-001 como solicitud principal. La decisión del equipo sigue pendiente. La prioridad alta de SC-003 reemplaza la media del borrador académico para mantener coherencia con el plan técnico. No modifica retroactivamente sus registros históricos.
 
@@ -69,15 +69,13 @@ Enlaces de antecedentes: [PR #2](https://github.com/Nidka/RRHH/pull/2), [PR #8](
 
 ### Publicación nueva solicitada
 
-| Rama solicitada | Cambios locales preparados | Commit nuevo | PR nuevo / estado |
+| SC / rama | Commit documental inicial | PR hacia main | Estado de publicación |
 |---|---|---|---|
-| SC-001 | Registro consolidado, análisis de horarios y control actualizado | Pendiente | Pendiente de creación |
-| SC-002 | Análisis y planificación de integridad/IDs | Pendiente | Pendiente de creación |
-| SC-003 | Análisis y planificación de motivos | Pendiente | Pendiente de creación |
+| SC-001 | `279d8b6c049be1c0648327fbbd985cdacf5b9af2` | [PR #11](https://github.com/Nidka/RRHH/pull/11) | Abierto en borrador, sin merge; revisión humana pendiente |
+| SC-002 | `591b05b0df01cfdbc8da35913ae0d44571899afe` | [PR #12](https://github.com/Nidka/RRHH/pull/12) | Abierto en borrador, sin merge; revisión humana pendiente |
+| SC-003 | `f51c21fa5d5c85c49020080297f4703dcfd6a85d` | [PR #13](https://github.com/Nidka/RRHH/pull/13) | Abierto en borrador, sin merge; revisión humana pendiente |
 
-Los nombres son literales y las descripciones usarán solo SC y propósito. Crear ramas independientes desde la base remota actual comprobada, conservando cambios ajenos. Publicar únicamente los archivos del paquete. No duplicar implementación ya integrada ni agregar outputs/tmp a los commits.
-
-Después de crear los PR, añadir aquí enlaces y SHA reales. Si el PR #10 sigue abierto y se acuerda actualizarlo, comprobar primero su contenido y comparar para no duplicar documentos. No cambiarlo ni asumir su estado con base en una copia local antigua.
+Las tres ramas parten independientemente de main 694a6586f32ed979d40a5010cd36682fcbf111d8. Los commits iniciales registran el contenido; los posteriores registran los enlaces ya creados. Consultar la pestaña Commits de cada PR para obtener su última revisión. No se modificó el PR #10. Publicación exclusivamente documental; no incluye output/tmp ni altera la implementación existente. Los análisis SC-002 y SC-003 se revisan en sus PR independientes; este control consolida los tres.
 
 Un commit identifica contenido; una rama delimita el trabajo; un PR permite revisión; una versión aceptada relaciona código, esquema, ejecutable y resultados. No se crea tag/release ni se hace merge en esta preparación.
 
@@ -92,7 +90,7 @@ Conclusiones:
 1. El registro, los análisis y el control usan las mismas equivalencias y prioridad técnica.
 2. La evidencia local permite sustentar avances existentes sin presentarlos como trabajo nuevo.
 3. Los antecedentes de RamaKike y PR #10 fortalecen la trazabilidad documental, con fecha y límites.
-4. Las nuevas ramas y PR siguen pendientes de publicación; no se inventan enlaces, commits, revisiones o merges.
+4. Las tres ramas y los PR #11, #12 y #13 están publicados para revisión; no se realizaron merges, revisiones simuladas ni releases.
 5. El cierre requiere resultados y aceptación reales. RF-01/02 y RF-04/05 mantienen criterios pendientes.
 
 ## Fuentes
