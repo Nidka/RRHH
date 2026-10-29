@@ -1,0 +1,72 @@
+SC-001 / CR-TEC-001 / TEC-001 — inspección Git local
+Fecha: 27/10/2026. Preparación asistida por Codex.
+Estas salidas prueban referencias de código e historial; no ejecución de la aplicación.
+
+COMANDO: git rev-parse HEAD
+694a6586f32ed979d40a5010cd36682fcbf111d8
+
+COMANDO: git show --format=fuller --stat 138dbce
+commit 138dbce6951d8472cfcbf1a8434d97d33c51234a
+Author:     Evelyn Victoria Rodriguez Cardozo <168020932+EVELYNRODRIGUEZ07@users.noreply.github.com>
+AuthorDate: Sun Oct 18 14:37:10 2026 -0500
+Commit:     Evelyn Victoria Rodriguez Cardozo <168020932+EVELYNRODRIGUEZ07@users.noreply.github.com>
+CommitDate: Sun Oct 18 14:37:10 2026 -0500
+
+    refactor(TEC-001): migrar horarios a MVP y repositorio PostgreSQL
+
+ .../RRHH.Application/Asistencia/EliminarHorario.cs |  24 +++
+ .../RRHH.Application/Asistencia/GuardarHorario.cs  |  31 ++++
+ Software/RRHH.Application/Asistencia/HorarioDto.cs |  13 ++
+ .../Asistencia/IHorarioRepository.cs               |  19 +++
+ .../RRHH.Application/Asistencia/ListarHorarios.cs  |  12 ++
+ .../RRHH.Application/Asistencia/ObtenerHorario.cs  |  17 ++
+ Software/RRHH.Domain/Asistencia/Horario.cs         |  55 +++++++
+ .../Asistencia/PostgreSqlHorarioRepository.cs      | 142 ++++++++++++++++
+ .../Asistencia/HorarioEditorPresenter.cs           |  58 +++++++
+ .../Asistencia/HorariosPresenter.cs                |  69 ++++++++
+ .../Asistencia/IHorarioEditorView.cs               |  24 +++
+ .../RRHH.Presentation/Asistencia/IHorariosView.cs  |  22 +++
+ .../Asistencia/HorarioPostgreSqlTests.cs           | 178 +++++++++++++++++++++
+ Software/RRHH.Tests/Asistencia/HorarioTests.cs     |  54 +++++++
+ .../Asistencia/HorariosPresenterTests.cs           | 167 +++++++++++++++++++
+ Software/RRHH.Tests/Fakes/FakeHorarioRepository.cs |  49 ++++++
+ .../RecursosHumanos/CompositionRoot.cs             |  21 +++
+ .../RecursosHumanos/RecursosHumanos/FrmHorarios.cs | 112 +++++++------
+ .../RecursosHumanos/FrmMantHorarios.cs             | 104 ++++++------
+ .../RecursosHumanos/RecursosHumanos/MainMDI.cs     |   4 +-
+ docs/t2/AVANCE_CODIGO_Y_SUSTENTACION.md            |  21 ++-
+ docs/t2/PLAN_EQUIPO.md                             |  15 +-
+ docs/t2/PROMPTS_POR_INTEGRANTE.md                  |  16 +-
+ docs/t2/README.md                                  |   6 +-
+ docs/t2/evidencias/TEC-001/validacion-local.txt    |  56 +++++++
+ specs/README.md                                    |   2 +-
+ specs/TEC-001-horarios.md                          |  77 +++++++--
+ 27 files changed, 1220 insertions(+), 148 deletions(-)
+
+COMANDO: git merge-base --is-ancestor 138dbce HEAD
+Código de salida: 0 (0 indica que el commit pertenece al historial de HEAD).
+
+COMANDO: git diff --name-status fd12b80 138dbce -- Software
+A	Software/RRHH.Application/Asistencia/EliminarHorario.cs
+A	Software/RRHH.Application/Asistencia/GuardarHorario.cs
+A	Software/RRHH.Application/Asistencia/HorarioDto.cs
+A	Software/RRHH.Application/Asistencia/IHorarioRepository.cs
+A	Software/RRHH.Application/Asistencia/ListarHorarios.cs
+A	Software/RRHH.Application/Asistencia/ObtenerHorario.cs
+A	Software/RRHH.Domain/Asistencia/Horario.cs
+A	Software/RRHH.PostgreSql/Asistencia/PostgreSqlHorarioRepository.cs
+A	Software/RRHH.Presentation/Asistencia/HorarioEditorPresenter.cs
+A	Software/RRHH.Presentation/Asistencia/HorariosPresenter.cs
+A	Software/RRHH.Presentation/Asistencia/IHorarioEditorView.cs
+A	Software/RRHH.Presentation/Asistencia/IHorariosView.cs
+A	Software/RRHH.Tests/Asistencia/HorarioPostgreSqlTests.cs
+A	Software/RRHH.Tests/Asistencia/HorarioTests.cs
+A	Software/RRHH.Tests/Asistencia/HorariosPresenterTests.cs
+A	Software/RRHH.Tests/Fakes/FakeHorarioRepository.cs
+M	Software/RecursosHumanos/RecursosHumanos/CompositionRoot.cs
+M	Software/RecursosHumanos/RecursosHumanos/FrmHorarios.cs
+M	Software/RecursosHumanos/RecursosHumanos/FrmMantHorarios.cs
+M	Software/RecursosHumanos/RecursosHumanos/MainMDI.cs
+
+Pendientes: revisión humana, QA Windows y versión final aceptada.
+No se verificó el estado remoto actual de GitHub ni se creó PR, tag o release.

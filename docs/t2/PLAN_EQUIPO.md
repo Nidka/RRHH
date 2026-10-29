@@ -280,3 +280,35 @@ pantalla, aplicar caracterización, spec, responsabilidades por capa, pruebas,
 QA y revisión en el orden técnico vigente. El avance existente debe
 demostrarse con código, clasificación de mantenimiento y pruebas, siguiendo
 la guía enlazada arriba.
+
+## Entregable documental T2-06: control SC para exposición (27/10/2026)
+
+[Aporte del integrante 4](aportes/T2-06/CONTROL_SC_Y_SUSTENTACION.md).
+Responsable propuesto de comprobación: Jorge Enrique Cano Asto; revisor de este
+aporte pendiente de confirmar, distinto del autor. Estado: borrador local
+preparado con asistencia de IA para revisión en RamaKike, sin aprobación humana.
+Aceptación: tres SC vinculadas a CR-TEC y specs, sustento de puntos 1–5,
+desarrollo del punto 6, referencias Git comprobables y distinción entre
+propuestas, evidencia histórica y pendientes. Comprobar enlaces y revisar
+coherencia con los otros tres aportes antes de incorporarlo al informe externo.
+No modifica el reparto de implementación ni cierra solicitudes técnicas/RF.
+
+Versión separada para entregar solo el punto 6:
+[Integrante 4: control del cambio y conclusiones](aportes/T2-06/INTEGRANTE_4_CONTROL_CAMBIO.md).
+Aceptación específica: mecanismo, registro SC-001, ficha de aprobación sin
+firma simulada, demostración propuesta, relación Git y conclusiones con
+[evidencia local del historial](aportes/T2-06/EVIDENCIA_GIT_SC-001.txt).
+Estado documental: preparado; comprobación de Jorge y revisión ajena pendientes.
+
+## SC-001, SC-002 y SC-003: registro y control actualizado (29/10/2026)
+
+El [registro consolidado](../cambios/REGISTRO_SOLICITUDES.md) desarrolla el punto 1;
+el [análisis de SC-001](../cambios/SC-001.md), los puntos 2–5; y el
+[control y trazabilidad](../cambios/CONTROL_Y_TRAZABILIDAD.md), el punto 6.
+SC-002 y SC-003 tienen análisis y planes propios, enlazados desde el registro.
+Son entregables documentales T2-06 para revisión del grupo, bajo KikeCano03,
+preparados con asistencia de Codex. Aceptación: tres solicitudes clasificadas,
+selección justificada, impacto, decisión propuesta, responsables y estimaciones,
+pruebas previstas y relaciones Git reales. Revisión humana y decisiones de
+aceptación pendientes. Estos documentos no sustituyen el reparto técnico TEC
+ni acreditan QA nueva. Los PR se dejan abiertos, sin merge por solicitud del usuario.
