@@ -92,3 +92,29 @@ En particular:
   `RRHHClass`, `SqlConnection` ni TableAdapters.
 - Cada pantalla migrada cumple la definición de terminado (sección 9) antes
   de abrir el pull request.
+
+## Ramas y versiones
+
+Política completa en [docs/versionado/POLITICA_VERSIONADO.md](docs/versionado/POLITICA_VERSIONADO.md).
+
+| Rama | Para qué sirve | Quién trabaja | Cómo se integra |
+|------|----------------|---------------|-----------------|
+| `main` | Versión estable. Siempre compila y pasa pruebas. | Nadie directamente | Solo PR aprobados |
+| `feature/<id>-<desc>` | Nueva función | Responsable del paquete | PR a `main`, sube MINOR |
+| `refactor/<id>-<desc>` | Reestructurar sin cambiar comportamiento | Responsable del paquete | PR a `main`, sube PATCH |
+| `docs/`, `test/`, `infra/` | Documentación, pruebas, scripts | Integrante asignado | PR a `main` (no cambia versión) |
+| `release/x.y.z` | Congelar una versión: CHANGELOG, número, pruebas finales | Coordinación | PR a `main`, luego tag `vx.y.z` y Release |
+| `hotfix/<desc>` | Corrección urgente de la versión entregada | Responsable del error | PR prioritario a `main`, sube PATCH |
+
+### Mensajes de commit
+
+Formato `tipo(ID): descripción`. Tipos: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`.
+Ejemplo: `fix(TEC-002): validar IDs duplicados de empleado`.
+
+### Publicar una versión
+
+1. Crear `release/x.y.z` desde `main`.
+2. Pasar lo de «[Sin publicar]» del CHANGELOG a la nueva versión con fecha.
+3. PR a `main`, revisión y merge.
+4. `git tag -a vx.y.z -m "RRHH x.y.z"` y `git push origin vx.y.z`.
+5. Crear el Release en GitHub con las notas del CHANGELOG.
