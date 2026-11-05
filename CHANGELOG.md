@@ -8,7 +8,7 @@ y el proyecto usa [Versionado Semántico](https://semver.org/lang/es/).
 ## [Sin publicar]
 
 ### Corregido
-- Integridad e identificadores de BD (TEC-002 / SC-002). PR #12
+- Integridad e identificadores de BD (TEC-002). PR #8
 - Ajustes de motivos de permiso según plan de aceptación (SC-003). PR #13
 
 ### Cambiado
