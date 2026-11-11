@@ -9,10 +9,9 @@ y el proyecto usa [Versionado Semántico](https://semver.org/lang/es/).
 
 ### Corregido
 - Integridad e identificadores de BD (TEC-002). PR #8
-- Ajustes de motivos de permiso según plan de aceptación (SC-003). PR #13
 
 ### Cambiado
-- Análisis y refactorización de horarios (TEC-001 / SC-001). PR #11
+- Horarios migrados a MVP y repositorio PostgreSQL, con el comportamiento conservado (TEC-001, commit `138dbce`). Integrado mediante PR #8
 
 ## [1.0.0] - 2026-10-18
 
@@ -20,7 +19,7 @@ y el proyecto usa [Versionado Semántico](https://semver.org/lang/es/).
 - Solución editable .NET Framework 4.8 recuperada de los ensamblados originales.
 - Acceso a datos en PostgreSQL (Neon) mediante variables de entorno o `.env` local.
 - Contraseñas de usuarios RRHH con hash PBKDF2-SHA256 y salt aleatorio.
-- Suite automática con 65 pruebas.
+- Suite automática con 74 métodos de prueba declarados (`[Fact]`/`[Theory]`) en `Software/RRHH.Tests`.
 
 ### Cambiado
 - Refactor de feriados (TEC-003). PR #1
