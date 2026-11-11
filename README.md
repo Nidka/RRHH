@@ -151,3 +151,9 @@ recupero el comportamiento, pero no los comentarios originales, el historial
 ni todos los nombres locales de 2013. `GRLL/` conserva codigo de referencia;
 la solucion compilable enlaza temporalmente `Software/lib/legacy/GRLL.dll`
 porque varios controles decompilados no producen C# valido sin reescritura.
+
+## Versión
+
+Versión actual: **1.0.0**. Historial en [CHANGELOG.md](CHANGELOG.md), política en
+[docs/versionado/POLITICA_VERSIONADO.md](docs/versionado/POLITICA_VERSIONADO.md) y registro en
+[docs/versionado/REGISTRO_VERSIONES.md](docs/versionado/REGISTRO_VERSIONES.md).
