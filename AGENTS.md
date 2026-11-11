@@ -50,6 +50,7 @@ La arquitectura tiene una sola fuente: `Software/docs/ARQUITECTURA.md`. Si se pr
 - Trabajar en una rama por tarea, vinculada a un ID T2, TEC o CR. Para código, mantener una spec concreta; para documentación basta el entregable y su aceptación en el plan.
 - La IA ayuda a analizar, redactar y programar; el integrante responsable comprueba el resultado y puede explicarlo. Registrar en el PR la ayuda material recibida y cómo se verificó.
 - No asignar commits a otra persona ni simular revisiones. No integrar a `main`, publicar ni invitar colaboradores salvo instrucción expresa. Preparar cambios locales revisables dentro del alcance autorizado.
+- Los commits y los PR no llevan trailers de coautoría (`Co-Authored-By`) ni líneas de atribución a una IA (por ejemplo «Generated with Claude Code»). El autor es la persona; el uso de IA se declara en el PR.
 - Una revisión la realiza otro integrante. El autor corrige observaciones; el revisor comprueba aceptación y evidencia antes de aprobar.
 - Para cada paquete TEC registrar también su CR-TEC, línea base, ingeniería inversa funcional/técnica y diagnóstico antes de implementar, según `docs/t2/PLAN_EQUIPO.md`. El feedback debe identificar archivo/caso, impacto, sugerencia y comprobación; no inventar revisiones ni defectos.
 
