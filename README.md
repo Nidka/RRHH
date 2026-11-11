@@ -144,6 +144,10 @@ IA están en [AGENTS.md](AGENTS.md), y las especificaciones de cambios en
 [specs/README.md](specs/README.md). El plan T2 complementa el plan técnico de
 refactorización existente; no implica implementar todos los RF en esta etapa.
 
+Para la evaluación T3, el orden por persona y día está en
+[docs/t3/CHECKLIST_T3.md](docs/t3/CHECKLIST_T3.md) y los prompts de trabajo en
+[docs/t3/PROMPTS_POR_INTEGRANTE.md](docs/t3/PROMPTS_POR_INTEGRANTE.md).
+
 ## Alcance de la recuperacion
 
 El codigo proviene del IL de los ensamblados y de los PDB disponibles. Se
