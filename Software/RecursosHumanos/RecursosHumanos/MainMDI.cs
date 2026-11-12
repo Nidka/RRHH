@@ -249,6 +249,8 @@ public class MainMDI : Form
 
 	private FrmRepPermisos oFrmRepPermisos;
 
+	private FrmRepAusencias oFrmRepAusencias;
+
 	private FrmReport_Cargos objFrmReportCargos;
 
 	private FrmReport_Selec_Fechas objFrmReportCumple;
@@ -1653,6 +1655,7 @@ public class MainMDI : Form
 		base.Load += MainMDI_Load;
 		__ENCAddToList(this);
 		InitializeComponent();
+		AgregarMenuAusenciasPorPeriodo();
 	}
 
 	[DebuggerNonUserCode]
@@ -2702,6 +2705,43 @@ public class MainMDI : Form
 		oFrmRepPermisos.MdiParent = this;
 		oFrmRepPermisos.StartPosition = FormStartPosition.CenterParent;
 		oFrmRepPermisos.Show();
+	}
+
+	/// <summary>
+	/// RF-18: agrega bajo «Permisos» la opción «Ausencias por periodo». Se crea aquí y no en
+	/// <c>InitializeComponent</c> para no tocar el código del diseñador; hereda la disponibilidad de «Permisos»
+	/// (asignar <c>Visible</c> a un ítem cambia su <c>Available</c>; el rol que no ve los reportes de permisos tampoco ve este).
+	/// </summary>
+	private void AgregarMenuAusenciasPorPeriodo()
+	{
+		ToolStripItemCollection items = PermisosToolStripMenuItem.Owner?.Items;
+		if (items == null)
+		{
+			return;
+		}
+		ToolStripMenuItem ausencias = new ToolStripMenuItem("Ausencias por periodo")
+		{
+			Name = "AusenciasPorPeriodoToolStripMenuItem",
+			Available = PermisosToolStripMenuItem.Available
+		};
+		ausencias.Click += AusenciasPorPeriodoToolStripMenuItem_Click;
+		PermisosToolStripMenuItem.AvailableChanged += (_, _) => ausencias.Available = PermisosToolStripMenuItem.Available;
+		items.Insert(items.IndexOf(PermisosToolStripMenuItem) + 1, ausencias);
+	}
+
+	private void AusenciasPorPeriodoToolStripMenuItem_Click(object sender, EventArgs e)
+	{
+		if (oFrmRepAusencias == null || oFrmRepAusencias.IsDisposed)
+		{
+			oFrmRepAusencias = CompositionRoot.CrearRepAusencias();
+		}
+		else
+		{
+			oFrmRepAusencias.BringToFront();
+		}
+		oFrmRepAusencias.MdiParent = this;
+		oFrmRepAusencias.StartPosition = FormStartPosition.CenterParent;
+		oFrmRepAusencias.Show();
 	}
 
 	private void FaltasToolStripMenuItem_Click(object sender, EventArgs e)

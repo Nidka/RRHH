@@ -139,6 +139,19 @@ internal static class CompositionRoot
 	}
 
 	/// <summary>
+	/// Crea el reporte RF-18 de ausencias por periodo con su presenter conectado. Reemplaza el criterio de
+	/// <c>RRHHClass.spRRHH_RepPermisos</c> (solo fecha de inicio) por el solapamiento de fechas inclusivas.
+	/// </summary>
+	public static FrmRepAusencias CrearRepAusencias()
+	{
+		FrmRepAusencias form = new FrmRepAusencias();
+		_ = new RepAusenciasPresenter(
+			form,
+			new ReportarAusenciasPorPeriodo(new PostgreSqlAusenciasRepository(Database.Value)));
+		return form;
+	}
+
+	/// <summary>
 	/// Crea el cálculo RF-17 de días no laborables (fines de semana y feriados) que usa el reporte
 	/// general de asistencias en lugar de contar solo sábados y domingos.
 	/// </summary>
