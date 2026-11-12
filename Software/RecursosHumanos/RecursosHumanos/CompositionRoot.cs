@@ -113,6 +113,15 @@ internal static class CompositionRoot
         return form;
     }
 
+	/// <summary>
+	/// Crea la validación RF-03 (sin permisos solapados) que usa FrmPermiso en lugar de
+	/// <c>RRHHClass.ExistePermiso</c>.
+	/// </summary>
+	public static ValidarPermisoSinSolapamiento CrearValidarPermiso()
+	{
+		return new ValidarPermisoSinSolapamiento(new PostgreSqlPermisoRepository(Database.Value));
+	}
+
 	/// <summary>Crea el formulario de gestión de feriados con su presenter conectado.</summary>
 	public static FrmFeriado CrearFeriado()
 	{
