@@ -1,0 +1,15 @@
+Código,RF,Datos de prueba,Resultado esperado,Resultado obtenido,Estado,Evidencia
+CP-13-01,RF-13,Empleado ficticio 101 del 10 al 10 de noviembre de 2026,Alta y listado de un día,,Pendiente,RegistroTeletrabajoTests
+CP-13-02,RF-13,Intervalo invertido 12 al 10,Rango rechazado,,Pendiente,RegistroTeletrabajoTests
+CP-13-03,RF-13,Alta igual a intervalo 10 al 12,Solapamiento rechazado,,Pendiente,RegistroTeletrabajoTests
+CP-13-04,RF-13,Alta 12 al 14 con periodo 10 al 12,Extremo común rechazado,,Pendiente,RegistroTeletrabajoTests
+CP-13-05,RF-13,Alta 9 al 13 con periodo 10 al 12,Contención rechazada,,Pendiente,RegistroTeletrabajoTests
+CP-13-06,RF-13,Empleados ficticios 101 y 102 en mismo intervalo,Ambas altas permitidas,,Pendiente,RegistroTeletrabajoTests
+CP-13-07,RF-13,Modalidad 999 o patrón parcial vacío,Datos rechazados,,Pendiente,RegistroTeletrabajoTests
+CP-13-08,RF-13,Empleado ficticio 999 inexistente,Alta rechazada,,Pendiente,RegistroTeletrabajoTests
+CP-13-09,RF-13,Dos altas concurrentes superpuestas en QA ficticia,Se confirma una única alta,,Pendiente,QA PostgreSQL
+CP-14-01,RF-14,Periodo ficticio 2 al 20 y consulta 9 al 15 de noviembre con feriado el 11,Cuatro días remotos,,Pendiente,ReportarDiasTeletrabajoTests
+CP-14-02,RF-14,Dos filas repetidas para lunes y miércoles,Cuenta cada día una vez,,Pendiente,ReportarDiasTeletrabajoTests
+CP-14-03,RF-14,Consulta de un empleado y de todos,Filas filtradas y totales por empleado,,Pendiente,ReportarDiasTeletrabajoTests
+CP-14-04,RF-14,Consulta sin periodos en el rango,Grilla vacía,,Pendiente,ReportarDiasTeletrabajoTests
+CP-14-05,RF-14,Rango invertido o código cero,Mensaje de validación,,Pendiente,ReportarDiasTeletrabajoTests
