@@ -739,7 +739,8 @@ public class FrmConsultaAsistencias : FrmConsulta
 		fi = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(UcFechas1.Rango.Desde.Year.ToString(), Interaction.IIf(UcFechas1.Rango.Desde.Month.ToString().Length == 1, "0" + UcFechas1.Rango.Desde.Month, UcFechas1.Rango.Desde.Month.ToString())), Interaction.IIf(UcFechas1.Rango.Desde.Day.ToString().Length == 1, "0" + UcFechas1.Rango.Desde.Day, UcFechas1.Rango.Desde.Day.ToString())));
 		ff = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(UcFechas1.Rango.Hasta.Year.ToString(), Interaction.IIf(UcFechas1.Rango.Hasta.Month.ToString().Length == 1, "0" + UcFechas1.Rango.Hasta.Month, UcFechas1.Rango.Hasta.Month.ToString())), Interaction.IIf(UcFechas1.Rango.Hasta.Day.ToString().Length == 1, "0" + UcFechas1.Rango.Hasta.Day, UcFechas1.Rango.Hasta.Day.ToString())));
 		string text = "[";
-		int num = 0;
+		// RF-17: reemplaza el conteo de solo sabados y domingos; ahora suma los feriados (sin duplicar los que caen en fin de semana).
+		int num = CompositionRoot.CrearCalcularDiasNoLaborables().Ejecutar(UcFechas1.Rango.Desde, UcFechas1.Rango.Hasta);
 		TimeSpan timeSpan = UcFechas1.Rango.Hasta - UcFechas1.Rango.Desde;
 		double totalDays = timeSpan.TotalDays;
 		double num2 = 0.0;
@@ -754,10 +755,6 @@ public class FrmConsultaAsistencias : FrmConsulta
 					break;
 				}
 				text = text + Conversions.ToString(UcFechas1.Rango.Desde.AddDays(num2)) + "] , [";
-				if ((UcFechas1.Rango.Desde.AddDays(num2).DayOfWeek == DayOfWeek.Saturday) | (UcFechas1.Rango.Desde.AddDays(num2).DayOfWeek == DayOfWeek.Sunday))
-				{
-					num++;
-				}
 				num2 += 1.0;
 			}
 			string text2 = "";
