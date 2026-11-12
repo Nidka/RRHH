@@ -43,4 +43,38 @@ public sealed class PostgreSqlPermisoRepository : IPermisoRepository
 			new PostgreSqlParameterValue("desde", rango.Desde, DbType.Date),
 			new PostgreSqlParameterValue("hasta", rango.Hasta, DbType.Date)) == 1;
 	}
+
+	/// <summary>
+	/// Lee la marca configurable <c>Motivo_Perm."UnaVezPorAnio"</c> (RF-06). Requiere la migración de BD que crea
+	/// esa columna (<c>infra/rf-06-flag-licencia-anual</c>); sin ella la consulta falla. Un motivo inexistente o con
+	/// la marca nula devuelve <c>false</c>.
+	/// </summary>
+	public bool MotivoSeOtorgaUnaVezPorAnio(int idMotivo)
+	{
+		return _database.ScalarInt(
+			"SELECT 1 FROM public.\"Motivo_Perm\" " +
+			"WHERE \"idMotivo\" = @motivoId AND COALESCE(\"UnaVezPorAnio\", false) = true " +
+			"LIMIT 1;",
+			new PostgreSqlParameterValue("motivoId", idMotivo, DbType.Int32)) == 1;
+	}
+
+	/// <summary>
+	/// Busca otro permiso del mismo empleado y motivo cuya fecha de inicio cae en el año indicado. El año se compara
+	/// como rango de fechas tipadas (<c>[1 de enero, 1 de enero siguiente)</c>) y no con texto.
+	/// </summary>
+	public bool ExistePermisoDelMotivoEnAnio(int idEmpleado, int idMotivo, int anio, int excluirNPermiso)
+	{
+		return _database.ScalarInt(
+			"SELECT 1 FROM public.\"Permiso\" " +
+			"WHERE \"IdEmpleado\" = @empleadoId " +
+			"AND \"idMotivo\" = @motivoId " +
+			"AND \"NPermiso\" <> @excluirNPermiso " +
+			"AND \"FechaInicio\"::date >= @inicioAnio AND \"FechaInicio\"::date < @inicioAnioSiguiente " +
+			"LIMIT 1;",
+			new PostgreSqlParameterValue("empleadoId", idEmpleado, DbType.Int32),
+			new PostgreSqlParameterValue("motivoId", idMotivo, DbType.Int32),
+			new PostgreSqlParameterValue("excluirNPermiso", excluirNPermiso, DbType.Int32),
+			new PostgreSqlParameterValue("inicioAnio", new DateTime(anio, 1, 1), DbType.Date),
+			new PostgreSqlParameterValue("inicioAnioSiguiente", new DateTime(anio, 1, 1).AddYears(1), DbType.Date)) == 1;
+	}
 }

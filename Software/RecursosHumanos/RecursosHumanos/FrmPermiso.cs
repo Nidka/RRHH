@@ -1534,8 +1534,9 @@ public class FrmPermiso : FrmConsulta
 		permiso.IdEmpleado = idEmpleado;
 		permiso.Obs = UcTxtObs.Text.Trim();
 		// RF-03: reemplaza RRHHClass.ExistePermiso (solo cubria el alta y no detectaba un rango que contiene a otro).
+		// RF-06: el mismo punto de validacion rechaza una segunda licencia de una vez por anio en el mismo anio.
 		// Valida tambien al editar, excluyendo el propio permiso (Npermiso).
-		var validacion = CompositionRoot.CrearValidarPermiso().Ejecutar(idEmpleado, UcFechas.Rango.Desde, UcFechas.Rango.Hasta, Npermiso);
+		var validacion = CompositionRoot.CrearValidarPermiso().Ejecutar(idEmpleado, Conversions.ToInteger(UcCmbMotivo.SelectedValue), UcFechas.Rango.Desde, UcFechas.Rango.Hasta, Npermiso);
 		if (!validacion.Exitoso)
 		{
 			MessageBox.Show(validacion.Mensaje, "", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
