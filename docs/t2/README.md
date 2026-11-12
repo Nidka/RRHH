@@ -71,3 +71,16 @@ revisión humana; no reemplaza las matrices ni acredita QA o aprobaciones nuevas
 con [evidencia Git local de SC-001](aportes/T2-06/EVIDENCIA_GIT_SC-001.txt).
 Desarrolla los seis criterios del punto 6; el documento anterior conserva
 el sustento auxiliar de los otros integrantes.
+
+## SC-001, SC-002 y SC-003: registro y control actualizado (29/10/2026)
+
+El [registro consolidado](../cambios/REGISTRO_SOLICITUDES.md) desarrolla el punto 1;
+el [análisis de SC-001](../cambios/SC-001.md), los puntos 2–5; y el
+[control y trazabilidad](../cambios/CONTROL_Y_TRAZABILIDAD.md), el punto 6.
+SC-002 y SC-003 tienen análisis y planes propios, enlazados desde el registro.
+Son entregables documentales T2-06 para revisión del grupo, bajo KikeCano03,
+preparados con asistencia de Codex. Aceptación: tres solicitudes clasificadas,
+selección justificada, impacto, decisión propuesta, responsables y estimaciones,
+pruebas previstas y relaciones Git reales. Revisión humana y decisiones de
+aceptación pendientes. Estos documentos no sustituyen el reparto técnico TEC
+ni acreditan QA nueva. Los PR se dejan abiertos, sin merge por solicitud del usuario.

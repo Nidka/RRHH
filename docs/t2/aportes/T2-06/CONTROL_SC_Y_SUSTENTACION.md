@@ -1,4 +1,7 @@
-# Registro de solicitudes y control del cambio — integrante 4
+# SC-001 Registro de solicitudes y control del cambio
+
+> Actualización SC-001 del 29/10/2026: el registro y los puntos 1–5 se desarrollan en [Registro de solicitudes](../../../cambios/REGISTRO_SOLICITUDES.md) y [Análisis y planificación de horarios](../../../cambios/SC-001.md). El punto 6 actualizado para las tres SC está en [Control y trazabilidad](../../../cambios/CONTROL_Y_TRAZABILIDAD.md). Esas fichas prevalecen sobre los estados de este antecedente del 27/10. SC-003 mantiene prioridad alta. El PR #10 se comprobó abierto y sin merge el 29/10; no se modifica ni acredita aceptación de código. Las ramas y PR nuevos conservan su revisión humana pendiente.
+
 
 Preparado el 27/10/2026 para Jorge Enrique Cano Asto. Tarea documental: T2-06.
 Pendiente de comprobación del expositor y revisión de otro integrante.
@@ -22,13 +25,13 @@ Fuentes: [plan vigente](../../PLAN_EQUIPO.md),
 Base inspeccionada: `694a658`. No se consultó el estado remoto actual de GitHub
 ni se ejecutó la aplicación en esta preparación.
 
-## 1. Sustento del integrante 1: tres solicitudes
+## 1. Registro de tres solicitudes
 
 | Código académico | Solicitud y equivalencia | Tipo principal | Prioridad propuesta | Justificación y situación |
 |---|---|---|---|---|
 | SC-001 | Refactorizar y completar aceptación de horarios; CR-TEC-001 / [TEC-001](../../../../specs/TEC-001-horarios.md) | Preventivo | Alta | Separar interfaz, reglas y persistencia reduce acoplamiento y facilita pruebas. Código integrado; QA Windows y revisión ajena pendientes. Las correcciones específicas se separan del refactor. |
 | SC-002 | Consolidar integridad e IDs de BD; CR-TEC-002 / [TEC-002](../../../../specs/TEC-002-integridad-bd.md) | Preventivo | Alta | Garantizar IDs y referencias también en BD. Scripts y pruebas locales existentes; saneamiento autorizado, aplicación al destino y QA pendientes. El despliegue previo adaptativo no se atribuye nuevamente. |
-| SC-003 | Refactorizar y completar aceptación de motivos de permiso; CR-TEC-004 / [TEC-004](../../../../specs/TEC-004-motivos-permiso.md) | Preventivo | Media | Separación de responsabilidades y recarga centralizada. Código integrado; falta aceptación Windows. Evitar escritura al abrir se clasifica aparte como corrección con evidencia. |
+| SC-003 | Refactorizar y completar aceptación de motivos de permiso; CR-TEC-004 / [TEC-004](../../../../specs/TEC-004-motivos-permiso.md) | Preventivo | Alta | Separación de responsabilidades y recarga centralizada. Código integrado; falta aceptación Windows. Evitar escritura al abrir se clasifica aparte como corrección con evidencia. |
 
 La prioridad media de SC-003 es una propuesta relativa a esta presentación;
 no sustituye la prioridad alta de CR-TEC-004 en el plan técnico.
@@ -40,7 +43,7 @@ integridad y compatibilidad; no puede omitirse por elegir horarios para exponer.
 Las tres solicitudes representan trabajo existente con pendientes de aceptación,
 no tres implementaciones nuevas iniciadas hoy.
 
-## 2. Sustento del integrante 2: solicitud principal e impacto
+## 2. SC-001 Solicitud principal e impacto
 
 **Descripción:** separar listado y mantenimiento de horarios mediante MVP con
 vista pasiva, casos de uso y repositorio PostgreSQL; completar la verificación
@@ -71,7 +74,7 @@ para compilar; IDs duplicados/secuencias; escritores externos sin FK; diferencia
 entre arnés .NET 8 y ejecutable net48; conflictos en CompositionRoot/MainMDI.
 La compatibilidad de datos se coordina con Kadin.
 
-## 3. Sustento del integrante 3: decisión y planificación
+## 3. SC-001 Evaluación, decisión y planificación
 
 **Recomendación: aprobar con condiciones la continuación y aceptación de SC-001.**
 Decisión humana real: pendiente de registrar. El diseño coincide con la
@@ -290,3 +293,15 @@ límites. Añadir después QA/revisión reales. No simular una demostración pen
 Limitación de preparación: la creación de docs/t2-06-control-sc-001 fue impedida
 por la restricción de escritura en .git. Se preparó este aporte como archivo local
 revisable. Posteriormente se creó RamaKike desde main mediante GitHub para publicar los documentos y solicitar revisión, sin merge.
+
+## SC-001 Control actualizado de publicación (29/10/2026)
+
+Se completaron registro, análisis de impacto, evaluación, planificación y control en las fichas enlazadas al inicio. Se mantiene SC-001 como selección propuesta y las tres prioridades altas. Se publicaron las siguientes ramas independientes bajo KikeCano03:
+
+| SC / rama | Commit documental inicial | PR hacia main | Estado de publicación |
+|---|---|---|---|
+| SC-001 | `279d8b6c049be1c0648327fbbd985cdacf5b9af2` | [PR #11](https://github.com/Nidka/RRHH/pull/11) | Abierto en borrador, sin merge; revisión humana pendiente |
+| SC-002 | `591b05b0df01cfdbc8da35913ae0d44571899afe` | [PR #12](https://github.com/Nidka/RRHH/pull/12) | Abierto en borrador, sin merge; revisión humana pendiente |
+| SC-003 | `f51c21fa5d5c85c49020080297f4703dcfd6a85d` | [PR #13](https://github.com/Nidka/RRHH/pull/13) | Abierto en borrador, sin merge; revisión humana pendiente |
+
+Este registro satisface la relación solicitud → rama → commit → PR con datos reales. Los SHA de código históricos permanecen separados de estos commits documentales. La última revisión de cada propuesta está en su pestaña Commits. No se creó versión final, ni se hizo merge, ni se emitió aprobación humana. El mecanismo, modelo de aprobación, demostración, condiciones y conclusiones vigentes se consolidan en [Control y trazabilidad](../../../cambios/CONTROL_Y_TRAZABILIDAD.md). Comprobación personal de Jorge y revisión del grupo pendientes.

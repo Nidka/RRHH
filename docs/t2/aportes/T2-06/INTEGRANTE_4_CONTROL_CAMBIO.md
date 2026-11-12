@@ -1,6 +1,9 @@
 # Punto 6. Control del cambio y conclusiones
 
-**Integrante 4: Jorge Enrique Cano Asto**  
+> Actualización SC-001 del 29/10/2026: el registro y los puntos 1–5 se desarrollan en [Registro de solicitudes](../../../cambios/REGISTRO_SOLICITUDES.md) y [Análisis y planificación de horarios](../../../cambios/SC-001.md). El punto 6 actualizado para las tres SC está en [Control y trazabilidad](../../../cambios/CONTROL_Y_TRAZABILIDAD.md). Esas fichas prevalecen sobre los estados de este antecedente del 27/10. SC-003 mantiene prioridad alta. El PR #10 se comprobó abierto y sin merge el 29/10; no se modifica ni acredita aceptación de código. Las ramas y PR nuevos conservan su revisión humana pendiente.
+
+
+**Responsable del control documental: Jorge Enrique Cano Asto**
 Proyecto: RRHH. Fecha de preparación: 27/10/2026. Entregable asociado a T2-06.
 
 Este aporte desarrolla exclusivamente el control de la solicitud **SC-001:
@@ -213,3 +216,15 @@ coherencia con la solicitud elegida y la decisión del equipo antes de entregar.
 Preparación asistida por Codex: inspección, extracción y redacción; no sustituye
 revisión humana. La creación local de la
 rama fue impedida por la restricción de escritura en .git. Se creó RamaKike desde main mediante GitHub para publicar esta entrega documental y someterla a revisión, sin merge.
+
+## SC-001 Control actualizado de publicación (29/10/2026)
+
+Se completaron registro, análisis de impacto, evaluación, planificación y control en las fichas enlazadas al inicio. Se mantiene SC-001 como selección propuesta y las tres prioridades altas. Se publicaron las siguientes ramas independientes bajo KikeCano03:
+
+| SC / rama | Commit documental inicial | PR hacia main | Estado de publicación |
+|---|---|---|---|
+| SC-001 | `279d8b6c049be1c0648327fbbd985cdacf5b9af2` | [PR #11](https://github.com/Nidka/RRHH/pull/11) | Abierto en borrador, sin merge; revisión humana pendiente |
+| SC-002 | `591b05b0df01cfdbc8da35913ae0d44571899afe` | [PR #12](https://github.com/Nidka/RRHH/pull/12) | Abierto en borrador, sin merge; revisión humana pendiente |
+| SC-003 | `f51c21fa5d5c85c49020080297f4703dcfd6a85d` | [PR #13](https://github.com/Nidka/RRHH/pull/13) | Abierto en borrador, sin merge; revisión humana pendiente |
+
+Este registro satisface la relación solicitud → rama → commit → PR con datos reales. Los SHA de código históricos permanecen separados de estos commits documentales. La última revisión de cada propuesta está en su pestaña Commits. No se creó versión final, ni se hizo merge, ni se emitió aprobación humana. El mecanismo, modelo de aprobación, demostración, condiciones y conclusiones vigentes se consolidan en [Control y trazabilidad](../../../cambios/CONTROL_Y_TRAZABILIDAD.md). Comprobación personal de Jorge y revisión del grupo pendientes.
