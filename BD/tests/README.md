@@ -88,3 +88,22 @@ Debe terminar con «RF-18: aserciones SQL correctas». Reproduce la consulta de
 `PostgreSqlAusenciasRepository.ListarSolapadas` (permisos que empiezan antes, terminan
 después, contienen el periodo o están dentro; excluye los contiguos sin día en común).
 Elimine la base desechable al terminar.
+
+## RF-13: tabla `Teletrabajo`
+
+Base local desechable; la migración no depende de otras tablas, basta una base vacía.
+
+```powershell
+createdb rrhh_rf13_tests
+$env:PGDATABASE = 'rrhh_rf13_tests'
+psql -X -v ON_ERROR_STOP=1 -f BD/migrations/20261112_03_teletrabajo.sql
+psql -X -v ON_ERROR_STOP=1 -f BD/tests/rf13_assertions.sql
+psql -X -v ON_ERROR_STOP=1 -f BD/migrations/20261112_03_teletrabajo.sql
+```
+
+La repetición final debe completar sin cambios (ni segundo índice). Las aserciones dejan la
+tabla vacía. `20261112_03_teletrabajo.rollback.sql` **elimina la tabla**, por eso se niega
+(SQLSTATE `P0001`) si tiene filas: respalde y vacíe antes de revertir. Si la tabla ya existe sin
+alguna columna del contrato, la migración aborta sin modificar nada. Las aserciones comprueban cada
+restricción (rango invertido, modalidad, máscara de días remotos, empleado nulo) con el mismo
+`INSERT` que usa `PostgreSqlTeletrabajoRepository`.
