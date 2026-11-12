@@ -57,7 +57,7 @@ RETURNING "Id";
 """, new PostgreSqlParameterValue("empleado", empleado, DbType.Int32))
         .Rows.Cast<DataRow>().Select(Mapear).ToList();
 
-    private static PeriodoTeletrabajoDto Mapear(DataRow row) => new PeriodoTeletrabajoDto
+    internal static PeriodoTeletrabajoDto Mapear(DataRow row) => new PeriodoTeletrabajoDto
     {
         Id = (int)row["Id"],
         IdEmpleado = (int)row["IdEmpleado"],

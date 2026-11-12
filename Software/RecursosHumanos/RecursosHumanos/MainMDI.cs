@@ -2284,6 +2284,19 @@ public class MainMDI : Form
     // Conserva el acceso del mantenimiento de Horarios, aplicado tras el login.
     private void AgregarMenuTeletrabajo()
     {
+        MantenimientosToolStripMenuItem1.DropDownItems.Add("Reporte de días de teletrabajo", null, (_, _) =>
+        {
+            try
+            {
+                using (var vista = CompositionRoot.CrearReporteTeletrabajo())
+                    vista.ShowDialog(this);
+            }
+            catch (Exception)
+            {
+                MessageBox.Show(this, "No se pudo abrir el reporte. Compruebe la configuración de la base.");
+            }
+        });
+
         MantenimientosToolStripMenuItem1.DropDownItems.Add("Periodos de teletrabajo", null, (_, _) =>
         {
             try

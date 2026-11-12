@@ -96,6 +96,16 @@ internal static class CompositionRoot
         return form;
     }
 
+    /// <summary>Conecta la consulta tipada de días remotos al calendario laboral.</summary>
+    public static FrmReporteTeletrabajo CrearReporteTeletrabajo()
+    {
+        var repositorio = new PostgreSqlReporteTeletrabajoRepository(Database.Value);
+        var feriados = new PostgreSqlFeriadoRepository(Database.Value);
+        var vista = new FrmReporteTeletrabajo();
+        _ = new ReporteTeletrabajoPresenter(vista, new ReportarDiasTeletrabajo(repositorio, feriados));
+        return vista;
+    }
+
     /// <summary>Conecta la vista pasiva de teletrabajo a sus casos de uso.</summary>
     public static FrmTeletrabajo CrearTeletrabajo()
     {
