@@ -1,0 +1,12 @@
+RF-04/RF-05 — 12/11/2026 America/Lima
+Base 03ab748; rama fix/rf-04-05-cierre-motivos.
+Suite complementaria net8 de fuentes exactas: 293 correctas, 0 fallos, 0 omitidas.
+PostgreSQL temporal local 14, puerto 55439, BD desechable rrhh_tec004_tests, datos ficticios.
+Incluye 16 pruebas SQL de motivos, más dominio/casos/presenters y resto de suite existente.
+Nueva caracterización: descripción repetida admitida con IDs distintos; no existe unicidad de descripción confirmada.
+Compatibilidad RF-06: columna anual usa default false en alta; editar no borra marca true y RF-06 sigue reconociéndola.
+Se probaron baja libre/referenciada/auditoría, duplicados de ID y cancelación mediante suite existente.
+No se detectó un defecto nuevo que justifique modificar producción. No se presenta un test verde de caracterización como corrección.
+No se ejecutaron WinForms, build.cmd Windows ni captura visual. Ejecución net48 requiere Windows/mono.
+No se leyó .env ni se conectó al servidor compartido. DDL solo en fixture local desechable.
+Cierre funcional RF-04/RF-05 pendiente de Evelyn y revisión de Frank; no hay aprobación humana.

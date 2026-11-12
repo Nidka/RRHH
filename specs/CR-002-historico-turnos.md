@@ -42,3 +42,7 @@ RF-02 / CR-002, asistencia. Pantalla FrmConsultaHorarioEsp; ConsultarHistoricoHo
 ## Resultado local
 
 323/323 pruebas net8 correctas con PostgreSQL ficticio local; proyecto real net48 de capas/pruebas compila con cero errores/advertencias. QA Windows pendiente. [Evidencia](../docs/t3/evidencias/RF-02/validacion-local.txt).
+
+## Trazabilidad local consolidada
+
+Commit de tarea `45752cb`; revisión local combinada en `revision/evelyn-t3-local`. [Resultado conjunto](../docs/t3/evidencias/EVELYN_VALIDACION_CONJUNTA.md). PR y aprobación humana pendientes. Los apartados «en curso/pendiente de creación» anteriores describen el inicio de la tarea, no anticipan aprobaciones.

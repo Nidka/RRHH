@@ -50,3 +50,7 @@ RF-01 / CR-001, asistencia, FrmHorarioEsp/AsignarHorarioPorPeriodo. Regla: perio
 ## Resultado local
 
 314 pruebas complementarias net8 correctas, ninguna omitida; incluye 5 pruebas SQL nuevas y la suite existente. Compilación del proyecto real RRHH.Tests net48: 0 errores/advertencias. Su ejecución en macOS se anuló por falta de mono. QA WinForms/build.cmd Windows y revisión de Kadin pendientes. Evidencia: [validación](../docs/t3/evidencias/RF-01/validacion-local.txt).
+
+## Trazabilidad local consolidada
+
+Commit de tarea `5e91030`; revisión local combinada en `revision/evelyn-t3-local`. [Resultado conjunto](../docs/t3/evidencias/EVELYN_VALIDACION_CONJUNTA.md). PR y aprobación humana pendientes. Los apartados «en curso/pendiente de creación» anteriores describen el inicio de la tarea, no anticipan aprobaciones.

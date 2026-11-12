@@ -1,0 +1,18 @@
+Versión de MSBuild 17.8.60+293f66545 para .NET
+  Determining projects to restore...
+  Restored /Users/helcorp/Documents/Proyectos/Evolucion/RRHH/Software/RRHH.Presentation/RRHH.Presentation.csproj (in 67 ms).
+  Restored /Users/helcorp/Documents/Proyectos/Evolucion/RRHH/Software/RRHH.Domain/RRHH.Domain.csproj (in 67 ms).
+  Restored /Users/helcorp/Documents/Proyectos/Evolucion/RRHH/Software/RRHH.PostgreSql/RRHH.PostgreSql.csproj (in 67 ms).
+  Restored /Users/helcorp/Documents/Proyectos/Evolucion/RRHH/Software/RRHH.Application/RRHH.Application.csproj (in 67 ms).
+  Restored /Users/helcorp/Documents/Proyectos/Evolucion/RRHH/Software/RRHH.Tests/RRHH.Tests.csproj (in 67 ms).
+  RRHH.Domain -> /Users/helcorp/Documents/Proyectos/Evolucion/RRHH/Software/RRHH.Domain/bin/Debug/net48/RRHH.Domain.dll
+  RRHH.Application -> /Users/helcorp/Documents/Proyectos/Evolucion/RRHH/Software/RRHH.Application/bin/Debug/net48/RRHH.Application.dll
+  RRHH.Presentation -> /Users/helcorp/Documents/Proyectos/Evolucion/RRHH/Software/RRHH.Presentation/bin/Debug/net48/RRHH.Presentation.dll
+  RRHH.PostgreSql -> /Users/helcorp/Documents/Proyectos/Evolucion/RRHH/Software/RRHH.PostgreSql/bin/Debug/net48/RRHH.PostgreSql.dll
+  RRHH.Tests -> /Users/helcorp/Documents/Proyectos/Evolucion/RRHH/Software/RRHH.Tests/bin/Debug/net48/RRHH.Tests.dll
+
+Compilación correcta.
+    0 Advertencia(s)
+    0 Errores
+
+Tiempo transcurrido 00:00:01.60
