@@ -1783,16 +1783,14 @@ public class FrmBuscarPersona : FrmConsulta
 	{
 	}
 
-	private void btnHorarios_Click(object sender, EventArgs e)
-	{
-		FrmConsultaHorarioEsp frmConsultaHorarioEsp = new FrmConsultaHorarioEsp();
-		int focusedRowHandle = GridView1.FocusedRowHandle;
-		if (Operators.ConditionalCompareObjectEqual(GridView1.GetRowCellValue(focusedRowHandle, "Codigo"), null, TextCompare: false))
-		{
-			MessageBox.Show("Seleccione un Empleado", "", MessageBoxButtons.OK, MessageBoxIcon.Hand);
-			return;
-		}
-		frmConsultaHorarioEsp.idEmpleado = Conversions.ToInteger(GridView1.GetRowCellValue(focusedRowHandle, "Codigo"));
-		frmConsultaHorarioEsp.Show();
-	}
-}
+    private void btnHorarios_Click(object sender, EventArgs e)
+    {
+        int fila=GridView1.FocusedRowHandle;
+        if (fila<0 || !(GridView1.GetRowCellValue(fila,"Codigo") is int empleado))
+        {
+            MessageBox.Show("Seleccione un Empleado","",MessageBoxButtons.OK,MessageBoxIcon.Hand);
+            return;
+        }
+        try { using(var historial=CompositionRoot.CrearHistoricoHorarios(empleado)) historial.ShowDialog(this); }
+        catch(Exception ex) { MessageBox.Show(this,"No se pudo abrir el histórico: "+ex.Message); }
+    }}

@@ -1,5 +1,6 @@
 using System;
 using System.Data;
+using System.Collections.Generic;
 using System.Linq;
 using RRHH.Application.Asistencia;
 using RRHH.Domain.Asistencia;
@@ -94,6 +95,36 @@ UPDATE public."HorarioTemporal" SET "FechaInicio"=@desde,"FechaFin"=@hasta,"Hora
             return a.Numero;
         });
     }
+
+    /// <summary>Reemplaza llena_HorariosTemporales, conservando filas sin catálogo y parametrizando el periodo.</summary>
+    public IReadOnlyList<HistoricoHorarioDto> Listar(int empleado, RangoFechas rango) => _db.Query("""
+SELECT ht.*, COALESCE(h."Descrip_Horario",'Horario no disponible') AS "Descrip_Horario",h."Ingreso1",h."Salida2"
+FROM public."HorarioTemporal" ht LEFT JOIN public."Horario" h ON h."idHorario"=ht."HorarioAsignado"
+WHERE ht."idEmpleado"=@empleado AND (@desde::date IS NULL OR
+ (ht."FechaInicio"::date<=@hasta AND ht."FechaFin"::date>=@desde AND ht."FechaInicio"::date<=ht."FechaFin"::date))
+ORDER BY ht."FechaInicio" DESC NULLS LAST,ht."N" DESC;
+""",Entero("empleado",empleado),new PostgreSqlParameterValue("desde",rango?.Desde,DbType.Date),
+        new PostgreSqlParameterValue("hasta",rango?.Hasta,DbType.Date)).Rows.Cast<DataRow>().Select(f=>new HistoricoHorarioDto
+        {
+            IdEmpleado=(int)f["idEmpleado"],N=(int)f["N"],FechaInicio=Fecha(f,"FechaInicio"),FechaFin=Fecha(f,"FechaFin"),
+            HorarioAsignado=f.IsNull("HorarioAsignado") ? (int?)null : (int)f["HorarioAsignado"],
+            Descrip_Horario=Convert.ToString(f["Descrip_Horario"]),Ingreso1=Convert.ToString(f["Ingreso1"]),
+            Salida2=Convert.ToString(f["Salida2"]),NroDocumento=Convert.ToString(f["NroDocumento"]),
+            Sisgedo=Convert.ToString(f["Sisgedo"]),FechaRegistro=Fecha(f,"FechaRegistro")
+        }).ToList();
+
+    /// <summary>Reemplaza eliminarHorarioTemporal; no se llama al agregar/reasignar periodos.</summary>
+    public bool Eliminar(int empleado,int numero) => _db.InTransaction(tx=>
+    {
+        tx.Execute("LOCK TABLE public.\"HorarioTemporal\" IN SHARE ROW EXCLUSIVE MODE;");
+        var claves=new[] { Entero("empleado",empleado),Entero("numero",numero) };
+        int cantidad=tx.ScalarInt("SELECT COUNT(*) FROM public.\"HorarioTemporal\" WHERE \"idEmpleado\"=@empleado AND \"N\"=@numero;",claves);
+        if(cantidad>1) throw Ambiguo();
+        if(cantidad==0) return false;
+        return tx.Execute("DELETE FROM public.\"HorarioTemporal\" WHERE \"idEmpleado\"=@empleado AND \"N\"=@numero;",claves)==1;
+    });
+
+    private static DateTime? Fecha(DataRow fila,string columna) => fila.IsNull(columna) ? (DateTime?)null : (DateTime)fila[columna];
 
     private static PostgreSqlParameterValue Entero(string nombre,int valor) => new PostgreSqlParameterValue(nombre,valor,DbType.Int32);
     private static ReglaNegocioException Ambiguo() => new ReglaNegocioException("Hay claves duplicadas. Solicite revisar los datos.");

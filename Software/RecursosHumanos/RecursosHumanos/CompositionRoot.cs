@@ -193,4 +193,14 @@ internal static class CompositionRoot
             new ListarHorarios(new PostgreSqlHorarioRepository(Database.Value)),new AsignarHorarioPorPeriodo(repo));
         return vista;
     }
+
+    /// <summary>Compone RF-02 sobre las asignaciones conservadas por RF-01, sin escrituras al consultar.</summary>
+    public static FrmConsultaHorarioEsp CrearHistoricoHorarios(int empleado)
+    {
+        var repo=new PostgreSqlHorarioTemporalRepository(Database.Value);
+        var vista=new FrmConsultaHorarioEsp { idEmpleado=empleado };
+        _=new HistoricoHorariosPresenter(vista,new ObtenerDatosAsignacion(repo),
+            new ConsultarHistoricoHorarios(repo),new EliminarAsignacionHorario(repo));
+        return vista;
+    }
 }
