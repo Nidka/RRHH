@@ -16,6 +16,10 @@ using RRHH.Domain.Permisos;
 using RRHH.PostgreSql.Permisos;
 using RRHH.Presentation.Permisos;
 
+using RRHH.Application.Teletrabajo;
+using RRHH.PostgreSql.Teletrabajo;
+using RRHH.Presentation.Teletrabajo;
+
 namespace RecursosHumanos;
 
 /// <summary>
@@ -90,6 +94,16 @@ internal static class CompositionRoot
         _ = new MotivoPermisoEditorPresenter(form, new ObtenerMotivoPermiso(repository, acceso),
             new GuardarMotivoPermiso(repository, acceso));
         return form;
+    }
+
+    /// <summary>Conecta la vista pasiva de teletrabajo a sus casos de uso.</summary>
+    public static FrmTeletrabajo CrearTeletrabajo()
+    {
+        var repositorio = new PostgreSqlTeletrabajoRepository(Database.Value);
+        var vista = new FrmTeletrabajo();
+        _ = new TeletrabajoPresenter(vista, new RegistrarPeriodoTeletrabajo(repositorio),
+            new ListarPeriodosTeletrabajo(repositorio));
+        return vista;
     }
 
     /// <summary>Compone listado y editor modal de horarios sobre un repositorio específico.</summary>

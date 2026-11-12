@@ -2278,7 +2278,25 @@ public class MainMDI : Form
 			ListaPersonalToolStripMenuItem.Visible = false;
 			RecordAsistenciasSemanalesToolStripMenuItem.Visible = true;
 		}
+		if (frmLogin.DialogResult == DialogResult.OK && HorariosToolStripMenuItem.Available) AgregarMenuTeletrabajo();
 	}
+
+    // Conserva el acceso del mantenimiento de Horarios, aplicado tras el login.
+    private void AgregarMenuTeletrabajo()
+    {
+        MantenimientosToolStripMenuItem1.DropDownItems.Add("Periodos de teletrabajo", null, (_, _) =>
+        {
+            try
+            {
+                using (var vista = CompositionRoot.CrearTeletrabajo())
+                    vista.ShowDialog(this);
+            }
+            catch (Exception)
+            {
+                MessageBox.Show(this, "No se pudo abrir teletrabajo. Compruebe la configuración de la base.");
+            }
+        });
+    }
 
 	private void ListaPersonalToolStripMenuItem_Click(object sender, EventArgs e)
 	{
