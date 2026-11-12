@@ -1533,13 +1533,17 @@ public class FrmPermiso : FrmConsulta
 		permiso.Retorno = ((editValue2 != null) ? ((bool?)editValue2) : flag9);
 		permiso.IdEmpleado = idEmpleado;
 		permiso.Obs = UcTxtObs.Text.Trim();
+		// RF-03: reemplaza RRHHClass.ExistePermiso (solo cubria el alta y no detectaba un rango que contiene a otro).
+		// RF-06: el mismo punto de validacion rechaza una segunda licencia de una vez por anio en el mismo anio.
+		// Valida tambien al editar, excluyendo el propio permiso (Npermiso).
+		var validacion = CompositionRoot.CrearValidarPermiso().Ejecutar(idEmpleado, Conversions.ToInteger(UcCmbMotivo.SelectedValue), UcFechas.Rango.Desde, UcFechas.Rango.Hasta, Npermiso);
+		if (!validacion.Exitoso)
+		{
+			MessageBox.Show(validacion.Mensaje, "", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+			return;
+		}
 		if (Npermiso == 0)
 		{
-			if (objClassRRHH.ExistePermiso(idEmpleado, Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(UcFechas.Rango.Desde.Year, Interaction.IIf(UcFechas.Rango.Desde.Month.ToString().Length == 1, "0" + Conversions.ToString(UcFechas.Rango.Desde.Month), UcFechas.Rango.Desde.Month)), Interaction.IIf(UcFechas.Rango.Desde.Day.ToString().Length == 1, "0" + Conversions.ToString(UcFechas.Rango.Desde.Day), UcFechas.Rango.Desde.Day))), Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(UcFechas.Rango.Hasta.Year, Interaction.IIf(UcFechas.Rango.Hasta.Month.ToString().Length == 1, "0" + Conversions.ToString(UcFechas.Rango.Hasta.Month), UcFechas.Rango.Hasta.Month)), Interaction.IIf(UcFechas.Rango.Hasta.Day.ToString().Length == 1, "0" + Conversions.ToString(UcFechas.Rango.Hasta.Day), UcFechas.Rango.Hasta.Day)))) >= 1)
-			{
-				MessageBox.Show("El Empleado se Encuentra de Permiso, No se puede agregar Otro Permiso", "", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-				return;
-			}
 			permiso.NPermiso = objClassRRHH.SgtIdPermiso(idEmpleado);
 			PermisoMapper.Instance().Insert(permiso);
 		}

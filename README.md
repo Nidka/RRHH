@@ -144,6 +144,10 @@ IA están en [AGENTS.md](AGENTS.md), y las especificaciones de cambios en
 [specs/README.md](specs/README.md). El plan T2 complementa el plan técnico de
 refactorización existente; no implica implementar todos los RF en esta etapa.
 
+Para la evaluación T3, el orden por persona y día está en
+[docs/t3/CHECKLIST_T3.md](docs/t3/CHECKLIST_T3.md) y los prompts de trabajo en
+[docs/t3/PROMPTS_POR_INTEGRANTE.md](docs/t3/PROMPTS_POR_INTEGRANTE.md).
+
 ## Alcance de la recuperacion
 
 El codigo proviene del IL de los ensamblados y de los PDB disponibles. Se
@@ -151,3 +155,9 @@ recupero el comportamiento, pero no los comentarios originales, el historial
 ni todos los nombres locales de 2013. `GRLL/` conserva codigo de referencia;
 la solucion compilable enlaza temporalmente `Software/lib/legacy/GRLL.dll`
 porque varios controles decompilados no producen C# valido sin reescritura.
+
+## Versión
+
+Versión actual: **1.0.0**. Historial en [CHANGELOG.md](CHANGELOG.md), política en
+[docs/versionado/POLITICA_VERSIONADO.md](docs/versionado/POLITICA_VERSIONADO.md) y registro en
+[docs/versionado/REGISTRO_VERSIONES.md](docs/versionado/REGISTRO_VERSIONES.md).

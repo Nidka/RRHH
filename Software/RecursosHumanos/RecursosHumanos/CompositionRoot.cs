@@ -113,6 +113,18 @@ internal static class CompositionRoot
         return form;
     }
 
+	/// <summary>
+	/// Crea la validación de permisos que usa FrmPermiso al guardar: RF-03 (sin permisos solapados, en lugar de
+	/// <c>RRHHClass.ExistePermiso</c>) y RF-06 (licencia de una vez por año), desde un único punto.
+	/// </summary>
+	public static ValidarPermiso CrearValidarPermiso()
+	{
+		IPermisoRepository repository = new PostgreSqlPermisoRepository(Database.Value);
+		return new ValidarPermiso(
+			new ValidarPermisoSinSolapamiento(repository),
+			new ValidarLicenciaUnaVezPorAnio(repository));
+	}
+
 	/// <summary>Crea el formulario de gestión de feriados con su presenter conectado.</summary>
 	public static FrmFeriado CrearFeriado()
 	{
@@ -124,5 +136,14 @@ internal static class CompositionRoot
 			new RegistrarFeriado(repository),
 			new EliminarFeriado(repository));
 		return form;
+	}
+
+	/// <summary>
+	/// Crea el cálculo RF-17 de días no laborables (fines de semana y feriados) que usa el reporte
+	/// general de asistencias en lugar de contar solo sábados y domingos.
+	/// </summary>
+	public static CalcularDiasNoLaborables CrearCalcularDiasNoLaborables()
+	{
+		return new CalcularDiasNoLaborables(new PostgreSqlFeriadoRepository(Database.Value));
 	}
 }

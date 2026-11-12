@@ -92,3 +92,48 @@ En particular:
   `RRHHClass`, `SqlConnection` ni TableAdapters.
 - Cada pantalla migrada cumple la definición de terminado (sección 9) antes
   de abrir el pull request.
+
+## Ramas y versiones
+
+Política completa en [docs/versionado/POLITICA_VERSIONADO.md](docs/versionado/POLITICA_VERSIONADO.md).
+
+| Rama | Para qué sirve | Quién trabaja | Cómo se integra |
+|------|----------------|---------------|-----------------|
+| `main` | Versión estable. Siempre compila y pasa pruebas. | Nadie directamente | Solo PR aprobados |
+| `feature/<id>-<desc>` | Nueva función | Responsable del paquete | PR a `main`, sube MINOR |
+| `fix/<id>-<desc>` | Corregir un comportamiento incorrecto | Responsable del paquete | PR a `main`, sube PATCH |
+| `refactor/<id>-<desc>` | Reestructurar sin cambiar comportamiento | Responsable del paquete | PR a `main`, sube PATCH |
+| `docs/`, `test/`, `infra/` | Documentación, pruebas, scripts | Integrante asignado | PR a `main` (no cambia versión) |
+| `release/x.y.z` | Congelar una versión: CHANGELOG, número, pruebas finales | Coordinación | PR a `main`, luego tag `vx.y.z` y Release |
+| `hotfix/<desc>` | Corrección urgente de la versión entregada | Responsable del error | PR prioritario a `main`, sube PATCH |
+
+### Mensajes de commit
+
+Formato `tipo(ALCANCE): descripción` en imperativo, más un pie `Refs:` en los commits de código:
+
+```
+fix(RF-03): detectar permisos que contienen a otro existente
+
+Refs: RF-03, CR-003, CP-03-01
+```
+
+| Tipo | Efecto en la versión |
+|------|----------------------|
+| `feat` | MINOR |
+| `fix`, `refactor`, `perf` | PATCH |
+| `docs`, `test`, `chore`, `build` | Ninguno |
+
+- `ALCANCE` es `RF-NN`, `TEC-NNN`, `REF-NNN` o `BASE` (infraestructura compartida). Varios: `RF-13,RF-14`.
+- Un cambio incompatible se escribe `feat(RF-NN)!: …` con el pie `BREAKING CHANGE: motivo` y sube MAJOR.
+- El número de versión se asigna al publicar el release, no en cada commit.
+- Los commits y los PR **no llevan** `Co-Authored-By` ni líneas de atribución a una IA. El uso de IA se declara en el PR.
+- Cada PR lleva una label `semver:major|minor|patch|none`: la propone el autor y la confirma el revisor.
+- La guía de la semana de T3 está en [docs/t3/PROMPTS_POR_INTEGRANTE.md](docs/t3/PROMPTS_POR_INTEGRANTE.md).
+
+### Publicar una versión
+
+1. Crear `release/x.y.z` desde `main`.
+2. Pasar lo de «[Sin publicar]» del CHANGELOG a la nueva versión con fecha.
+3. PR a `main`, revisión y merge.
+4. `git tag -a vx.y.z -m "RRHH x.y.z"` y `git push origin vx.y.z`.
+5. Crear el Release en GitHub con las notas del CHANGELOG.
