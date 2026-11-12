@@ -125,4 +125,13 @@ internal static class CompositionRoot
 			new EliminarFeriado(repository));
 		return form;
 	}
+
+	/// <summary>
+	/// Crea el cálculo RF-17 de días no laborables (fines de semana y feriados) que usa el reporte
+	/// general de asistencias en lugar de contar solo sábados y domingos.
+	/// </summary>
+	public static CalcularDiasNoLaborables CrearCalcularDiasNoLaborables()
+	{
+		return new CalcularDiasNoLaborables(new PostgreSqlFeriadoRepository(Database.Value));
+	}
 }
