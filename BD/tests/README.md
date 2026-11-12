@@ -72,3 +72,19 @@ es un paso aparte, con el `"idMotivo"` confirmado en la base real.
 `BD/schema.sql` no se regenera con esta migración: es la línea base del volcado
 inicial y tampoco refleja la migración 02. El esquema vigente es esa línea base
 más las migraciones de `BD/migrations/`, en orden.
+
+## RF-18: consulta de ausencias por periodo
+
+Base local desechable y **vacía** (no usa el fixture de TEC-002): el script crea sus
+propias tablas ficticias y aborta si ya existe `public."Permiso"` o `public."Empleado"`.
+
+```powershell
+createdb rrhh_rf18_tests
+$env:PGDATABASE = 'rrhh_rf18_tests'
+psql -X -v ON_ERROR_STOP=1 -f BD/tests/rf18_ausencias.sql
+```
+
+Debe terminar con «RF-18: aserciones SQL correctas». Reproduce la consulta de
+`PostgreSqlAusenciasRepository.ListarSolapadas` (permisos que empiezan antes, terminan
+después, contienen el periodo o están dentro; excluye los contiguos sin día en común).
+Elimine la base desechable al terminar.
