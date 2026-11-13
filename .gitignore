@@ -28,3 +28,6 @@ BD/CMI.sql
 
 # graphify (grafo generado localmente)
 graphify-out/
+
+# Archivos temporales de Word
+~$*

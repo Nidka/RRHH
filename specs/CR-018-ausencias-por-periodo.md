@@ -1,6 +1,6 @@
 # CR-018: reportar quiénes están ausentes entre dos fechas
 
-- Estado: Implementado en la rama `feature/rf-18-ausencias-por-periodo` (T3); en pruebas: faltan compilar y ejecutar `dotnet test` en Windows, el QA en la aplicación con datos ficticios y la revisión de Evelyn.
+- Estado: Implementado e integrado en main (PR #22, v1.2.0). Suite completa en net8 correcta (342 de 342) y prueba manual en la aplicación Windows.
 - Tarea / RF / CR: RF-18 (complementario) / CR-018.
 - Autor responsable / revisor: Francisco Kadin Valera Lizarraga / Evelyn Victoria Rodriguez Cardozo.
 - Versión/commit analizado: `30e4c70` (`origin/main` con los PR #10 a #13, #17, #20 y #21).

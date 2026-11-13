@@ -1,0 +1,374 @@
+EJECUCIÓN DE LA SUITE COMPLETA SOBRE main (arnés net8)
+Fecha: 12/11/2026 (America/Lima)  ·  Commit: 5d5976d (origin/main, incluye v1.0.1 a v1.4.0 y PR #29)
+Ejecutó: Francisco Kadin Valera Lizarraga
+Entorno: macOS arm64; .NET SDK 8.0.134; PostgreSQL 16 local desechable (puerto 54720, BD rrhh_tec004_tests, datos ficticios).
+Sin .env y sin conexión a la base compartida.
+
+Método: git archive de main (Software/RRHH.Domain, Application, Presentation, PostgreSql, Tests y BD/schema.sql) en un directorio temporal;
+solo se cambió <TargetFramework> net48 -> net8.0 y se quitó <PlatformTarget>x86</PlatformTarget>. El código fuente no se modificó.
+Variable usada para las pruebas de integración: RRHH_TEST_POSTGRES_CONNECTION.
+
+RESULTADO: Superadas 325, con error 0, omitidas 0, total 325.
+Sin PostgreSQL disponible: 289 superadas y 36 de integración sin poder ejecutarse (no se cuentan como aprobadas).
+
+Alcance NO cubierto: el proyecto WinForms RecursosHumanos (requiere Windows y las DLL licenciadas DevExpress 11.2 / GRLL), la ejecución net48 y la captura de pantallas.
+
+Clase de prueba                                            Superadas  Total
+Arquitectura.DependenciasEntreCapasTests                           4      4
+Asistencia.AsignacionHorarioPresenterTests                         5      5
+Asistencia.AsignacionHorarioTests                                 13     13
+Asistencia.CalcularDiasNoLaborablesTests                           9      9
+Asistencia.CalendarioLaboralTests                                 21     21
+Asistencia.FeriadoPresenterTests                                   8      8
+Asistencia.FeriadoTests                                            8      8
+Asistencia.HistoricoHorariosPresenterTests                         3      3
+Asistencia.HistoricoHorariosTests                                  5      5
+Asistencia.HorarioPostgreSqlTests                                 14     14
+Asistencia.HorarioTemporalPostgreSqlTests                          6      6
+Asistencia.HorarioTests                                           12     12
+Asistencia.HorariosPresenterTests                                 11     11
+Asistencia.RegistrarFeriadoTests                                   6      6
+Catalogos.CatalogoPresenterTests                                  12     12
+Catalogos.DefinicionCatalogoTests                                 10     10
+Catalogos.MapeosCatalogoTests                                     30     30
+Comun.RangoFechasTests                                            22     22
+Permisos.GestionMotivosPermisoTests                               11     11
+Permisos.MotivoPermisoPostgreSqlTests                             16     16
+Permisos.MotivoPermisoTests                                        9      9
+Permisos.MotivosPresenterTests                                     9      9
+Permisos.RepAusenciasPresenterTests                               10     10
+Permisos.ReportarAusenciasPorPeriodoTests                         17     17
+Permisos.ValidarLicenciaUnaVezPorAnioTests                        10     10
+Permisos.ValidarPermisoSinSolapamientoTests                       14     14
+Permisos.ValidarPermisoTests                                       6      6
+Seguridad.ObtenerAccesoUsuarioTests                                7      7
+Seguridad.Pbkdf2PasswordHasherTests                                2      2
+Teletrabajo.RegistroTeletrabajoTests                              10     10
+Teletrabajo.ReportarDiasTeletrabajoTests                           5      5
+
+DETALLE POR PRUEBA
+Passed   RRHH.Tests.Arquitectura.DependenciasEntreCapasTests.ElDominioNoDependeDeNingunaOtraCapaNiDeInfraestructura
+Passed   RRHH.Tests.Arquitectura.DependenciasEntreCapasTests.LaAplicacionSoloDependeDelDominio
+Passed   RRHH.Tests.Arquitectura.DependenciasEntreCapasTests.LaInfraestructuraNoConoceLaPresentacionNiLaInterfaz
+Passed   RRHH.Tests.Arquitectura.DependenciasEntreCapasTests.LaPresentacionNoConoceWinFormsDevExpressNiLaBase
+Passed   RRHH.Tests.Asistencia.AsignacionHorarioPresenterTests.CargaFallidaNoPermiteGuardar
+Passed   RRHH.Tests.Asistencia.AsignacionHorarioPresenterTests.CargarYCancelarNoEscribenYGuardarSoloUnaVezCierra
+Passed   RRHH.Tests.Asistencia.AsignacionHorarioPresenterTests.ConflictoDePersistenciaNoCierraYErrorTecnicoPermiteReintentar
+Passed   RRHH.Tests.Asistencia.AsignacionHorarioPresenterTests.EdicionCargaElNumeroSinEscribir
+Passed   RRHH.Tests.Asistencia.AsignacionHorarioPresenterTests.RangoInvalidoNoEscribeNiCierraYPermiteCorregir
+Passed   RRHH.Tests.Asistencia.AsignacionHorarioTests.DetectaTodosLosCrucesInclusivos(desde: 10, hasta: 12, esperado: True)
+Passed   RRHH.Tests.Asistencia.AsignacionHorarioTests.DetectaTodosLosCrucesInclusivos(desde: 11, hasta: 11, esperado: True)
+Passed   RRHH.Tests.Asistencia.AsignacionHorarioTests.DetectaTodosLosCrucesInclusivos(desde: 12, hasta: 14, esperado: True)
+Passed   RRHH.Tests.Asistencia.AsignacionHorarioTests.DetectaTodosLosCrucesInclusivos(desde: 13, hasta: 14, esperado: False)
+Passed   RRHH.Tests.Asistencia.AsignacionHorarioTests.DetectaTodosLosCrucesInclusivos(desde: 8, hasta: 10, esperado: True)
+Passed   RRHH.Tests.Asistencia.AsignacionHorarioTests.DetectaTodosLosCrucesInclusivos(desde: 8, hasta: 9, esperado: False)
+Passed   RRHH.Tests.Asistencia.AsignacionHorarioTests.DetectaTodosLosCrucesInclusivos(desde: 9, hasta: 13, esperado: True)
+Passed   RRHH.Tests.Asistencia.AsignacionHorarioTests.NoTruncaDocumentoNiSisgedo
+Passed   RRHH.Tests.Asistencia.AsignacionHorarioTests.OtroEmpleadoYLaPropiaEdicionNoBloquean
+Passed   RRHH.Tests.Asistencia.AsignacionHorarioTests.RechazaIdentificadoresInvalidos(empleado: 0, numero: 0, horario: 1)
+Passed   RRHH.Tests.Asistencia.AsignacionHorarioTests.RechazaIdentificadoresInvalidos(empleado: 1, numero: -1, horario: 1)
+Passed   RRHH.Tests.Asistencia.AsignacionHorarioTests.RechazaIdentificadoresInvalidos(empleado: 1, numero: 0, horario: 0)
+Passed   RRHH.Tests.Asistencia.AsignacionHorarioTests.UnDiaNormalizaHorasYConservaTextoHastaCincuentaCaracteres
+Passed   RRHH.Tests.Asistencia.CalcularDiasNoLaborablesTests.FeriadoEnFinDeSemana_NoSeCuentaDosVeces
+Passed   RRHH.Tests.Asistencia.CalcularDiasNoLaborablesTests.FeriadoEntreSemana_SeSumaAlFinDeSemana
+Passed   RRHH.Tests.Asistencia.CalcularDiasNoLaborablesTests.FeriadoFueraDelPeriodo_NoAfecta
+Passed   RRHH.Tests.Asistencia.CalcularDiasNoLaborablesTests.FeriadoRepetidoEnLaTabla_SeCuentaUnaVez
+Passed   RRHH.Tests.Asistencia.CalcularDiasNoLaborablesTests.PeriodoDeUnDiaLaborableFeriado_CuentaUno
+Passed   RRHH.Tests.Asistencia.CalcularDiasNoLaborablesTests.PeriodoDeUnDiaLaborableNormal_CuentaCero
+Passed   RRHH.Tests.Asistencia.CalcularDiasNoLaborablesTests.PeriodoInvertido_LanzaReglaNegocio
+Passed   RRHH.Tests.Asistencia.CalcularDiasNoLaborablesTests.RepositorioNulo_LanzaArgumentNull
+Passed   RRHH.Tests.Asistencia.CalcularDiasNoLaborablesTests.SemanaSinFeriados_CuentaSoloElFinDeSemana
+Passed   RRHH.Tests.Asistencia.CalendarioLaboralTests.Constructor_FeriadosNulos_LanzaArgumentNull
+Passed   RRHH.Tests.Asistencia.CalendarioLaboralTests.DiasLaborables_ExcluyeFeriadoEntreSemana
+Passed   RRHH.Tests.Asistencia.CalendarioLaboralTests.DiasLaborables_ExcluyeFinesDeSemana
+Passed   RRHH.Tests.Asistencia.CalendarioLaboralTests.DiasLaborables_FeriadoEnFinDeSemana_NoDescuentaDeMas
+Passed   RRHH.Tests.Asistencia.CalendarioLaboralTests.DiasLaborables_FeriadoFueraDelRango_NoAfecta
+Passed   RRHH.Tests.Asistencia.CalendarioLaboralTests.DiasLaborables_FeriadosRepetidos_SeCuentanUnaVez
+Passed   RRHH.Tests.Asistencia.CalendarioLaboralTests.DiasLaborables_RangoNulo_LanzaArgumentNull
+Passed   RRHH.Tests.Asistencia.CalendarioLaboralTests.DiasLaborables_SemanaCompleta_SinFeriados
+Passed   RRHH.Tests.Asistencia.CalendarioLaboralTests.DiasLaborables_UnDiaDeFinDeSemana_EsCero
+Passed   RRHH.Tests.Asistencia.CalendarioLaboralTests.DiasLaborables_UnDiaFeriado_EsCero
+Passed   RRHH.Tests.Asistencia.CalendarioLaboralTests.DiasLaborables_UnDiaLaborable_EsUno
+Passed   RRHH.Tests.Asistencia.CalendarioLaboralTests.EsLaborable_FeriadoEnSabado_SigueSiendoNoLaborable
+Passed   RRHH.Tests.Asistencia.CalendarioLaboralTests.EsLaborable_FeriadoEntreSemana_NoEsLaborable
+Passed   RRHH.Tests.Asistencia.CalendarioLaboralTests.EsLaborable_FinDeSemana_NoEsLaborable(dia: 14)
+Passed   RRHH.Tests.Asistencia.CalendarioLaboralTests.EsLaborable_FinDeSemana_NoEsLaborable(dia: 15)
+Passed   RRHH.Tests.Asistencia.CalendarioLaboralTests.EsLaborable_IgnoraLaHoraTantoEnFeriadoComoEnConsulta
+Passed   RRHH.Tests.Asistencia.CalendarioLaboralTests.EsLaborable_LunesAViernes_SinFeriados(dia: 10)
+Passed   RRHH.Tests.Asistencia.CalendarioLaboralTests.EsLaborable_LunesAViernes_SinFeriados(dia: 11)
+Passed   RRHH.Tests.Asistencia.CalendarioLaboralTests.EsLaborable_LunesAViernes_SinFeriados(dia: 12)
+Passed   RRHH.Tests.Asistencia.CalendarioLaboralTests.EsLaborable_LunesAViernes_SinFeriados(dia: 13)
+Passed   RRHH.Tests.Asistencia.CalendarioLaboralTests.EsLaborable_LunesAViernes_SinFeriados(dia: 9)
+Passed   RRHH.Tests.Asistencia.FeriadoPresenterTests.Agregar_ErrorDeBaseDeDatos_MuestraAlerta
+Passed   RRHH.Tests.Asistencia.FeriadoPresenterTests.Agregar_FechaDuplicada_MuestraAlertaYNoInserta
+Passed   RRHH.Tests.Asistencia.FeriadoPresenterTests.Agregar_FeriadoNuevo_InsertaRecargaYReiniciaControles
+Passed   RRHH.Tests.Asistencia.FeriadoPresenterTests.Agregar_MotivoVacio_MuestraAlertaYNoInserta
+Passed   RRHH.Tests.Asistencia.FeriadoPresenterTests.Cargar_MuestraLosFeriadosDelRepositorio
+Passed   RRHH.Tests.Asistencia.FeriadoPresenterTests.Eliminar_ConfirmacionCancelada_NoElimina
+Passed   RRHH.Tests.Asistencia.FeriadoPresenterTests.Eliminar_Confirmado_EliminaElElegidoYRecarga
+Passed   RRHH.Tests.Asistencia.FeriadoPresenterTests.Eliminar_SinSeleccion_MuestraMensajeYNoElimina
+Passed   RRHH.Tests.Asistencia.FeriadoTests.Crear_ConMotivoInvalido_LanzaReglaNegocioException
+Passed   RRHH.Tests.Asistencia.FeriadoTests.Crear_TruncaHoraDeLaFechaYNormalizaMotivo
+Passed   RRHH.Tests.Asistencia.FeriadoTests.Reconstituir_PermiteRegistrosHistoricosSinMotivoOConHora
+Passed   RRHH.Tests.Asistencia.FeriadoTests.Validar_FechaPorDefecto_DevuelveError
+Passed   RRHH.Tests.Asistencia.FeriadoTests.Validar_RespetaLongitudMaximaDelEsquema
+Passed   RRHH.Tests.Asistencia.FeriadoTests.Validar_SinMotivo_DevuelveError(motivo: "   ")
+Passed   RRHH.Tests.Asistencia.FeriadoTests.Validar_SinMotivo_DevuelveError(motivo: "")
+Passed   RRHH.Tests.Asistencia.FeriadoTests.Validar_SinMotivo_DevuelveError(motivo: null)
+Passed   RRHH.Tests.Asistencia.HistoricoHorariosPresenterTests.AbrirConsultarYCancelarEditorNoBorranNiGuardan
+Passed   RRHH.Tests.Asistencia.HistoricoHorariosPresenterTests.CancelarBajaNoEscribeYConfirmarBorraSoloSeleccionada
+Passed   RRHH.Tests.Asistencia.HistoricoHorariosPresenterTests.ConsultaFallidaLimpiaFilasYNoPermiteBajaDeResultadoAnterior
+Passed   RRHH.Tests.Asistencia.HistoricoHorariosTests.EntradaInvalidaNoConsulta(empleado: 0, desde: 10, hasta: 12)
+Passed   RRHH.Tests.Asistencia.HistoricoHorariosTests.EntradaInvalidaNoConsulta(empleado: 1, desde: 10, hasta: 0)
+Passed   RRHH.Tests.Asistencia.HistoricoHorariosTests.EntradaInvalidaNoConsulta(empleado: 1, desde: 12, hasta: 10)
+Passed   RRHH.Tests.Asistencia.HistoricoHorariosTests.InterseccionIncluyeContencionYExtremosYOrdenaSinMezclarEmpleados
+Passed   RRHH.Tests.Asistencia.HistoricoHorariosTests.TodosIncluyeFechasAusentesYNoEscribe
+Passed   RRHH.Tests.Asistencia.HorarioPostgreSqlTests.ActualizarConservaSgtDiaYEstadoNullable
+Passed   RRHH.Tests.Asistencia.HorarioPostgreSqlTests.AltasConcurrentesNoDuplicanIdsSinSecuencia
+Passed   RRHH.Tests.Asistencia.HorarioPostgreSqlTests.CadaReferenciaImpideElBorrado
+Passed   RRHH.Tests.Asistencia.HorarioPostgreSqlTests.CodigosDuplicadosNoSeActualizanNiEliminan
+Passed   RRHH.Tests.Asistencia.HorarioPostgreSqlTests.DatosHistoricosInvalidosSePuedenLeerParaCorregir
+Passed   RRHH.Tests.Asistencia.HorarioPostgreSqlTests.DefaultCeroRevierteElAltaParaNoConfundirlaConRegistroNuevo
+Passed   RRHH.Tests.Asistencia.HorarioPostgreSqlTests.FKAdicionalSeTraduceARegistroEnUso
+Passed   RRHH.Tests.Asistencia.HorarioPostgreSqlTests.IdentidadAlwaysNoRecibeIdExplicito
+Passed   RRHH.Tests.Asistencia.HorarioPostgreSqlTests.RegistroInexistenteNoSimulaExito
+Passed   RRHH.Tests.Asistencia.HorarioPostgreSqlTests.SecuenciaDefaultSeRespeta
+Passed   RRHH.Tests.Asistencia.HorarioPostgreSqlTests.SecuenciaDesalineadaConPKInformaConflicto
+Passed   RRHH.Tests.Asistencia.HorarioPostgreSqlTests.SecuenciaDesalineadaSinPKRevierteInsercion
+Passed   RRHH.Tests.Asistencia.HorarioPostgreSqlTests.TablaVaciaGeneraIdYHorasCanonicasConEstadoNulo
+Passed   RRHH.Tests.Asistencia.HorarioPostgreSqlTests.TextoConComillaSeGuardaComoDato
+Passed   RRHH.Tests.Asistencia.HorarioTemporalPostgreSqlTests.AltaReasignaSinBorrarHistoriaYEdicionConservaFechaRegistro
+Passed   RRHH.Tests.Asistencia.HorarioTemporalPostgreSqlTests.ContencionEdicionYReferenciaInvalidaNoDejanEscrituras
+Passed   RRHH.Tests.Asistencia.HorarioTemporalPostgreSqlTests.DosAltasSuperpuestasSoloConfirmanUna
+Passed   RRHH.Tests.Asistencia.HorarioTemporalPostgreSqlTests.DuplicadosYFechasInconsistentesExigenRevisionSinModificarDatos
+Passed   RRHH.Tests.Asistencia.HorarioTemporalPostgreSqlTests.HistoricoConservaPeriodosSinCatalogoYFiltraInterseccion
+Passed   RRHH.Tests.Asistencia.HorarioTemporalPostgreSqlTests.OrdenDeBloqueosCompatibleConBajaDeHorarioEvitaInterbloqueo
+Passed   RRHH.Tests.Asistencia.HorarioTests.AdmiteDescripcionVaciaPeroRespetaLongitudDelEsquema
+Passed   RRHH.Tests.Asistencia.HorarioTests.ConservaJornadaNocturnaSinInventarOrdenDeHoras
+Passed   RRHH.Tests.Asistencia.HorarioTests.NormalizaSinDependerDeLaCultura(cultura: "en-US")
+Passed   RRHH.Tests.Asistencia.HorarioTests.NormalizaSinDependerDeLaCultura(cultura: "es-PE")
+Passed   RRHH.Tests.Asistencia.HorarioTests.NormalizaSinDependerDeLaCultura(cultura: "fr-FR")
+Passed   RRHH.Tests.Asistencia.HorarioTests.RechazaHorasInvalidas(hora: "")
+Passed   RRHH.Tests.Asistencia.HorarioTests.RechazaHorasInvalidas(hora: "-01:00:00")
+Passed   RRHH.Tests.Asistencia.HorarioTests.RechazaHorasInvalidas(hora: "07:30:00.5")
+Passed   RRHH.Tests.Asistencia.HorarioTests.RechazaHorasInvalidas(hora: "12:60:00")
+Passed   RRHH.Tests.Asistencia.HorarioTests.RechazaHorasInvalidas(hora: "24:00:00")
+Passed   RRHH.Tests.Asistencia.HorarioTests.RechazaHorasInvalidas(hora: "29:30:00")
+Passed   RRHH.Tests.Asistencia.HorarioTests.RechazaHorasInvalidas(hora: null)
+Passed   RRHH.Tests.Asistencia.HorariosPresenterTests.CancelarBorradoNoEscribe
+Passed   RRHH.Tests.Asistencia.HorariosPresenterTests.CargaDeEditorEsSoloLecturaYGuardaUnaVez
+Passed   RRHH.Tests.Asistencia.HorariosPresenterTests.CasoDeUsoInformaRegistroEliminadoYNoCambiaId
+Passed   RRHH.Tests.Asistencia.HorariosPresenterTests.FalloDeCargaDeshabilitaAccionesYNoAbreEditor
+Passed   RRHH.Tests.Asistencia.HorariosPresenterTests.FalloDePersistenciaMantieneEditorAbierto
+Passed   RRHH.Tests.Asistencia.HorariosPresenterTests.RecargaSoloAlGuardarElEditor(guardado: False, lecturas: 1)
+Passed   RRHH.Tests.Asistencia.HorariosPresenterTests.RecargaSoloAlGuardarElEditor(guardado: True, lecturas: 2)
+Passed   RRHH.Tests.Asistencia.HorariosPresenterTests.ReferenciasImpidenBorradoYRecarga
+Passed   RRHH.Tests.Asistencia.HorariosPresenterTests.RegistroEliminadoAntesDeCargarNoPermiteGuardar
+Passed   RRHH.Tests.Asistencia.HorariosPresenterTests.SinSeleccionNoAbreEditorNiPideConfirmacion
+Passed   RRHH.Tests.Asistencia.HorariosPresenterTests.ValidacionFallidaConservaEditorYPermiteCorregir
+Passed   RRHH.Tests.Asistencia.RegistrarFeriadoTests.Ejecutar_DeteccionDeDuplicadoNoDependeDelFormatoRegional(culturaNombre: "en-US")
+Passed   RRHH.Tests.Asistencia.RegistrarFeriadoTests.Ejecutar_DeteccionDeDuplicadoNoDependeDelFormatoRegional(culturaNombre: "es-PE")
+Passed   RRHH.Tests.Asistencia.RegistrarFeriadoTests.Ejecutar_DosAltasSimultaneasDelMismoDia_SoloPermiteUnRegistro
+Passed   RRHH.Tests.Asistencia.RegistrarFeriadoTests.Ejecutar_FechaLibre_InsertaYNormalizaDatos
+Passed   RRHH.Tests.Asistencia.RegistrarFeriadoTests.Ejecutar_MismoDiaConDistintaHora_RechazaDuplicado
+Passed   RRHH.Tests.Asistencia.RegistrarFeriadoTests.ElMapeoDeFeriadoCoincideConElEsquema
+Passed   RRHH.Tests.Catalogos.CatalogoPresenterTests.AlIniciar_CatalogoSinExtra_OcultaLaColumnaExtra
+Passed   RRHH.Tests.Catalogos.CatalogoPresenterTests.AlIniciar_ConfiguraLasColumnasSegunLaDefinicion
+Passed   RRHH.Tests.Catalogos.CatalogoPresenterTests.Buscar_MuestraLosRegistrosQueCoincidenConElFiltro
+Passed   RRHH.Tests.Catalogos.CatalogoPresenterTests.Eliminar_Confirmado_Elimina
+Passed   RRHH.Tests.Catalogos.CatalogoPresenterTests.Eliminar_RegistroEnUso_MuestraErrorYCancela
+Passed   RRHH.Tests.Catalogos.CatalogoPresenterTests.Eliminar_SinConfirmacion_NoElimina
+Passed   RRHH.Tests.Catalogos.CatalogoPresenterTests.Guardar_ErrorDeBaseDeDatos_MuestraErrorYCancela
+Passed   RRHH.Tests.Catalogos.CatalogoPresenterTests.Guardar_FilaExistente_Actualiza
+Passed   RRHH.Tests.Catalogos.CatalogoPresenterTests.Guardar_FilaInvalida_MuestraErrorYNoGuarda
+Passed   RRHH.Tests.Catalogos.CatalogoPresenterTests.Guardar_FilaNueva_AsignaCodigoEInforma
+Passed   RRHH.Tests.Catalogos.CatalogoPresenterTests.Guardar_RegistroEliminadoPorOtroUsuario_MuestraErrorYCancela
+Passed   RRHH.Tests.Catalogos.CatalogoPresenterTests.Validar_FilaSinDescripcion_DevuelveError
+Passed   RRHH.Tests.Catalogos.DefinicionCatalogoTests.Crear_CatalogoSinExtra_DescartaElExtra
+Passed   RRHH.Tests.Catalogos.DefinicionCatalogoTests.Crear_DatosInvalidos_Lanza
+Passed   RRHH.Tests.Catalogos.DefinicionCatalogoTests.Crear_NormalizaEspaciosYExtraVacio
+Passed   RRHH.Tests.Catalogos.DefinicionCatalogoTests.TodosLosTiposTienenDefinicion
+Passed   RRHH.Tests.Catalogos.DefinicionCatalogoTests.Validar_RegimenUsaSuEtiqueta
+Passed   RRHH.Tests.Catalogos.DefinicionCatalogoTests.Validar_RespetaLongitudDeDescripcion
+Passed   RRHH.Tests.Catalogos.DefinicionCatalogoTests.Validar_RespetaLongitudDelExtra
+Passed   RRHH.Tests.Catalogos.DefinicionCatalogoTests.Validar_SinDescripcion_Falla(descripcion: "   ")
+Passed   RRHH.Tests.Catalogos.DefinicionCatalogoTests.Validar_SinDescripcion_Falla(descripcion: "")
+Passed   RRHH.Tests.Catalogos.DefinicionCatalogoTests.Validar_SinDescripcion_Falla(descripcion: null)
+Passed   RRHH.Tests.Catalogos.MapeosCatalogoTests.ElMapeoCoincideConElEsquema(tipo: Cargo)
+Passed   RRHH.Tests.Catalogos.MapeosCatalogoTests.ElMapeoCoincideConElEsquema(tipo: EstadoCivil)
+Passed   RRHH.Tests.Catalogos.MapeosCatalogoTests.ElMapeoCoincideConElEsquema(tipo: GrupoSanguineo)
+Passed   RRHH.Tests.Catalogos.MapeosCatalogoTests.ElMapeoCoincideConElEsquema(tipo: Nacionalidad)
+Passed   RRHH.Tests.Catalogos.MapeosCatalogoTests.ElMapeoCoincideConElEsquema(tipo: RegimenPension)
+Passed   RRHH.Tests.Catalogos.MapeosCatalogoTests.ElMapeoCoincideConElEsquema(tipo: TipoDocumentoIdentidad)
+Passed   RRHH.Tests.Catalogos.MapeosCatalogoTests.ElMapeoCoincideConElEsquema(tipo: TipoEstudio)
+Passed   RRHH.Tests.Catalogos.MapeosCatalogoTests.ElMapeoCoincideConElEsquema(tipo: TipoInstitucion)
+Passed   RRHH.Tests.Catalogos.MapeosCatalogoTests.ElMapeoCoincideConElEsquema(tipo: TipoPermiso)
+Passed   RRHH.Tests.Catalogos.MapeosCatalogoTests.ElMapeoCoincideConElEsquema(tipo: TipoTrabajador)
+Passed   RRHH.Tests.Catalogos.MapeosCatalogoTests.LasReferenciasExistenEnElEsquema(tipo: Cargo)
+Passed   RRHH.Tests.Catalogos.MapeosCatalogoTests.LasReferenciasExistenEnElEsquema(tipo: EstadoCivil)
+Passed   RRHH.Tests.Catalogos.MapeosCatalogoTests.LasReferenciasExistenEnElEsquema(tipo: GrupoSanguineo)
+Passed   RRHH.Tests.Catalogos.MapeosCatalogoTests.LasReferenciasExistenEnElEsquema(tipo: Nacionalidad)
+Passed   RRHH.Tests.Catalogos.MapeosCatalogoTests.LasReferenciasExistenEnElEsquema(tipo: RegimenPension)
+Passed   RRHH.Tests.Catalogos.MapeosCatalogoTests.LasReferenciasExistenEnElEsquema(tipo: TipoDocumentoIdentidad)
+Passed   RRHH.Tests.Catalogos.MapeosCatalogoTests.LasReferenciasExistenEnElEsquema(tipo: TipoEstudio)
+Passed   RRHH.Tests.Catalogos.MapeosCatalogoTests.LasReferenciasExistenEnElEsquema(tipo: TipoInstitucion)
+Passed   RRHH.Tests.Catalogos.MapeosCatalogoTests.LasReferenciasExistenEnElEsquema(tipo: TipoPermiso)
+Passed   RRHH.Tests.Catalogos.MapeosCatalogoTests.LasReferenciasExistenEnElEsquema(tipo: TipoTrabajador)
+Passed   RRHH.Tests.Catalogos.MapeosCatalogoTests.NoFaltaNingunaReferencia(tipo: Cargo)
+Passed   RRHH.Tests.Catalogos.MapeosCatalogoTests.NoFaltaNingunaReferencia(tipo: EstadoCivil)
+Passed   RRHH.Tests.Catalogos.MapeosCatalogoTests.NoFaltaNingunaReferencia(tipo: GrupoSanguineo)
+Passed   RRHH.Tests.Catalogos.MapeosCatalogoTests.NoFaltaNingunaReferencia(tipo: Nacionalidad)
+Passed   RRHH.Tests.Catalogos.MapeosCatalogoTests.NoFaltaNingunaReferencia(tipo: RegimenPension)
+Passed   RRHH.Tests.Catalogos.MapeosCatalogoTests.NoFaltaNingunaReferencia(tipo: TipoDocumentoIdentidad)
+Passed   RRHH.Tests.Catalogos.MapeosCatalogoTests.NoFaltaNingunaReferencia(tipo: TipoEstudio)
+Passed   RRHH.Tests.Catalogos.MapeosCatalogoTests.NoFaltaNingunaReferencia(tipo: TipoInstitucion)
+Passed   RRHH.Tests.Catalogos.MapeosCatalogoTests.NoFaltaNingunaReferencia(tipo: TipoPermiso)
+Passed   RRHH.Tests.Catalogos.MapeosCatalogoTests.NoFaltaNingunaReferencia(tipo: TipoTrabajador)
+Passed   RRHH.Tests.Comun.RangoFechasTests.Contiene_IgnoraLaHora
+Passed   RRHH.Tests.Comun.RangoFechasTests.Contiene_IncluyeLosExtremos(dia: 10, esperado: True)
+Passed   RRHH.Tests.Comun.RangoFechasTests.Contiene_IncluyeLosExtremos(dia: 11, esperado: True)
+Passed   RRHH.Tests.Comun.RangoFechasTests.Contiene_IncluyeLosExtremos(dia: 12, esperado: True)
+Passed   RRHH.Tests.Comun.RangoFechasTests.Contiene_IncluyeLosExtremos(dia: 13, esperado: False)
+Passed   RRHH.Tests.Comun.RangoFechasTests.Contiene_IncluyeLosExtremos(dia: 9, esperado: False)
+Passed   RRHH.Tests.Comun.RangoFechasTests.Crear_MismoDiaConHorasInvertidas_NoEsInvertido
+Passed   RRHH.Tests.Comun.RangoFechasTests.Crear_RangoInvertido_LanzaReglaNegocio
+Passed   RRHH.Tests.Comun.RangoFechasTests.Crear_TruncaLaHoraDeAmbosExtremos
+Passed   RRHH.Tests.Comun.RangoFechasTests.Dias_CruzaFinDeMes
+Passed   RRHH.Tests.Comun.RangoFechasTests.Dias_CuentaAmbosExtremos
+Passed   RRHH.Tests.Comun.RangoFechasTests.Dias_RangoDeUnDia_EsUno
+Passed   RRHH.Tests.Comun.RangoFechasTests.Solapa_ElNuevoContieneAlExistente
+Passed   RRHH.Tests.Comun.RangoFechasTests.Solapa_ElNuevoEstaContenidoEnElExistente
+Passed   RRHH.Tests.Comun.RangoFechasTests.Solapa_EsSimetrico
+Passed   RRHH.Tests.Comun.RangoFechasTests.Solapa_Nulo_LanzaArgumentNull
+Passed   RRHH.Tests.Comun.RangoFechasTests.Solapa_ParcialPorElFinal
+Passed   RRHH.Tests.Comun.RangoFechasTests.Solapa_ParcialPorElInicio
+Passed   RRHH.Tests.Comun.RangoFechasTests.Solapa_RangoAnteriorSinDiaEnComun_NoSolapa
+Passed   RRHH.Tests.Comun.RangoFechasTests.Solapa_RangoPosteriorContiguo_NoSolapa
+Passed   RRHH.Tests.Comun.RangoFechasTests.Solapa_RangosIguales
+Passed   RRHH.Tests.Comun.RangoFechasTests.Solapa_UnDiaContraUnDiaIgual
+Passed   RRHH.Tests.Permisos.GestionMotivosPermisoTests.AltaEnTablaVaciaAsignaIdYModalidadDeSesion
+Passed   RRHH.Tests.Permisos.GestionMotivosPermisoTests.DatosInvalidosNoLleganALaEscritura(tipo: 0, descripcion: "Motivo")
+Passed   RRHH.Tests.Permisos.GestionMotivosPermisoTests.DatosInvalidosNoLleganALaEscritura(tipo: 1, descripcion: " ")
+Passed   RRHH.Tests.Permisos.GestionMotivosPermisoTests.EdicionDeRol13NoReactivaNiPierdeModalidad
+Passed   RRHH.Tests.Permisos.GestionMotivosPermisoTests.EdicionFueraDeModalidadSeRechaza
+Passed   RRHH.Tests.Permisos.GestionMotivosPermisoTests.ListadoRespetaModalidadYSigueMostrandoInactivos(rol: 10, modalidad: "P", cantidad: 1)
+Passed   RRHH.Tests.Permisos.GestionMotivosPermisoTests.ListadoRespetaModalidadYSigueMostrandoInactivos(rol: 13, modalidad: null, cantidad: 3)
+Passed   RRHH.Tests.Permisos.GestionMotivosPermisoTests.ListadoRespetaModalidadYSigueMostrandoInactivos(rol: 14, modalidad: "C", cantidad: 1)
+Passed   RRHH.Tests.Permisos.GestionMotivosPermisoTests.MotivoReferenciadoNoSeElimina
+Passed   RRHH.Tests.Permisos.GestionMotivosPermisoTests.RolNoPermitidoNoConsultaNiEscribe
+Passed   RRHH.Tests.Permisos.GestionMotivosPermisoTests.TipoDistintoYRegistroAusenteSeRechazan
+Passed   RRHH.Tests.Permisos.MotivoPermisoPostgreSqlTests.ActualizarConservaEstadoModalidadYTipoInclusoSiEstadoCambio
+Passed   RRHH.Tests.Permisos.MotivoPermisoPostgreSqlTests.AltasConcurrentesSinSecuenciaNoRepitenCodigo
+Passed   RRHH.Tests.Permisos.MotivoPermisoPostgreSqlTests.BorradoCompruebaPermisoYAmbosLadosDeAuditoria
+Passed   RRHH.Tests.Permisos.MotivoPermisoPostgreSqlTests.BorradoFueraDeModalidadNoEliminaYOtroSinReferenciasSi
+Passed   RRHH.Tests.Permisos.MotivoPermisoPostgreSqlTests.CambioConcurrenteDeModalidadNoSeSobrescribe
+Passed   RRHH.Tests.Permisos.MotivoPermisoPostgreSqlTests.DescripcionConSQLSeGuardaComoDato
+Passed   RRHH.Tests.Permisos.MotivoPermisoPostgreSqlTests.DescripcionRepetidaMantieneElComportamientoActualConIdsDistintos
+Passed   RRHH.Tests.Permisos.MotivoPermisoPostgreSqlTests.DuplicadosDeIDSeDiagnosticanSinModificarFilas
+Passed   RRHH.Tests.Permisos.MotivoPermisoPostgreSqlTests.FiltroNoOcultaInactivosYRespetaTipoModalidad
+Passed   RRHH.Tests.Permisos.MotivoPermisoPostgreSqlTests.IdentidadNuevaDeTEC002SeUtilizaSinIDExplicito
+Passed   RRHH.Tests.Permisos.MotivoPermisoPostgreSqlTests.MarcaAnualDeRF06UsaDefaultEnAltaYSeConservaAlEditar
+Passed   RRHH.Tests.Permisos.MotivoPermisoPostgreSqlTests.SecuenciaDefaultDeTEC002SeUtiliza
+Passed   RRHH.Tests.Permisos.MotivoPermisoPostgreSqlTests.SecuenciaDesalineadaSinPKRevierteLaFilaDuplicada
+Passed   RRHH.Tests.Permisos.MotivoPermisoPostgreSqlTests.TablaVaciaInsertaYConsultaConCamposNulos
+Passed   RRHH.Tests.Permisos.MotivoPermisoPostgreSqlTests.TipoDuplicadoComoEnDespliegueRechazaAltaSinEscribir
+Passed   RRHH.Tests.Permisos.MotivoPermisoPostgreSqlTests.TipoInexistenteRevierteSinInsertar
+Passed   RRHH.Tests.Permisos.MotivoPermisoTests.DescripcionVaciaSeRechaza(descripcion: "   ")
+Passed   RRHH.Tests.Permisos.MotivoPermisoTests.DescripcionVaciaSeRechaza(descripcion: "")
+Passed   RRHH.Tests.Permisos.MotivoPermisoTests.DescripcionVaciaSeRechaza(descripcion: null)
+Passed   RRHH.Tests.Permisos.MotivoPermisoTests.EditarConservaCamposNoEditablesYNulabilidad
+Passed   RRHH.Tests.Permisos.MotivoPermisoTests.LimitesDeColumnasYNormalizacion
+Passed   RRHH.Tests.Permisos.MotivoPermisoTests.PoliticaConservaElAlcanceDeRoles(rol: 10, modalidad: "P", permitido: True)
+Passed   RRHH.Tests.Permisos.MotivoPermisoTests.PoliticaConservaElAlcanceDeRoles(rol: 13, modalidad: null, permitido: True)
+Passed   RRHH.Tests.Permisos.MotivoPermisoTests.PoliticaConservaElAlcanceDeRoles(rol: 14, modalidad: "C", permitido: True)
+Passed   RRHH.Tests.Permisos.MotivoPermisoTests.PoliticaConservaElAlcanceDeRoles(rol: 3, modalidad: null, permitido: False)
+Passed   RRHH.Tests.Permisos.MotivosPresenterTests.CargaFallidaNoPermiteGuardarUnEditorVacio
+Passed   RRHH.Tests.Permisos.MotivosPresenterTests.CargarEditorExistenteSoloLeeYConservaCampos
+Passed   RRHH.Tests.Permisos.MotivosPresenterTests.EditarSinSeleccionNoAbreDialogo
+Passed   RRHH.Tests.Permisos.MotivosPresenterTests.EditorCanceladoNoRecargaYGuardadoSiRecarga
+Passed   RRHH.Tests.Permisos.MotivosPresenterTests.EliminarCanceladoNoEscribeNiRecarga
+Passed   RRHH.Tests.Permisos.MotivosPresenterTests.EliminarEnUsoInformaYMantieneListado
+Passed   RRHH.Tests.Permisos.MotivosPresenterTests.ErrorDePersistenciaNoCierraEditorYPuedeReintentarse
+Passed   RRHH.Tests.Permisos.MotivosPresenterTests.GuardadoInvalidoMantieneEditorAbiertoYSinEscritura
+Passed   RRHH.Tests.Permisos.MotivosPresenterTests.RolDesconocidoNoCargaDatosNiAbreEditor
+Passed   RRHH.Tests.Permisos.RepAusenciasPresenterTests.Cargar_EntregaLosMotivosALaVista
+Passed   RRHH.Tests.Permisos.RepAusenciasPresenterTests.Cargar_SiFallaElRepositorio_MuestraElError
+Passed   RRHH.Tests.Permisos.RepAusenciasPresenterTests.ConstructorConArgumentosNulos_Lanza
+Passed   RRHH.Tests.Permisos.RepAusenciasPresenterTests.Consultar_AplicaElMotivoElegidoEnLaVista
+Passed   RRHH.Tests.Permisos.RepAusenciasPresenterTests.Consultar_DeshabilitaMientrasTrabajaYHabilitaAlTerminar
+Passed   RRHH.Tests.Permisos.RepAusenciasPresenterTests.Consultar_MuestraLasAusenciasYElResumen
+Passed   RRHH.Tests.Permisos.RepAusenciasPresenterTests.Consultar_PeriodoInvertido_MuestraElMensajeDeLaReglaSinConsultar
+Passed   RRHH.Tests.Permisos.RepAusenciasPresenterTests.Consultar_SiFallaElRepositorio_MuestraErrorYVuelveAHabilitar
+Passed   RRHH.Tests.Permisos.RepAusenciasPresenterTests.Consultar_SinAusencias_InformaQueNadieSeAusenta
+Passed   RRHH.Tests.Permisos.RepAusenciasPresenterTests.Consultar_UnaPersonaUnPermiso_UsaElSingular
+Passed   RRHH.Tests.Permisos.ReportarAusenciasPorPeriodoTests.DistingueMotivoYPersona_UnaPersonaConDosMotivosApareceDosVeces
+Passed   RRHH.Tests.Permisos.ReportarAusenciasPorPeriodoTests.ElResultadoSeOrdenaPorPersonaYLuegoPorInicio
+Passed   RRHH.Tests.Permisos.ReportarAusenciasPorPeriodoTests.FiltrarPorMotivo_DevuelveSoloEseMotivo
+Passed   RRHH.Tests.Permisos.ReportarAusenciasPorPeriodoTests.LaHoraDelPermisoSeIgnora
+Passed   RRHH.Tests.Permisos.ReportarAusenciasPorPeriodoTests.MotivoCero_SeTrataComoTodosLosMotivos
+Passed   RRHH.Tests.Permisos.ReportarAusenciasPorPeriodoTests.PeriodoDeUnSoloDia_IncluyeLosPermisosQueLoCubren
+Passed   RRHH.Tests.Permisos.ReportarAusenciasPorPeriodoTests.PeriodoInvertido_LanzaReglaNegocioSinConsultar
+Passed   RRHH.Tests.Permisos.ReportarAusenciasPorPeriodoTests.PermisoConFechasInvertidasEnLosDatos_SeOmiteSinAbortarElReporte
+Passed   RRHH.Tests.Permisos.ReportarAusenciasPorPeriodoTests.PermisoDentroDelPeriodo_SeIncluyeConSusDias
+Passed   RRHH.Tests.Permisos.ReportarAusenciasPorPeriodoTests.PermisoQueContieneTodoElPeriodo_SeIncluye
+Passed   RRHH.Tests.Permisos.ReportarAusenciasPorPeriodoTests.PermisoQueEmpiezaAntesYTerminaDentro_CuentaSoloLosDiasDelPeriodo
+Passed   RRHH.Tests.Permisos.ReportarAusenciasPorPeriodoTests.PermisoQueEmpiezaDentroYTerminaDespues_SeIncluye
+Passed   RRHH.Tests.Permisos.ReportarAusenciasPorPeriodoTests.PermisoQueTerminaElDiaPrevioOEmpiezaElSiguiente_SeExcluye
+Passed   RRHH.Tests.Permisos.ReportarAusenciasPorPeriodoTests.PermisoQueTocaSoloUnExtremo_SeIncluyeConUnDia
+Passed   RRHH.Tests.Permisos.ReportarAusenciasPorPeriodoTests.RepositorioNulo_LanzaArgumentNull
+Passed   RRHH.Tests.Permisos.ReportarAusenciasPorPeriodoTests.SiElRepositorioDevuelveDeMas_ElCasoDeUsoVuelveAFiltrarPorPeriodoYMotivo
+Passed   RRHH.Tests.Permisos.ReportarAusenciasPorPeriodoTests.SinPermisos_DevuelveListaVacia
+Passed   RRHH.Tests.Permisos.ValidarLicenciaUnaVezPorAnioTests.EditarLaPropiaLicencia_NoChocaConsigoMisma
+Passed   RRHH.Tests.Permisos.ValidarLicenciaUnaVezPorAnioTests.EditarUnaLicenciaCuandoYaHayOtraEnElAnio_SeRechaza
+Passed   RRHH.Tests.Permisos.ValidarLicenciaUnaVezPorAnioTests.MismoTipoEnOtroAnio_Pasa
+Passed   RRHH.Tests.Permisos.ValidarLicenciaUnaVezPorAnioTests.MotivoSinLaMarca_NoSeRestringe
+Passed   RRHH.Tests.Permisos.ValidarLicenciaUnaVezPorAnioTests.OtraPersonaConLaLicenciaDelAnio_NoBloquea
+Passed   RRHH.Tests.Permisos.ValidarLicenciaUnaVezPorAnioTests.OtroMotivoDelMismoAnio_NoBloqueaALaLicenciaAnual
+Passed   RRHH.Tests.Permisos.ValidarLicenciaUnaVezPorAnioTests.PrimeraLicenciaDelAnio_Pasa
+Passed   RRHH.Tests.Permisos.ValidarLicenciaUnaVezPorAnioTests.RepositorioNulo_LanzaArgumentNull
+Passed   RRHH.Tests.Permisos.ValidarLicenciaUnaVezPorAnioTests.SegundaLicenciaEnElMismoAnio_SeRechazaConMensajeClaro
+Passed   RRHH.Tests.Permisos.ValidarLicenciaUnaVezPorAnioTests.SinMotivoElegido_NoConsultaNiRestringe
+Passed   RRHH.Tests.Permisos.ValidarPermisoSinSolapamientoTests.EditarElPropioPermiso_NoGeneraConflictoConsigoMismo
+Passed   RRHH.Tests.Permisos.ValidarPermisoSinSolapamientoTests.EditarUnPermisoQueChocaConOtro_SeRechaza
+Passed   RRHH.Tests.Permisos.ValidarPermisoSinSolapamientoTests.LaHoraDeLasFechasNoInfluye
+Passed   RRHH.Tests.Permisos.ValidarPermisoSinSolapamientoTests.NuevoContenidoEnElExistente_SeRechaza
+Passed   RRHH.Tests.Permisos.ValidarPermisoSinSolapamientoTests.NuevoContieneAlExistente_SeRechaza
+Passed   RRHH.Tests.Permisos.ValidarPermisoSinSolapamientoTests.PermisoDeOtroEmpleado_NoBloquea
+Passed   RRHH.Tests.Permisos.ValidarPermisoSinSolapamientoTests.RangoIgualAlExistente_SeRechaza
+Passed   RRHH.Tests.Permisos.ValidarPermisoSinSolapamientoTests.RangoInvertido_DevuelveMensajeClaroSinConsultar
+Passed   RRHH.Tests.Permisos.ValidarPermisoSinSolapamientoTests.RangoSinDiasEnComun_Pasa(desde: 13, hasta: 15)
+Passed   RRHH.Tests.Permisos.ValidarPermisoSinSolapamientoTests.RangoSinDiasEnComun_Pasa(desde: 5, hasta: 9)
+Passed   RRHH.Tests.Permisos.ValidarPermisoSinSolapamientoTests.RepositorioNulo_LanzaArgumentNull
+Passed   RRHH.Tests.Permisos.ValidarPermisoSinSolapamientoTests.SinPermisosPrevios_Pasa
+Passed   RRHH.Tests.Permisos.ValidarPermisoSinSolapamientoTests.SolapamientoParcialPorUnLado_SeRechaza(desde: 12, hasta: 14)
+Passed   RRHH.Tests.Permisos.ValidarPermisoSinSolapamientoTests.SolapamientoParcialPorUnLado_SeRechaza(desde: 8, hasta: 10)
+Passed   RRHH.Tests.Permisos.ValidarPermisoTests.ColaboradoresNulos_LanzanArgumentNull
+Passed   RRHH.Tests.Permisos.ValidarPermisoTests.LicenciaAnualRepetida_SeRechazaPorRF06
+Passed   RRHH.Tests.Permisos.ValidarPermisoTests.PermisoSolapado_SeRechazaPorRF03
+Passed   RRHH.Tests.Permisos.ValidarPermisoTests.RangoInvertido_NoLlegaAConsultarLaLicencia
+Passed   RRHH.Tests.Permisos.ValidarPermisoTests.SiHayAmbosConflictos_PrevaleceElSolapamiento
+Passed   RRHH.Tests.Permisos.ValidarPermisoTests.SinConflictos_Pasa
+Passed   RRHH.Tests.Seguridad.ObtenerAccesoUsuarioTests.LoginVacio_DevuelveNullSinConsultar(login: "   ")
+Passed   RRHH.Tests.Seguridad.ObtenerAccesoUsuarioTests.LoginVacio_DevuelveNullSinConsultar(login: null)
+Passed   RRHH.Tests.Seguridad.ObtenerAccesoUsuarioTests.PasswordVacio_DevuelveNullSinConsultar(password: "")
+Passed   RRHH.Tests.Seguridad.ObtenerAccesoUsuarioTests.PasswordVacio_DevuelveNullSinConsultar(password: null)
+Passed   RRHH.Tests.Seguridad.ObtenerAccesoUsuarioTests.UsuarioConEmpleado_DevuelveElAcceso
+Passed   RRHH.Tests.Seguridad.ObtenerAccesoUsuarioTests.UsuarioInexistente_DevuelveNull
+Passed   RRHH.Tests.Seguridad.ObtenerAccesoUsuarioTests.UsuarioSinEmpleado_NoTieneAccesoARRHH
+Passed   RRHH.Tests.Seguridad.Pbkdf2PasswordHasherTests.HashCreado_VerificaLaContrasenaCorrecta
+Passed   RRHH.Tests.Seguridad.Pbkdf2PasswordHasherTests.HashMalFormado_NoLanzaExcepcion
+Passed   RRHH.Tests.Teletrabajo.RegistroTeletrabajoTests.Otro_empleado_y_rangos_contiguos_pueden_registrarse
+Passed   RRHH.Tests.Teletrabajo.RegistroTeletrabajoTests.Presenter_refresca_la_consulta_y_comunica_un_conflicto
+Passed   RRHH.Tests.Teletrabajo.RegistroTeletrabajoTests.Rechaza_modalidad_o_patron_invalido(modalidad: 1, mascara: 0)
+Passed   RRHH.Tests.Teletrabajo.RegistroTeletrabajoTests.Rechaza_modalidad_o_patron_invalido(modalidad: 1, mascara: 31)
+Passed   RRHH.Tests.Teletrabajo.RegistroTeletrabajoTests.Rechaza_modalidad_o_patron_invalido(modalidad: 999, mascara: 31)
+Passed   RRHH.Tests.Teletrabajo.RegistroTeletrabajoTests.Rechaza_rango_invertido_y_empleado_inexistente
+Passed   RRHH.Tests.Teletrabajo.RegistroTeletrabajoTests.Rechaza_solapamiento_del_mismo_empleado(desde: 10, hasta: 12)
+Passed   RRHH.Tests.Teletrabajo.RegistroTeletrabajoTests.Rechaza_solapamiento_del_mismo_empleado(desde: 12, hasta: 14)
+Passed   RRHH.Tests.Teletrabajo.RegistroTeletrabajoTests.Rechaza_solapamiento_del_mismo_empleado(desde: 9, hasta: 13)
+Passed   RRHH.Tests.Teletrabajo.RegistroTeletrabajoTests.Registra_y_lista_un_dia_para_un_empleado_existente
+Passed   RRHH.Tests.Teletrabajo.ReportarDiasTeletrabajoTests.Cuenta_patron_parcial_una_vez_por_empleado_y_permite_filtro
+Passed   RRHH.Tests.Teletrabajo.ReportarDiasTeletrabajoTests.Presenter_entrega_filas_tipadas_y_comunica_error
+Passed   RRHH.Tests.Teletrabajo.ReportarDiasTeletrabajoTests.Rango_sin_periodos_devuelve_lista_vacia
+Passed   RRHH.Tests.Teletrabajo.ReportarDiasTeletrabajoTests.Rechaza_rango_invertido_y_codigo_invalido
+Passed   RRHH.Tests.Teletrabajo.ReportarDiasTeletrabajoTests.Recorta_periodo_y_excluye_feriado

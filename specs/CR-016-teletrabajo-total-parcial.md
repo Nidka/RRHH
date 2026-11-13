@@ -1,6 +1,6 @@
 # CR-016: reportar quiénes realizan teletrabajo total o parcial
 
-- Estado: Implementado en la rama `feature/rf-16-teletrabajo-total-parcial` (T3); en pruebas: suite completa en net8 correcta; faltan la compilación del WinForms y el recorrido de la pantalla en Windows.
+- Estado: Implementado e integrado en main (PR #31, v1.5.0). Suite completa en net8 correcta (342 de 342) y prueba manual en la aplicación Windows.
 - Tarea / RF / CR: RF-16 (complementario) / CR-016.
 - Autor responsable / revisor: Francisco Kadin Valera Lizarraga (implementación) / Jorge Enrique Cano Asto (autor de RF-13 y RF-14, de los que depende).
 - Versión/commit analizado: `5d5976d` (`origin/main` con v1.4.0 y el PR #29).
