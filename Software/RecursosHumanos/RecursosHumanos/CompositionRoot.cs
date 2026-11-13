@@ -183,4 +183,14 @@ internal static class CompositionRoot
 	{
 		return new CalcularDiasNoLaborables(new PostgreSqlFeriadoRepository(Database.Value));
 	}
+
+    /// <summary>Compone RF-01 con repositorios PostgreSQL específicos y catálogo TEC-001.</summary>
+    public static FrmHorarioEsp CrearAsignacionHorario(int empleado, int numero = 0)
+    {
+        var repo = new PostgreSqlHorarioTemporalRepository(Database.Value);
+        var vista = new FrmHorarioEsp { idEmpleado=empleado, Npermiso=numero };
+        _ = new AsignacionHorarioPresenter(vista,new ObtenerDatosAsignacion(repo),
+            new ListarHorarios(new PostgreSqlHorarioRepository(Database.Value)),new AsignarHorarioPorPeriodo(repo));
+        return vista;
+    }
 }

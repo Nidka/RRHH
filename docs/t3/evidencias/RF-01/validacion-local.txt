@@ -1,0 +1,19 @@
+RF-01 / CR-001 — 12/11/2026, America/Lima
+Base 03ab748. Rama feature/rf-01-turnos-por-periodo.
+macOS arm64; SDK 8.0.132. Arnés temporal net8 con las fuentes exactas de las cuatro capas y tests.
+Pruebas escritas antes de las clases nuevas: primer intento falla por tipos faltantes; después se implementaron.
+No se presenta ese error de compilación inicial como un fallo conductual de una implementación anterior.
+Suite complementaria: 314 correctas, 0 fallos, 0 omitidas.
+PostgreSQL temporal local 14, puerto 55439, BD desechable rrhh_tec004_tests; datos ficticios.
+Incluye 14 pruebas SQL de motivos (TEC-004), 14 de catálogo horarios y 5 nuevas de asignación temporal.
+No se leyó .env ni se conectó a BD compartida; no se aplicó DDL fuera de esta BD temporal.
+Comando: RRHH_TEST_POSTGRES_CONNECTION=<solo destino temporal local> dotnet test <arnés>/RRHH.Tests/RRHH.Tests.csproj --no-restore -m:1
+Compilación real: dotnet build Software/RRHH.Tests/RRHH.Tests.csproj -m:1 -p:NuGetAudit=false: 0 errores, 0 advertencias.
+Ejecución real net48: anulada por falta del host mono en macOS (FileNotFoundException).
+La aplicación WinForms y build.cmd Windows siguen pendientes; faltan DLL heredadas licenciadas en este checkout; responsable Evelyn, revisor Kadin.
+No hay aprobación humana ni PR publicado. La revisión de IA no sustituye al integrante asignado.
+
+Revisión técnica de IA detectó orden de bloqueos incompatible con baja de horario.
+Regresión determinista antes del arreglo: SQLSTATE 55P03 al bloquear Empleado.
+Arreglo: orden global Horario -> Empleado -> HorarioTemporal; prueba y suite completas correctas.
+Esta revisión no representa aprobación de Kadin.

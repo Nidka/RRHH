@@ -1043,9 +1043,7 @@ public class FrmConsultaHorarioEsp : FrmConsulta
 
 	private void Button1_Click(object sender, EventArgs e)
 	{
-		FrmHorarioEsp frmHorarioEsp = new FrmHorarioEsp();
-		frmHorarioEsp.idEmpleado = idEmpleado;
-		frmHorarioEsp.Npermiso = 0;
+		FrmHorarioEsp frmHorarioEsp = CompositionRoot.CrearAsignacionHorario(idEmpleado);
 		frmHorarioEsp.ShowDialog();
 		if (frmHorarioEsp.DialogResult == DialogResult.OK)
 		{
@@ -1061,9 +1059,7 @@ public class FrmConsultaHorarioEsp : FrmConsulta
 			MessageBox.Show("Seleccione un Permiso", "", MessageBoxButtons.OK, MessageBoxIcon.Hand);
 			return;
 		}
-		FrmHorarioEsp frmHorarioEsp = new FrmHorarioEsp();
-		frmHorarioEsp.idEmpleado = idEmpleado;
-		frmHorarioEsp.Npermiso = Conversions.ToInteger(GridView1.GetRowCellValue(focusedRowHandle, "N"));
+		FrmHorarioEsp frmHorarioEsp = CompositionRoot.CrearAsignacionHorario(idEmpleado, Conversions.ToInteger(GridView1.GetRowCellValue(focusedRowHandle, "N")));
 		frmHorarioEsp.ShowDialog();
 		if (frmHorarioEsp.DialogResult == DialogResult.OK)
 		{
