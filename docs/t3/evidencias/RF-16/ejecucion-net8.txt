@@ -1,0 +1,11 @@
+RF-16 — ejecución de pruebas. 12/11/2026 (America/Lima). Ejecutó: Francisco Kadin Valera Lizarraga.
+Entorno: macOS arm64; .NET SDK 8.0.134; PostgreSQL 16 local desechable (BD rrhh_tec004_tests, datos ficticios). Sin .env ni base compartida.
+Método: fuentes de la rama feature/rf-16-teletrabajo-total-parcial (Domain, Application, Presentation, PostgreSql, Tests y BD/schema.sql) en un
+directorio temporal; solo se cambió <TargetFramework> net48 -> net8.0 y se quitó <PlatformTarget>x86</PlatformTarget>.
+
+1) Clases de teletrabajo (filtro FullyQualifiedName~Teletrabajo): 32 superadas, 0 fallos (15 de RF-13/RF-14 y 17 de RF-16).
+2) Suite completa con PostgreSQL local: 342 superadas, 0 fallos, 0 omitidas (325 previas en main + 17 nuevas).
+3) Prueba de mutación: en ReportarTeletrabajoTotalOParcial se cambió «fila.Dias >= laborables» por «fila.Dias > laborables».
+   Resultado: 6 de las 17 pruebas de RF-16 fallan (Total, feriado, periodos consecutivos, filtro y presenter). Restaurado el código: 17 superadas.
+
+No cubierto: compilación del proyecto WinForms (requiere Windows y las DLL licenciadas) y recorrido de FrmClasificacionTeletrabajo.

@@ -2297,6 +2297,19 @@ public class MainMDI : Form
             }
         });
 
+        MantenimientosToolStripMenuItem1.DropDownItems.Add("Personal en teletrabajo (total o parcial)", null, (_, _) =>
+        {
+            try
+            {
+                using (var vista = CompositionRoot.CrearClasificacionTeletrabajo())
+                    vista.ShowDialog(this);
+            }
+            catch (Exception)
+            {
+                MessageBox.Show(this, "No se pudo abrir el reporte. Compruebe la configuración de la base.");
+            }
+        });
+
         MantenimientosToolStripMenuItem1.DropDownItems.Add("Periodos de teletrabajo", null, (_, _) =>
         {
             try
