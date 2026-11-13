@@ -59,11 +59,11 @@ Pendiente para la Evaluación Final: requerimientos de vacaciones (RF-07 a RF-12
 - Horarios migrados a MVP y repositorio PostgreSQL, con el comportamiento conservado (TEC-001, commit `138dbce`). Integrado mediante PR #8
 
 ### Nota sobre la verificación
-Las versiones 1.0.2 a 1.5.0 se etiquetaron sobre los commits de integración en el orden real de `main`.
-Ninguna se compiló con `build.cmd` ni se probó con `dotnet test` sobre net48 en Windows; las pruebas de
-Evelyn (RF-01/02/04/05) se ejecutaron en un arnés net8 en macOS y el resto solo con SQL en bases locales
-desechables. Por eso las publicaciones de GitHub se marcan como pre-lanzamiento hasta ese QA.
-RF-04 y RF-05 (PR #29) solo agregan pruebas y documentación y no cambian la versión.
+La v1.5.0 fue probada manualmente en Windows sobre la aplicación en ejecución, con resultado
+satisfactorio, y su suite completa pasa en net8 (342 de 342 con PostgreSQL local). Las versiones
+1.0.2 a 1.4.0 se etiquetaron sobre los commits de integración en el orden real de `main` y no se probaron una por una en
+Windows; sus publicaciones de GitHub se marcan como pre-lanzamiento. RF-04 y RF-05 (PR #29) solo agregan pruebas y
+documentación y no cambian la versión.
 
 ## [1.0.0] - 2026-10-18
 
