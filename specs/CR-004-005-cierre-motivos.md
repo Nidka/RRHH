@@ -37,3 +37,7 @@ Codex asiste revisión, pruebas y documentación. No se atribuye aprobación hum
 ## Resultado automatizado
 
 293 pruebas complementarias net8 correctas, ninguna omitida. No se requirió cambio de producción. [Evidencia](../docs/t3/evidencias/RF-04/validacion-local.txt). Windows y revisión humana pendientes.
+
+## Integración de main y PR
+
+PR [#29](https://github.com/Nidka/RRHH/pull/29). Incorporado main `46df930` en la rama de tarea para resolver el conflicto de casos. Se conservaron 30 CP únicos y las filas ajenas del control; suite complementaria conjunta 325/325 correcta. [Evidencia](../docs/t3/evidencias/RF-04/integracion-main.txt). Windows y revisión de Frank permanecen pendientes.

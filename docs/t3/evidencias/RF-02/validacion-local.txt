@@ -1,0 +1,11 @@
+RF-02 / CR-002 — 12/11/2026, America/Lima
+Base RF-01 5e91030; rama feature/rf-02-historico-turnos (dependiente de RF-01).
+Suite complementaria de fuentes exactas en arnés net8 macOS arm64: 323 correctas, 0 fallos, 0 omitidas.
+PostgreSQL temporal local 14, puerto 55439, rrhh_tec004_tests; no .env ni destino compartido.
+Incluye conservación de dos periodos al agregar, consulta por intersección y catálogo faltante.
+Pruebas nuevas escritas antes de las clases nuevas; error inicial por símbolos inexistentes, no prueba conductual anterior.
+Compilación proyecto real RRHH.Tests net48: 0 errores, 0 advertencias.
+Ejecución net48 anulada por falta de mono; Windows/build.cmd/WinForms/Excel COM y revisión humana pendientes.
+Se conservó la baja explícita confirmada; histórico de asignaciones no significa auditoría inmutable.
+La exportación existente no se ejecutó en macOS.
+Evelyn verifica en Windows con datos ficticios; Kadin revisa. No hay PR ni aprobación publicados.

@@ -8,7 +8,8 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Forms;
-using ClassRRHH;
+using RRHH.Application.Asistencia;
+using RRHH.Presentation.Asistencia;
 using DevExpress.LookAndFeel;
 using DevExpress.XtraEditors;
 using GRLL.Common;
@@ -18,7 +19,7 @@ using RecursosHumanos.My.Resources;
 namespace RecursosHumanos;
 
 [DesignerGenerated]
-public class FrmHorarioEsp : FrmConsulta
+public class FrmHorarioEsp : FrmConsulta, IAsignacionHorarioView
 {
 	private static List<WeakReference> __ENCList = new List<WeakReference>();
 
@@ -94,11 +95,7 @@ public class FrmHorarioEsp : FrmConsulta
 
 	public int Npermiso;
 
-	private byte[] img;
-
-	private RRHHClass objClassRRHH;
-
-	private List<Horario> dt;
+	private List<HorarioDto> dt = new List<HorarioDto>();
 
 	protected override Button cmdCerrar
 	{
@@ -476,10 +473,8 @@ public class FrmHorarioEsp : FrmConsulta
 	{
 		base.Load += FrmHorarioEsp_Load;
 		__ENCAddToList(this);
-		img = null;
-		objClassRRHH = new RRHHClass();
-		dt = new List<Horario>();
 		InitializeComponent();
+		btnGuardar.Enabled = false;
 	}
 
 	[DebuggerNonUserCode]
@@ -921,104 +916,64 @@ public class FrmHorarioEsp : FrmConsulta
 		this.PerformLayout();
 	}
 
-	private void FrmHorarioEsp_Load(object sender, EventArgs e)
-	{
-		DataTable dataTable = objClassRRHH.BuscarEmpleado_Codigo(idEmpleado);
-		if (dataTable.Rows.Count == 1)
-		{
-			foreach (object row in dataTable.Rows)
-			{
-				object objectValue = RuntimeHelpers.GetObjectValue(row);
-				if (NewLateBinding.LateGet(objectValue, null, "Item", new object[1] { "Foto" }, null, null, null).ToString().Length > 0)
-				{
-					img = (byte[])NewLateBinding.LateGet(objectValue, null, "Item", new object[1] { "Foto" }, null, null, null);
-					MemoryStream memoryStream = new MemoryStream();
-					memoryStream.Write(img, 0, checked(img.GetUpperBound(0) + 1));
-					UcFoto.Image = Image.FromStream(memoryStream);
-					memoryStream.Close();
-				}
-				UcTxtNombres.Text = NewLateBinding.LateGet(objectValue, null, "Item", new object[1] { "Nombres" }, null, null, null).ToString();
-				UcTxtApePater.Text = NewLateBinding.LateGet(objectValue, null, "Item", new object[1] { "Apellido_Paterno" }, null, null, null).ToString();
-				UcTxtApeMater.Text = NewLateBinding.LateGet(objectValue, null, "Item", new object[1] { "Apellido_Materno" }, null, null, null).ToString();
-				UcTxtNDoc.Text = NewLateBinding.LateGet(objectValue, null, "Item", new object[1] { "NumDocID" }, null, null, null).ToString();
-			}
-		}
-		dt = HorarioMapper.Instance().SelectAll();
-		dt.Insert(0, new Horario
-		{
-			idHorario = 0,
-			Descrip_Horario = "--SELECCIONAR--"
-		});
-		UcCmbTipoPermiso.DataSource = dt;
-		UcCmbTipoPermiso.DisplayMember = "Descrip_Horario";
-		UcCmbTipoPermiso.ValueMember = "idHorario";
-		if (Npermiso != 0)
-		{
-			HorarioTemporal horarioTemporal = HorarioTemporalMapper.Instance().SelectBy([SpecialName] (HorarioTemporal v) => (v.idEmpleado == idEmpleado) & (v.N == Npermiso)).Single();
-			UcCmbTipoPermiso.SelectedValue = horarioTemporal.HorarioAsignado;
-			UcTxtRef.Text = horarioTemporal.NroDocumento.ToString();
-			UcTxtSisgedo.Text = horarioTemporal.Sisgedo.ToString();
-			RangoFecha rango = new RangoFecha(horarioTemporal.FechaInicio.Value, horarioTemporal.FechaFin.Value);
-			UcFechas.Rango = rango;
-		}
-	}
+    /// <inheritdoc/>
+    public int IdEmpleado => idEmpleado;
+    /// <inheritdoc/>
+    public int Numero => Npermiso;
+    /// <inheritdoc/>
+    public int IdHorario => UcCmbTipoPermiso.SelectedValue is int id ? id : 0;
+    public DateTime Desde => UcFechas.Rango.Desde;
+    public DateTime Hasta => UcFechas.Rango.Hasta;
+    public string Documento => UcTxtRef.Text;
+    public string Sisgedo => UcTxtSisgedo.Text;
+    public event EventHandler CargarSolicitado;
+    public event EventHandler GuardarSolicitado;
 
-	private void UcCmbTipoPermiso_SelectedIndexChanged(object sender, EventArgs e)
-	{
-		if (UcCmbTipoPermiso.SelectedIndex == 0)
-		{
-			lblHorario.Text = "";
-			return;
-		}
-		Horario horario = dt[UcCmbTipoPermiso.SelectedIndex];
-		lblHorario.Text = "Ingreso: " + horario.Ingreso1 + " | Salida:" + horario.Salida2;
-	}
+    private void FrmHorarioEsp_Load(object sender, EventArgs e) => CargarSolicitado?.Invoke(this, EventArgs.Empty);
+    private void btnGuardar_Click(object sender, EventArgs e) => GuardarSolicitado?.Invoke(this, EventArgs.Empty);
+    private void cmdCerrar_Click(object sender, EventArgs e) => Close();
 
-	private void btnGuardar_Click(object sender, EventArgs e)
-	{
-		if (DateTime.Compare(UcFechas.Rango.Desde, UcFechas.Rango.Hasta) > 0)
-		{
-			MessageBox.Show("La Fecha de Inicio no puede ser mayor a la de Término", "", MessageBoxButtons.OK, MessageBoxIcon.Hand);
-			return;
-		}
-		if (Operators.ConditionalCompareObjectEqual(UcCmbTipoPermiso.SelectedValue, 0, TextCompare: false))
-		{
-			MessageBox.Show("Debe Seleccionar un Horario Válido", "", MessageBoxButtons.OK, MessageBoxIcon.Hand);
-			return;
-		}
-		if (Npermiso == 0)
-		{
-			List<HorarioTemporal> list = HorarioTemporalMapper.Instance().SelectBy([SpecialName] (HorarioTemporal p) => (p.idEmpleado == idEmpleado) & (Operators.CompareString(p.FechaInicio.Value.ToShortDateString(), UcFechas.Rango.Desde.ToShortDateString(), TextCompare: false) <= 0) & (Operators.CompareString(p.FechaFin.Value.ToShortDateString(), UcFechas.Rango.Desde.ToShortDateString(), TextCompare: false) >= 0));
-			if (list.Count >= 1)
-			{
-				MessageBox.Show("El Empleado ya Registra este Horario", "", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-				return;
-			}
-		}
-		HorarioTemporal horarioTemporal = new HorarioTemporal();
-		horarioTemporal.idEmpleado = idEmpleado;
-		horarioTemporal.FechaFin = Conversions.ToDate(UcFechas.Rango.Hasta.ToShortDateString());
-		horarioTemporal.FechaInicio = Conversions.ToDate(UcFechas.Rango.Desde.ToShortDateString());
-		object selectedValue = UcCmbTipoPermiso.SelectedValue;
-		int? num = default(int?);
-		horarioTemporal.HorarioAsignado = ((selectedValue != null) ? ((int?)selectedValue) : num);
-		horarioTemporal.NroDocumento = UcTxtRef.Text.Trim();
-		horarioTemporal.Sisgedo = UcTxtSisgedo.Text.Trim();
-		if (Npermiso == 0)
-		{
-			horarioTemporal.N = objClassRRHH.SgtIdHorarioTemporal(idEmpleado);
-			HorarioTemporalMapper.Instance().Insert(horarioTemporal);
-		}
-		else
-		{
-			horarioTemporal.N = Npermiso;
-			HorarioTemporalMapper.Instance().Update(horarioTemporal);
-		}
-		DialogResult = DialogResult.OK;
-	}
-
-	private void cmdCerrar_Click(object sender, EventArgs e)
-	{
-		Close();
-	}
+    /// <inheritdoc/>
+    public void MostrarEmpleado(EmpleadoHorarioDto empleado)
+    {
+        UcTxtNombres.Text=empleado.Nombres;
+        UcTxtApePater.Text=empleado.ApellidoPaterno;
+        UcTxtApeMater.Text=empleado.ApellidoMaterno;
+        UcTxtNDoc.Text=empleado.Documento;
+        if(empleado.Foto != null)
+        {
+            // La imagen se clona para no retener el stream; una foto inválida no bloquea el periodo.
+            try { using(var stream=new MemoryStream(empleado.Foto))
+                using(var imagen=Image.FromStream(stream)) UcFoto.Image=new Bitmap(imagen); }
+            catch(ArgumentException) { UcFoto.Image=null; }
+        }
+    }
+    /// <inheritdoc/>
+    public void MostrarHorarios(IReadOnlyList<HorarioDto> horarios)
+    {
+        dt=new List<HorarioDto> { new HorarioDto { Id=0,Descripcion="--SELECCIONAR--" } };
+        dt.AddRange(horarios);
+        UcCmbTipoPermiso.DisplayMember=nameof(HorarioDto.Descripcion);
+        UcCmbTipoPermiso.ValueMember=nameof(HorarioDto.Id);
+        UcCmbTipoPermiso.DataSource=dt;
+    }
+    /// <inheritdoc/>
+    public void MostrarAsignacion(AsignacionHorarioDto asignacion)
+    {
+        UcCmbTipoPermiso.SelectedValue=asignacion.IdHorario;
+        UcTxtRef.Text=asignacion.Documento;
+        UcTxtSisgedo.Text=asignacion.Sisgedo;
+        UcFechas.Rango=new RangoFecha(asignacion.Desde,asignacion.Hasta);
+    }
+    private void UcCmbTipoPermiso_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        var horario=dt.Find(h=>h.Id==IdHorario);
+        lblHorario.Text=horario==null || horario.Id==0 ? "" : "Ingreso: "+horario.Ingreso1+" | Salida: "+horario.Salida2;
+    }
+    /// <inheritdoc/>
+    public void HabilitarGuardar(bool habilitado) => btnGuardar.Enabled=habilitado;
+    /// <inheritdoc/>
+    public void MostrarError(string mensaje) => MessageBox.Show(this,mensaje,"Horarios por periodo",MessageBoxButtons.OK,MessageBoxIcon.Warning);
+    /// <inheritdoc/>
+    public void CerrarGuardado() => DialogResult=DialogResult.OK;
 }

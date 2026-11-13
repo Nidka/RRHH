@@ -1,0 +1,23 @@
+PR #29 / RF-04/RF-05 — resolución de conflicto, 12/11/2026 America/Lima
+Main incorporado: 46df930; no se modifica main.
+Conflicto único: add/add en docs/t3/casos_prueba/evelyn.csv.
+Resolución: unión por Código, 30 casos únicos y las siete columnas originales; no se descartó ningún caso.
+CONTROL_CAMBIOS.csv: filas ajenas conservadas; filas CR-004/CR-005 enlazan PR #29.
+Suite complementaria net8 de fuentes reales en macOS: 325 correctas, 0 fallos y 0 omitidas.
+PostgreSQL 14 temporal local, puerto 55439, base ficticia rrhh_tec004_tests; sin .env ni conexión compartida.
+No se ejecutaron Windows, WinForms ni capturas; sus pendientes no cambian por resolver este conflicto.
+No se alteró el código productivo para resolver el conflicto ni se afirma revisión humana.
+
+  RRHH.Domain -> /private/tmp/rrhh-evelyn-motivos-check/RRHH.Domain/bin/Debug/net8.0/RRHH.Domain.dll
+  RRHH.Application -> /private/tmp/rrhh-evelyn-motivos-check/RRHH.Application/bin/Debug/net8.0/RRHH.Application.dll
+  RRHH.Presentation -> /private/tmp/rrhh-evelyn-motivos-check/RRHH.Presentation/bin/Debug/net8.0/RRHH.Presentation.dll
+  RRHH.PostgreSql -> /private/tmp/rrhh-evelyn-motivos-check/RRHH.PostgreSql/bin/Debug/net8.0/RRHH.PostgreSql.dll
+  RRHH.Tests -> /private/tmp/rrhh-evelyn-motivos-check/RRHH.Tests/bin/Debug/net8.0/RRHH.Tests.dll
+Serie de pruebas para /private/tmp/rrhh-evelyn-motivos-check/RRHH.Tests/bin/Debug/net8.0/RRHH.Tests.dll (.NETCoreApp,Version=v8.0)
+Herramienta de línea de comandos de ejecución de pruebas de Microsoft(R), versión 17.8.0 (arm64)
+Copyright (c) Microsoft Corporation. Todos los derechos reservados.
+
+Iniciando la ejecución de pruebas, espere...
+1 archivos de prueba en total coincidieron con el patrón especificado.
+
+Correctas! - Con error:     0, Superado:   325, Omitido:     0, Total:   325, Duración: 1 s - RRHH.Tests.dll (net8.0)

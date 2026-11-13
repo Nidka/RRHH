@@ -7,7 +7,9 @@ using System.Drawing;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Windows.Forms;
-using ClassRRHH;
+using RRHH.Application.Asistencia;
+using RRHH.Presentation.Asistencia;
+using System.Linq;
 using DevExpress.LookAndFeel;
 using DevExpress.XtraEditors;
 using DevExpress.XtraGrid;
@@ -24,7 +26,7 @@ using RecursosHumanos.My.Resources;
 namespace RecursosHumanos;
 
 [DesignerGenerated]
-public class FrmConsultaHorarioEsp : FrmConsulta
+public class FrmConsultaHorarioEsp : FrmConsulta, IHistoricoHorariosView
 {
 	private static List<WeakReference> __ENCList = new List<WeakReference>();
 
@@ -110,9 +112,10 @@ public class FrmConsultaHorarioEsp : FrmConsulta
 
 	public int idEmpleado;
 
-	private byte[] img;
-
-	private RRHHClass objClassRRHH;
+    private readonly CheckBox _todosPeriodos = new CheckBox { Text="Todos los periodos",Checked=true,AutoSize=true };
+    private readonly DateTimePicker _desde = new DateTimePicker { Format=DateTimePickerFormat.Short,Width=100,Enabled=false };
+    private readonly DateTimePicker _hasta = new DateTimePicker { Format=DateTimePickerFormat.Short,Width=100,Enabled=false };
+    private readonly Button _consultar = new Button { Text="Consultar",AutoSize=true };
 
 	protected override Button cmdCerrar
 	{
@@ -568,9 +571,8 @@ public class FrmConsultaHorarioEsp : FrmConsulta
 	{
 		base.Load += FrmConsultaHorarioEsp_Load;
 		__ENCAddToList(this);
-		img = null;
-		objClassRRHH = new RRHHClass();
 		InitializeComponent();
+        ConfigurarFiltro();
 	}
 
 	[DebuggerNonUserCode]
@@ -1011,86 +1013,62 @@ public class FrmConsultaHorarioEsp : FrmConsulta
 		this.PerformLayout();
 	}
 
-	private void FrmConsultaHorarioEsp_Load(object sender, EventArgs e)
-	{
-		DataTable dataTable = objClassRRHH.BuscarEmpleado_Codigo(idEmpleado);
-		if (dataTable.Rows.Count == 1)
-		{
-			foreach (object row in dataTable.Rows)
-			{
-				object objectValue = RuntimeHelpers.GetObjectValue(row);
-				if (NewLateBinding.LateGet(objectValue, null, "Item", new object[1] { "Foto" }, null, null, null).ToString().Length > 0)
-				{
-					img = (byte[])NewLateBinding.LateGet(objectValue, null, "Item", new object[1] { "Foto" }, null, null, null);
-					MemoryStream memoryStream = new MemoryStream();
-					memoryStream.Write(img, 0, checked(img.GetUpperBound(0) + 1));
-					UcFoto.Image = Image.FromStream(memoryStream);
-					memoryStream.Close();
-				}
-				UcTxtNombres.Text = NewLateBinding.LateGet(objectValue, null, "Item", new object[1] { "Nombres" }, null, null, null).ToString();
-				UcTxtApePater.Text = NewLateBinding.LateGet(objectValue, null, "Item", new object[1] { "Apellido_Paterno" }, null, null, null).ToString();
-				UcTxtApeMater.Text = NewLateBinding.LateGet(objectValue, null, "Item", new object[1] { "Apellido_Materno" }, null, null, null).ToString();
-				UcTxtNDoc.Text = NewLateBinding.LateGet(objectValue, null, "Item", new object[1] { "NumDocID" }, null, null, null).ToString();
-			}
-		}
-		GridControl1.DataSource = RuntimeHelpers.GetObjectValue(objClassRRHH.llena_HorariosTemporales(idEmpleado));
-	}
+    public int IdEmpleado => idEmpleado;
+    public int? NumeroSeleccionado => GridView1.FocusedRowHandle < 0 ? (int?)null :
+        (GridView1.GetRowCellValue(GridView1.FocusedRowHandle,"N") is int n ? n : (int?)null);
+    public DateTime? Desde => _todosPeriodos.Checked ? (DateTime?)null : _desde.Value.Date;
+    public DateTime? Hasta => _todosPeriodos.Checked ? (DateTime?)null : _hasta.Value.Date;
+    public event EventHandler CargarSolicitado;
+    public event EventHandler ConsultarSolicitado;
+    public event EventHandler AgregarSolicitado;
+    public event EventHandler EditarSolicitado;
+    public event EventHandler EliminarSolicitado;
 
-	private void cmdCerrar_Click(object sender, EventArgs e)
-	{
-		Close();
-	}
+    private void ConfigurarFiltro()
+    {
+        // Se añade fuera de InitializeComponent para conservar el diseñador recuperado.
+        var panel=new FlowLayoutPanel { Location=GridControl1.Location,Width=GridControl1.Width,Height=36,
+            Anchor=AnchorStyles.Top|AnchorStyles.Left|AnchorStyles.Right,WrapContents=false,AutoScroll=true };
+        panel.Controls.AddRange(new Control[] { _todosPeriodos,_desde,_hasta,_consultar });
+        _desde.AccessibleName="Desde";_hasta.AccessibleName="Hasta";
+        _todosPeriodos.CheckedChanged+=(_,_)=> { _desde.Enabled=_hasta.Enabled=!_todosPeriodos.Checked; };
+        _consultar.Click+=(_,_)=>ConsultarSolicitado?.Invoke(this,EventArgs.Empty);
+        GridControl1.Top+=38;GridControl1.Height-=38;
+        Controls.Add(panel);panel.BringToFront();
+    }
+    private void FrmConsultaHorarioEsp_Load(object sender,EventArgs e) => CargarSolicitado?.Invoke(this,EventArgs.Empty);
+    private void cmdCerrar_Click(object sender,EventArgs e) => Close();
+    private void Button1_Click(object sender,EventArgs e) => AgregarSolicitado?.Invoke(this,EventArgs.Empty);
+    private void BtnModificar_Click(object sender,EventArgs e) => EditarSolicitado?.Invoke(this,EventArgs.Empty);
+    private void BtnEliminar_Click(object sender,EventArgs e) => EliminarSolicitado?.Invoke(this,EventArgs.Empty);
 
-	private void Button1_Click(object sender, EventArgs e)
-	{
-		FrmHorarioEsp frmHorarioEsp = new FrmHorarioEsp();
-		frmHorarioEsp.idEmpleado = idEmpleado;
-		frmHorarioEsp.Npermiso = 0;
-		frmHorarioEsp.ShowDialog();
-		if (frmHorarioEsp.DialogResult == DialogResult.OK)
-		{
-			GridControl1.DataSource = RuntimeHelpers.GetObjectValue(objClassRRHH.llena_HorariosTemporales(idEmpleado));
-		}
-	}
-
-	private void BtnModificar_Click(object sender, EventArgs e)
-	{
-		int focusedRowHandle = GridView1.FocusedRowHandle;
-		if (Operators.ConditionalCompareObjectEqual(GridView1.GetRowCellValue(focusedRowHandle, "N"), null, TextCompare: false))
-		{
-			MessageBox.Show("Seleccione un Permiso", "", MessageBoxButtons.OK, MessageBoxIcon.Hand);
-			return;
-		}
-		FrmHorarioEsp frmHorarioEsp = new FrmHorarioEsp();
-		frmHorarioEsp.idEmpleado = idEmpleado;
-		frmHorarioEsp.Npermiso = Conversions.ToInteger(GridView1.GetRowCellValue(focusedRowHandle, "N"));
-		frmHorarioEsp.ShowDialog();
-		if (frmHorarioEsp.DialogResult == DialogResult.OK)
-		{
-			GridControl1.DataSource = RuntimeHelpers.GetObjectValue(objClassRRHH.llena_HorariosTemporales(idEmpleado));
-		}
-	}
-
-	private void BtnEliminar_Click(object sender, EventArgs e)
-	{
-		int focusedRowHandle = GridView1.FocusedRowHandle;
-		if (Operators.ConditionalCompareObjectEqual(GridView1.GetRowCellValue(focusedRowHandle, "N"), null, TextCompare: false))
-		{
-			MessageBox.Show("Seleccione un Permiso", "", MessageBoxButtons.OK, MessageBoxIcon.Hand);
-		}
-		else if (MessageBox.Show(Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(Operators.ConcatenateObject("Desea eliminar el permiso de la fecha: ", GridView1.GetRowCellValue(focusedRowHandle, "FechaInicio")), " al "), GridView1.GetRowCellValue(focusedRowHandle, "FechaFin"))), "Alerta!", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) == DialogResult.Yes)
-		{
-			if (objClassRRHH.eliminarHorarioTemporal(idEmpleado, Conversions.ToInteger(GridView1.GetRowCellValue(focusedRowHandle, "N"))))
-			{
-				MessageBox.Show("Se eliminó exitosamente", "", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
-				FrmConsultaHorarioEsp_Load(RuntimeHelpers.GetObjectValue(sender), e);
-			}
-			else
-			{
-				MessageBox.Show("Se generó un error durante la operacion, por favor intételo nuevamente mas tarde", "", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
-			}
-		}
-	}
+    /// <inheritdoc/>
+    public void MostrarEmpleado(EmpleadoHorarioDto empleado)
+    {
+        UcTxtNombres.Text=empleado.Nombres;UcTxtApePater.Text=empleado.ApellidoPaterno;
+        UcTxtApeMater.Text=empleado.ApellidoMaterno;UcTxtNDoc.Text=empleado.Documento;
+        if(empleado.Foto!=null)
+        {
+            try { using(var stream=new MemoryStream(empleado.Foto))
+                using(var imagen=Image.FromStream(stream)) UcFoto.Image=new Bitmap(imagen); }
+            catch(ArgumentException) { UcFoto.Image=null; }
+        }
+    }
+    /// <inheritdoc/>
+    public void MostrarFilas(IReadOnlyList<HistoricoHorarioDto> filas) => GridControl1.DataSource=filas.ToList();
+    /// <inheritdoc/>
+    public bool AbrirEditor(int numero)
+    {
+        using(var editor=CompositionRoot.CrearAsignacionHorario(idEmpleado,numero))
+            return editor.ShowDialog(this)==DialogResult.OK;
+    }
+    /// <inheritdoc/>
+    public bool ConfirmarEliminar() => MessageBox.Show(this,"¿Desea eliminar la asignación seleccionada? Esta baja elimina esa fila del histórico.",
+        "Horarios por periodo",MessageBoxButtons.YesNo,MessageBoxIcon.Question,MessageBoxDefaultButton.Button2)==DialogResult.Yes;
+    /// <inheritdoc/>
+    public void Habilitar(bool habilitado) => _consultar.Enabled=Button1.Enabled=BtnModificar.Enabled=BtnEliminar.Enabled=habilitado;
+    /// <inheritdoc/>
+    public void MostrarError(string mensaje) => MessageBox.Show(this,mensaje,"Histórico de horarios",MessageBoxButtons.OK,MessageBoxIcon.Warning);
 
 	private void Button2_Click(object sender, EventArgs e)
 	{
