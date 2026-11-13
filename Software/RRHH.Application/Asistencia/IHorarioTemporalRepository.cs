@@ -1,4 +1,6 @@
 using RRHH.Domain.Asistencia;
+using RRHH.Domain.Comun;
+using System.Collections.Generic;
 
 namespace RRHH.Application.Asistencia;
 
@@ -13,4 +15,8 @@ public interface IHorarioTemporalRepository
     /// <remarks>Un alta agrega una fila. La edición conserva FechaRegistro y no cambia otras asignaciones.</remarks>
     /// <exception cref="RRHH.Domain.Comun.ReglaNegocioException">Conflicto, datos ambiguos o referencia inválida.</exception>
     int Guardar(AsignacionHorario asignacion);
+    /// <summary>Lista sin escrituras; rango nulo incluye fechas ausentes, otro rango filtra por intersección.</summary>
+    IReadOnlyList<HistoricoHorarioDto> Listar(int empleado, RangoFechas rango);
+    /// <summary>Baja explícita por clave única; false si ya no existe, error si es ambigua.</summary>
+    bool Eliminar(int empleado, int numero);
 }

@@ -113,6 +113,18 @@ INSERT INTO public."Horario" VALUES (1,'Horario ficticio','08:00:00','17:00:00')
         }
     }
 
+    [PostgreSqlLocalFact]
+    public void HistoricoConservaPeriodosSinCatalogoYFiltraInterseccion()
+    {
+        _repo.Guardar(Nueva(1,0,10,12));_repo.Guardar(Nueva(1,0,13,15));
+        _repo.Guardar(Nueva(2,0,10,12));
+        _db.Execute("DELETE FROM public.\"Horario\";");
+        var todos=_repo.Listar(1,null);Assert.Equal(2,todos.Count);Assert.Equal(2,todos[0].N);
+        var corte=_repo.Listar(1,RangoFechas.Crear(new DateTime(2026,11,11),new DateTime(2026,11,12)));
+        Assert.Single(corte);Assert.Equal(1,corte[0].N);Assert.NotEmpty(corte[0].Descrip_Horario);
+        Assert.Equal(3,_db.ScalarInt("SELECT COUNT(*) FROM public.\"HorarioTemporal\";"));
+    }
+
     private static AsignacionHorario Nueva(int empleado,int numero,int desde,int hasta,string doc=null) =>
         new AsignacionHorario(empleado,numero,RangoFechas.Crear(new DateTime(2026,11,desde),
             new DateTime(2026,11,hasta)),1,doc,null);

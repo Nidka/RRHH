@@ -52,6 +52,8 @@ public class AsignacionHorarioPresenterTests
     private sealed class Repositorio : IHorarioTemporalRepository
     {
         public int Escrituras;public bool Fallar;
+        public IReadOnlyList<HistoricoHorarioDto> Listar(int empleado,RangoFechas rango)=>Array.Empty<HistoricoHorarioDto>();
+        public bool Eliminar(int empleado,int numero)=>false;
         public EmpleadoHorarioDto ObtenerEmpleado(int empleado) => Fallar ? throw new InvalidOperationException() : new EmpleadoHorarioDto();
         public AsignacionHorarioDto Obtener(int empleado,int numero) => new AsignacionHorarioDto { IdEmpleado=empleado,Numero=numero };
         public int Guardar(AsignacionHorario a) { if(Fallar) throw new InvalidOperationException();Escrituras++;return 7; }
