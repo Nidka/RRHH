@@ -199,6 +199,29 @@ ALTER TABLE public."Motivo_Perm" ALTER COLUMN "idMotivo" SET DEFAULT nextval('pu
         Assert.Single(_repo.Listar(1, "P"));
     }
 
+    [PostgreSqlLocalFact]
+    public void MarcaAnualDeRF06UsaDefaultEnAltaYSeConservaAlEditar()
+    {
+        _db.Execute("ALTER TABLE public.\"Motivo_Perm\" ADD COLUMN \"UnaVezPorAnio\" boolean NOT NULL DEFAULT false;");
+        int id=_repo.Insertar(Nuevo("Motivo ficticio anual","P"));
+        Assert.False((bool)_db.Scalar("SELECT \"UnaVezPorAnio\" FROM public.\"Motivo_Perm\" WHERE \"idMotivo\"=@id;", new PostgreSqlParameterValue("id",id,System.Data.DbType.Int32)));
+        _db.Execute("UPDATE public.\"Motivo_Perm\" SET \"UnaVezPorAnio\"=true;");
+        Assert.True(_repo.Actualizar(_repo.Obtener(id).Editar("Descripción corregida","MC",true)));
+        Assert.True(new RRHH.PostgreSql.Permisos.PostgreSqlPermisoRepository(_db).MotivoSeOtorgaUnaVezPorAnio(id));
+        Assert.Equal("Descripción corregida",_repo.Obtener(id).Descripcion);
+        Assert.True(_repo.Eliminar(id,"P"));
+    }
+
+    [PostgreSqlLocalFact]
+    public void DescripcionRepetidaMantieneElComportamientoActualConIdsDistintos()
+    {
+        int primero=_repo.Insertar(Nuevo("Motivo ficticio repetido","P"));
+        int segundo=_repo.Insertar(Nuevo("Motivo ficticio repetido","P"));
+        Assert.NotEqual(primero,segundo);
+        Assert.Equal(2,_repo.Listar(1,"P").Count);
+        // No se inventa una regla de unicidad por descripción: requiere acuerdo de negocio.
+    }
+
     private static MotivoPermiso Nuevo(string descripcion, string modalidad) =>
         MotivoPermiso.Nuevo(1, descripcion, null, null, modalidad);
 }
