@@ -156,7 +156,7 @@ th{font-size:22px}
   <h2>Lo que pidió la T3 y cómo lo cubrimos</h2><div class="title-rule"></div>
   <div class="content">
     <div class="row grow" style="gap:22px">
-      <div class="card grow col"><span class="chip ok" style="align-self:flex-start">10 de 11</span><h3>Versión funcional</h3><p>8 obligatorios + 3 complementarios</p></div>
+      <div class="card grow col"><span class="chip ok" style="align-self:flex-start">11 de 11</span><h3>Versión funcional</h3><p>8 obligatorios + 3 complementarios</p></div>
       <div class="card grow col"><span class="chip ok" style="align-self:flex-start">Hecho</span><h3>Diagnóstico T2</h3><p>Confirmado, cambiado, ampliado</p></div>
       <div class="card grow col"><span class="chip ok" style="align-self:flex-start">Hecho</span><h3>Base técnica</h3><p>Capas, BD, scripts, ejecución</p></div>
       <div class="card grow col"><span class="chip ok" style="align-self:flex-start">5 (mín. 3)</span><h3>Refactorización</h3><p>Antes/después en Git</p></div>
@@ -164,12 +164,12 @@ th{font-size:22px}
     <div class="row grow" style="gap:22px">
       <div class="card grow col"><span class="chip ok" style="align-self:flex-start">Hecho</span><h3>Control de cambios</h3><p>Requerimiento → … → evidencia</p></div>
       <div class="card grow col"><span class="chip ok" style="align-self:flex-start">7 versiones</span><h3>Versionado</h3><p>Ramas, commits, changelog, tags</p></div>
-      <div class="card grow col"><span class="chip warn" style="align-self:flex-start">86 de 90</span><h3>Pruebas</h3><p>Casos con resultado real</p></div>
+      <div class="card grow col"><span class="chip ok" style="align-self:flex-start">103 de 107</span><h3>Pruebas</h3><p>Casos con resultado real</p></div>
       <div class="card grow col"><span class="chip ok" style="align-self:flex-start">18 secciones</span><h3>Informe</h3><p>Completo y ordenado</p></div>
     </div>
   </div>
   <div class="foot"><span>T3 · Alcance</span><span>2</span></div>
-  <aside class="notes"><b>Mapa.</b> Cada tarjeta es un bloque de la evaluación. Dos honestidades desde ya: tenemos 10 de los 11 requerimientos mínimos (falta el tercer complementario, RF-16) y 4 de los 90 casos son de aceptación en Windows y no se han ejecutado.</aside>
+  <aside class="notes"><b>Mapa.</b> Cada tarjeta es un bloque de la evaluación. Dos honestidades desde ya: tenemos los 11 requerimientos mínimos implementados, pero RF-16 está en un PR por integrar (#31), y 4 de los 107 casos son de aceptación en Windows y no se han ejecutado.</aside>
 </section>
 
 <!-- 3 · Punto de partida -->
@@ -179,7 +179,7 @@ th{font-size:22px}
   <div class="content">
     <div class="row">
       <div class="kpi card"><div class="big acc">69</div><div class="lab">commits desde v1.0.0</div></div>
-      <div class="kpi card"><div class="big acc">213</div><div class="lab">métodos de prueba (74 en v1.0.0)</div></div>
+      <div class="kpi card"><div class="big acc">230</div><div class="lab">métodos de prueba (74 en v1.0.0)</div></div>
       <div class="kpi card"><div class="big acc">5</div><div class="lab">refactorizaciones aplicadas</div></div>
       <div class="kpi card"><div class="big acc">7</div><div class="lab">versiones etiquetadas</div></div>
     </div>
@@ -197,7 +197,7 @@ th{font-size:22px}
     <p class="lead mut">T2: solo ejecutable, 14 problemas diagnosticados, 18 solicitudes de cambio. T3: base ejecutable sobre PostgreSQL y requerimientos integrados.</p>
   </div>
   <div class="foot"><span>T3 · Avances desde la T2</span><span>3</span></div>
-  <aside class="notes"><b>Qué cambió.</b> En T2 el producto era un diagnóstico. Ahora hay código por capas, 213 métodos de prueba, cinco refactorizaciones y siete versiones etiquetadas. Los números salen del repositorio, no de memoria.</aside>
+  <aside class="notes"><b>Qué cambió.</b> En T2 el producto era un diagnóstico. Ahora hay código por capas, 230 métodos de prueba, cinco refactorizaciones y siete versiones etiquetadas. Los números salen del repositorio, no de memoria.</aside>
 </section>
 
 <!-- 4 · Requerimientos -->
@@ -215,17 +215,17 @@ th{font-size:22px}
     <div><p class="mut" style="margin-bottom:12px;font-size:26px;letter-spacing:.08em">COMPLEMENTARIOS (mínimo 3)</p>
       <div class="row" style="gap:16px">
         <div class="rf ok grow">RF-17<small>Feriados en reporte</small></div><div class="rf ok grow">RF-18<small>Ausencias por periodo</small></div>
-        <div class="rf next grow">RF-16<small>Siguiente en la cola</small></div>
+        <div class="rf next grow">RF-16<small>En el PR #31</small></div>
         <div class="rf off grow">RF-07<small>Vac. generadas</small></div><div class="rf off grow">RF-08<small>Vac. pendientes</small></div>
         <div class="rf off grow">RF-09<small>Vac. truncas</small></div><div class="rf off grow">RF-10<small>Media jornada</small></div>
         <div class="rf off grow">RF-11<small>Reporte vac.</small></div><div class="rf off grow">RF-12<small>Consulta usuario</small></div>
         <div class="rf off grow">RF-15<small>Presencial/remoto</small></div>
       </div></div>
-    <div class="legend"><span><span class="dot" style="background:var(--ok)"></span>Integrado en main</span><span><span class="dot" style="background:var(--warn)"></span>Siguiente</span><span><span class="dot" style="background:#5d6c8a"></span>Planificado para la Evaluación Final</span></div>
-    <div class="card hl"><p><b>10 de 11 mínimos.</b> Los 8 obligatorios y 2 complementarios están integrados; el tercer complementario es <b class="warn">RF-16</b>, y su base ya existe (RF-13 + consulta de RF-14).</p></div>
+    <div class="legend"><span><span class="dot" style="background:var(--ok)"></span>Integrado en main</span><span><span class="dot" style="background:var(--warn)"></span>Implementado, PR por integrar</span><span><span class="dot" style="background:#5d6c8a"></span>Planificado para la Evaluación Final</span></div>
+    <div class="card hl"><p><b>11 de 11 mínimos.</b> Los 8 obligatorios y 2 complementarios están integrados en main; el tercero, <b class="warn">RF-16</b>, está implementado en el <b>PR #31</b> y solo falta integrarlo.</p></div>
   </div>
   <div class="foot"><span>T3 · Requerimientos</span><span>4</span></div>
-  <aside class="notes"><b>Estado.</b> Verde: integrado en la rama principal con su especificación, casos de prueba y solicitud de cambio. RF-16 es el que nos falta para llegar a 11; es corto porque reutiliza la consulta de RF-14.</aside>
+  <aside class="notes"><b>Estado.</b> Verde: integrado en la rama principal con su especificación, casos de prueba y solicitud de cambio. RF-16 es el que completa los 11: reutiliza la consulta de RF-14 y está en el PR #31, probado con la suite completa; falta integrarlo a main.</aside>
 </section>
 
 <!-- 5 · Obligatorios -->
@@ -251,10 +251,11 @@ th{font-size:22px}
 <!-- 6 · Complementarios -->
 <section class="slide" data-title="Implementación: complementarios">
   <div class="kicker">Implementación (2 de 2)</div>
-  <h2>Complementarios integrados</h2><div class="title-rule"></div>
+  <h2>Complementarios implementados</h2><div class="title-rule"></div>
   <div class="content">
     <div class="tbl"><table>
       <tr><th style="width:120px">RF</th><th>Regla de negocio</th><th>Componente</th><th style="width:150px">Commit</th><th style="width:110px">CP</th></tr>
+      <tr><td><b>RF-16</b></td><td>Total = teletrabaja todos los días laborables del periodo; parcial = algunos</td><td class="code">ReportarTeletrabajoTotalOParcial</td><td class="code">80450af</td><td>17</td></tr>
       <tr><td><b>RF-17</b></td><td>Día no laborable = fin de semana o feriado, contado una sola vez</td><td class="code">CalcularDiasNoLaborables</td><td class="code">cd4e46d</td><td>7</td></tr>
       <tr><td><b>RF-18</b></td><td>Ausencia = permiso con al menos un día en el periodo; filtro por motivo</td><td class="code">ReportarAusenciasPorPeriodo</td><td class="code">11b2429</td><td>21</td></tr>
     </table></div>
@@ -302,7 +303,7 @@ th{font-size:22px}
   <h2>Qué recuperamos, reconstruimos y reemplazamos</h2><div class="title-rule"></div>
   <div class="content"><div class="row grow" style="gap:22px">
     <div class="col" style="flex:1.1;gap:18px">
-      <div class="card"><h3>Estructura actual</h3><ul><li><b>RecursosHumanos</b> · WinForms recuperado</li><li><b>4 capas nuevas</b> · Domain, Application, Presentation, PostgreSql</li><li><b>Tests</b> · 40 archivos · 213 métodos</li><li><b>BD</b> · 105 tablas, 3 migraciones nuevas, 6 scripts de prueba</li></ul></div>
+      <div class="card"><h3>Estructura actual</h3><ul><li><b>RecursosHumanos</b> · WinForms recuperado</li><li><b>4 capas nuevas</b> · Domain, Application, Presentation, PostgreSql</li><li><b>Tests</b> · 41 archivos · 230 métodos</li><li><b>BD</b> · 105 tablas, 3 migraciones nuevas, 6 scripts de prueba</li></ul></div>
     </div>
     <div class="col" style="flex:1.3;gap:16px">
       <div class="card" style="border-left:8px solid #8095bb"><h3>Recuperado</h3><p>Código C# descompilado, <b>congelado</b></p></div>
@@ -346,12 +347,12 @@ th{font-size:22px}
       <p class="mut" style="font-size:25px">El WinForms exige las DLL licenciadas: el recorrido de las pantallas nuevas se hace en equipos Windows.</p>
     </div>
     <div class="col" style="flex:1">
-      <div class="card hl"><div class="big ok">325/325</div><p style="margin-top:10px">pruebas superadas sobre <b>main</b></p><p class="mut" style="font-size:24px;margin-top:8px">.NET 8 · PostgreSQL 16 local desechable · 12/11/2026 · 0 fallos</p></div>
+      <div class="card hl"><div class="big ok">342/342</div><p style="margin-top:10px">pruebas superadas · <b>main + RF-16</b></p><p class="mut" style="font-size:24px;margin-top:8px">.NET 8 · PostgreSQL 16 local desechable · 12/11/2026 · 0 fallos · sobre main solo: 325/325</p></div>
       <div class="card"><h3>Además</h3><ul><li>Dos altas simultáneas: una se confirma, otra se rechaza</li><li>Migraciones aplicadas, repetidas y revertidas en BD desechable</li></ul></div>
     </div>
   </div></div>
   <div class="foot"><span>T3 · Evidencia</span><span>11</span></div>
-  <aside class="notes"><b>Sin exagerar.</b> Las capturas son de la línea base de T2. Lo nuevo se demuestra con la suite completa: 325 de 325 sobre main, ejecutada por nosotros con una base desechable. El ejecutable WinForms completo necesita las DLL licenciadas, por eso la demostración en vivo se hace en una máquina Windows.</aside>
+  <aside class="notes"><b>Sin exagerar.</b> Las capturas son de la línea base de T2. Lo nuevo se demuestra con la suite completa: 342 de 342 con RF-16 (325 de 325 sobre main solo), ejecutada por nosotros con una base desechable. El ejecutable WinForms completo necesita las DLL licenciadas, por eso la demostración en vivo se hace en una máquina Windows.</aside>
 </section>
 
 <!-- 12 · Demo -->
@@ -361,7 +362,7 @@ th{font-size:22px}
   <div class="content"><div class="row grow" style="gap:16px">
     <div class="step"><div class="n">1 · RF-03</div><h4>Permiso solapado</h4><p>Permiso 10–12/11 y luego 9–13/11. Se <b>rechaza</b> (antes se aceptaba).</p></div><div class="arrow">›</div>
     <div class="step"><div class="n">2 · RF-06</div><h4>Licencia anual</h4><p>Segunda licencia marcada en el mismo año. Mensaje claro; en otro año, se permite.</p></div><div class="arrow">›</div>
-    <div class="step"><div class="n">3 · RF-13/14</div><h4>Teletrabajo</h4><p>Registrar periodo, intentar solaparlo y ver el reporte de días.</p></div><div class="arrow">›</div>
+    <div class="step"><div class="n">3 · RF-13/14</div><h4>Teletrabajo</h4><p>Registrar periodo, intentar solaparlo, ver los días (RF-14) y quién es total o parcial (RF-16).</p></div><div class="arrow">›</div>
     <div class="step"><div class="n">4 · RF-18</div><h4>Ausencias</h4><p>Reportes › Ausencias por periodo: aparece el permiso que contiene al periodo.</p></div><div class="arrow">›</div>
     <div class="step"><div class="n">5 · RF-01/02</div><h4>Turnos</h4><p>Asignar turno por periodo y consultar el histórico.</p></div>
   </div>
@@ -471,7 +472,7 @@ th{font-size:22px}
     </div>
     <div class="row grow" style="gap:22px">
       <div class="card grow"><h3>Convención</h3><ul><li><span style="font-family:var(--mono)">tipo(RF-NN): descripción</span> + pie <span style="font-family:var(--mono)">Refs: RF-NN, CR-0NN</span></li><li>feat → MINOR · fix/refactor → PATCH</li><li>Ramas: feature/ · fix/ · refactor/ · infra/ · docs/ · release/</li></ul></div>
-      <div class="card grow"><h3>Orden real de integración</h3><p>Los números siguen el orden en que entró cada cambio a <b>main</b>, no el plan inicial. CHANGELOG y registro de versiones lo documentan.</p><p class="warn" style="font-size:25px;margin-top:10px">Publicadas como pre-lanzamiento hasta el recorrido en Windows.</p></div>
+      <div class="card grow"><h3>Orden real de integración</h3><p>Los números siguen el orden en que entró cada cambio a <b>main</b>, no el plan inicial. CHANGELOG y registro de versiones lo documentan. RF-16 saldrá como <b>v1.5.0</b> al integrarse.</p><p class="warn" style="font-size:25px;margin-top:10px">Publicadas como pre-lanzamiento hasta el recorrido en Windows.</p></div>
     </div>
   </div>
   <div class="foot"><span>T3 · Versionado</span><span>17</span></div>
@@ -493,7 +494,7 @@ th{font-size:22px}
       <div class="card"><b class="acc">Evelyn</b> · RF-01, 02, 04, 05 · refactor de motivos y horarios</div>
       <div class="card"><b class="ok">Frank</b> · base RangoFechas, RF-03, 06, 17</div>
       <div class="card"><b class="info">Jorge</b> · RF-13, RF-14 · diagnóstico técnico</div>
-      <div class="card"><b class="warn">Kadin</b> · integridad BD, migraciones, RF-18, control de cambios, versiones</div>
+      <div class="card"><b class="warn">Kadin</b> · integridad BD, migraciones, RF-18, RF-16, control de cambios, versiones</div>
     </div>
   </div></div>
   <div class="foot"><span>T3 · Repositorio</span><span>18</span></div>
@@ -503,16 +504,16 @@ th{font-size:22px}
 <!-- 19 · Pruebas -->
 <section class="slide" data-title="Pruebas">
   <div class="kicker">Pruebas funcionales del avance</div>
-  <h2>90 casos con los siete campos exigidos</h2><div class="title-rule"></div>
+  <h2>107 casos con los siete campos exigidos</h2><div class="title-rule"></div>
   <div class="content"><div class="row grow" style="gap:34px">
     <div class="col" style="flex:1.3;justify-content:center;gap:22px">
-      <div><div class="row" style="justify-content:space-between"><span style="font-size:27px">Automatizados · aprobados</span><b class="ok" style="font-size:30px">83</b></div><div class="bar"><i style="width:92%;background:var(--ok)"></i></div></div>
-      <div><div class="row" style="justify-content:space-between"><span style="font-size:27px">SQL en BD desechable · aprobados</span><b class="info" style="font-size:30px">3</b></div><div class="bar"><i style="width:3.3%;background:var(--info)"></i></div></div>
-      <div><div class="row" style="justify-content:space-between"><span style="font-size:27px">Aceptación en Windows · sin ejecutar</span><b class="warn" style="font-size:30px">4</b></div><div class="bar"><i style="width:4.4%;background:var(--warn)"></i></div></div>
+      <div><div class="row" style="justify-content:space-between"><span style="font-size:27px">Automatizados · aprobados</span><b class="ok" style="font-size:30px">100</b></div><div class="bar"><i style="width:93.5%;background:var(--ok)"></i></div></div>
+      <div><div class="row" style="justify-content:space-between"><span style="font-size:27px">SQL en BD desechable · aprobados</span><b class="info" style="font-size:30px">3</b></div><div class="bar"><i style="width:2.8%;background:var(--info)"></i></div></div>
+      <div><div class="row" style="justify-content:space-between"><span style="font-size:27px">Aceptación en Windows · sin ejecutar</span><b class="warn" style="font-size:30px">4</b></div><div class="bar"><i style="width:3.7%;background:var(--warn)"></i></div></div>
       <p class="mut" style="font-size:25px">Código · RF · datos · esperado · obtenido · estado · evidencia</p>
     </div>
     <div class="col" style="flex:1;gap:18px">
-      <div class="card hl"><div class="big ok" style="font-size:96px">325/325</div><p class="mut" style="font-size:25px">suite completa sobre main</p></div>
+      <div class="card hl"><div class="big ok" style="font-size:96px">342/342</div><p class="mut" style="font-size:25px">suite completa · main + RF-16</p></div>
       <div class="card"><p>Cada RF integrado tiene casos aprobados. Los 4 sin ejecutar son de pantalla Windows (RF-01, 02, 04, 05).</p></div>
     </div>
   </div></div>
@@ -546,7 +547,7 @@ th{font-size:22px}
   <div class="kicker">Plan de cierre hacia la Evaluación Final</div>
   <h2>Tres semanas, tres objetivos</h2><div class="title-rule"></div>
   <div class="content"><div class="row grow" style="gap:22px">
-    <div class="card grow"><span class="chip info">S14</span><h3 style="margin-top:14px">Verificar y cerrar</h3><ul><li>Recorrido en Windows y capturas</li><li>build.cmd sobre main</li><li>Aplicar migraciones con respaldo</li><li>RF-16 → <b>v1.5.0</b></li></ul></div>
+    <div class="card grow"><span class="chip info">S14</span><h3 style="margin-top:14px">Verificar y cerrar</h3><ul><li>Recorrido en Windows y capturas</li><li>build.cmd sobre main</li><li>Aplicar migraciones con respaldo</li><li>Integrar RF-16 → <b>v1.5.0</b></li></ul></div>
     <div class="card grow"><span class="chip info">S15</span><h3 style="margin-top:14px">Vacaciones (núcleo)</h3><ul><li>RF-07, RF-08, RF-10</li><li>Reglas validadas con el área</li><li>RF-15 presencial / remoto</li></ul></div>
     <div class="card grow"><span class="chip info">S16</span><h3 style="margin-top:14px">Reportes y entrega</h3><ul><li>RF-09, RF-11, RF-12</li><li>Retiro de TableAdapters</li><li>Regresión completa → <b>v2.0.0</b></li></ul></div>
   </div></div>
@@ -560,9 +561,9 @@ th{font-size:22px}
   <h2>Qué se evalúa y dónde está</h2><div class="title-rule" style="margin-bottom:22px"></div>
   <div class="content"><div class="row grow" style="gap:26px">
     <div class="col" style="flex:1.1;gap:14px">
-      <div class="card"><div class="row" style="justify-content:space-between"><b>Implementación funcional</b><b class="acc">máx. 5</b></div><p class="mut" style="font-size:27px">10 de 11 integrados · suite 325/325</p></div>
+      <div class="card"><div class="row" style="justify-content:space-between"><b>Implementación funcional</b><b class="acc">máx. 5</b></div><p class="mut" style="font-size:27px">11 de 11 implementados · suite 342/342</p></div>
       <div class="card"><div class="row" style="justify-content:space-between"><b>Refactorización y arquitectura</b><b class="acc">máx. 5</b></div><p class="mut" style="font-size:27px">5 REF con antes/después · capas verificadas</p></div>
-      <div class="card"><div class="row" style="justify-content:space-between"><b>Cambio, pruebas y trazabilidad</b><b class="acc">máx. 5</b></div><p class="mut" style="font-size:27px">Matriz + 90 casos con resultado real</p></div>
+      <div class="card"><div class="row" style="justify-content:space-between"><b>Cambio, pruebas y trazabilidad</b><b class="acc">máx. 5</b></div><p class="mut" style="font-size:27px">Matriz + 107 casos con resultado real</p></div>
       <div class="card"><div class="row" style="justify-content:space-between"><b>Versionado, informe y repositorio</b><b class="acc">máx. 5</b></div><p class="mut" style="font-size:27px">7 versiones · changelog · 4 integrantes</p></div>
     </div>
     <div class="card" style="flex:1"><h3>Informe · 18 secciones</h3>
@@ -570,7 +571,7 @@ th{font-size:22px}
       <p style="font-size:24px;margin-top:14px"><span style="font-family:var(--mono)">docs/t3/informe/INFORME_T3.docx</span></p></div>
   </div></div>
   <div class="foot"><span>T3 · Informe</span><span>22</span></div>
-  <aside class="notes">Cuatro criterios de 5 puntos. En cada uno señalamos la evidencia concreta. En el primero, la salvedad: 10 de 11 y recorrido en Windows por completar.</aside>
+  <aside class="notes">Cuatro criterios de 5 puntos. En cada uno señalamos la evidencia concreta. En el primero, la salvedad: RF-16 está en un PR por integrar y falta el recorrido en Windows.</aside>
 </section>
 
 <!-- 23 · Conclusiones -->
@@ -580,11 +581,11 @@ th{font-size:22px}
   <div class="content"><div class="row grow" style="gap:26px">
     <div class="card grow hl"><h3 class="ok">Logrado</h3><ul>
       <li>Base por capas probada sin interfaz ni BD compartida</li>
-      <li>8 obligatorios + 2 complementarios integrados</li>
+      <li>8 obligatorios + 3 complementarios implementados</li>
       <li>Una regla de dominio para siete requerimientos</li>
       <li>Trazabilidad completa y 7 versiones</li></ul></div>
     <div class="card grow"><h3 class="warn">Falta, dicho claro</h3><ul>
-      <li>RF-16, el tercer complementario</li>
+      <li>Integrar RF-16 (PR #31) a main</li>
       <li>Recorrido en Windows y capturas</li>
       <li>Migraciones en la base compartida</li>
       <li>Vacaciones y reportes restantes</li></ul></div>
