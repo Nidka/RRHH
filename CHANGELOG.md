@@ -7,7 +7,12 @@ y el proyecto usa [Versionado Semántico](https://semver.org/lang/es/).
 
 ## [Sin publicar]
 
-Pendiente de integrar tras la v1.4.0: RF-16 (teletrabajo total/parcial) y el retiro de TableAdapters (2.0.0).
+Pendiente para la Evaluación Final: requerimientos de vacaciones (RF-07 a RF-12), RF-15 y el retiro de TableAdapters (2.0.0).
+
+## [1.5.0] - 2026-11-12
+
+### Agregado
+- RF-16: reporte «Personal en teletrabajo (total o parcial)». Clasifica a cada persona por cobertura de los días laborables del periodo (Total si teletrabaja todos, Parcial si algunos) con sus días remotos y filtro por clase (CR-016). PR #31. Completa los tres complementarios de la T3 junto con RF-17 y RF-18.
 
 ## [1.4.0] - 2026-11-12
 
@@ -54,7 +59,7 @@ Pendiente de integrar tras la v1.4.0: RF-16 (teletrabajo total/parcial) y el ret
 - Horarios migrados a MVP y repositorio PostgreSQL, con el comportamiento conservado (TEC-001, commit `138dbce`). Integrado mediante PR #8
 
 ### Nota sobre la verificación
-Las versiones 1.0.2 a 1.4.0 se etiquetaron sobre los commits de integración en el orden real de `main`.
+Las versiones 1.0.2 a 1.5.0 se etiquetaron sobre los commits de integración en el orden real de `main`.
 Ninguna se compiló con `build.cmd` ni se probó con `dotnet test` sobre net48 en Windows; las pruebas de
 Evelyn (RF-01/02/04/05) se ejecutaron en un arnés net8 en macOS y el resto solo con SQL en bases locales
 desechables. Por eso las publicaciones de GitHub se marcan como pre-lanzamiento hasta ese QA.
@@ -73,7 +78,8 @@ RF-04 y RF-05 (PR #29) solo agregan pruebas y documentación y no cambian la ver
 - Motivos de permiso (TEC-004). PR #2
 - La importación biométrica escribe asistencia y marcaciones en PostgreSQL dentro de una transacción.
 
-[Sin publicar]: https://github.com/Nidka/RRHH/compare/v1.4.0...HEAD
+[Sin publicar]: https://github.com/Nidka/RRHH/compare/v1.5.0...HEAD
+[1.5.0]: https://github.com/Nidka/RRHH/releases/tag/v1.5.0
 [1.4.0]: https://github.com/Nidka/RRHH/releases/tag/v1.4.0
 [1.3.0]: https://github.com/Nidka/RRHH/releases/tag/v1.3.0
 [1.2.0]: https://github.com/Nidka/RRHH/releases/tag/v1.2.0
