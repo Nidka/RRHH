@@ -1,0 +1,11 @@
+CP-13-09 — dos altas simultáneas, RF-13. Ejecutado el 12/11/2026 por Francisco Kadin Valera Lizarraga.
+Entorno: PostgreSQL 16 local desechable (BD rrhh_conc), migración 20261112_03_teletrabajo.sql aplicada, empleado ficticio 101.
+Procedimiento: BD/tests/rf13_concurrencia_sesion.sql en dos sesiones (A con pausa de 3 s dentro de la transacción; B iniciada 0,7 s después).
+
+Resultado:
+  A : CONFIRMADA
+  B : RECHAZADA (solapamiento detectado bajo el bloqueo)
+  filas finales en public."Teletrabajo": 1
+
+Alcance: valida la estrategia de bloqueo a nivel SQL con la misma secuencia que PostgreSqlTeletrabajoRepository.Registrar.
+No ejecuta el código C# del repositorio con dos hilos.

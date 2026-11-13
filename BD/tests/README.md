@@ -107,3 +107,11 @@ tabla vacía. `20261112_03_teletrabajo.rollback.sql` **elimina la tabla**, por e
 alguna columna del contrato, la migración aborta sin modificar nada. Las aserciones comprueban cada
 restricción (rango invertido, modalidad, máscara de días remotos, empleado nulo) con el mismo
 `INSERT` que usa `PostgreSqlTeletrabajoRepository`.
+
+## RF-13: alta concurrente (CP-13-09)
+
+`BD/tests/rf13_concurrencia_sesion.sql` reproduce en SQL la secuencia de bloqueo y comprobación del
+repositorio. En una BD desechable con la tabla `Teletrabajo` y una tabla `Empleado` mínima (empleado 101),
+ejecútelo en dos sesiones con un segundo de diferencia (instrucciones en la cabecera del script). Resultado
+verificado el 12/11/2026 en PostgreSQL 16: la sesión A queda confirmada, la B rechazada y la tabla termina
+con una fila.
