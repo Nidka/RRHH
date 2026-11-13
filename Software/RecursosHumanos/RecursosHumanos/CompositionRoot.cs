@@ -106,6 +106,20 @@ internal static class CompositionRoot
         return vista;
     }
 
+    /// <summary>
+    /// RF-16: conecta el reporte de personal en teletrabajo total o parcial; reutiliza el conteo de días remotos de RF-14
+    /// y el calendario laboral.
+    /// </summary>
+    public static FrmClasificacionTeletrabajo CrearClasificacionTeletrabajo()
+    {
+        var repositorio = new PostgreSqlReporteTeletrabajoRepository(Database.Value);
+        var feriados = new PostgreSqlFeriadoRepository(Database.Value);
+        var vista = new FrmClasificacionTeletrabajo();
+        _ = new ClasificacionTeletrabajoPresenter(vista,
+            new ReportarTeletrabajoTotalOParcial(new ReportarDiasTeletrabajo(repositorio, feriados), feriados));
+        return vista;
+    }
+
     /// <summary>Conecta la vista pasiva de teletrabajo a sus casos de uso.</summary>
     public static FrmTeletrabajo CrearTeletrabajo()
     {
