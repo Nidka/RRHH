@@ -74,7 +74,9 @@ public sealed class PostgreSqlConnectionFactory
 			Username = Required("DB_USER"),
 			Password = Required("DB_PASSWORD"),
 			SslMode = sslMode,
+#if NETFRAMEWORK
 			TrustServerCertificate = sslMode != SslMode.Disable,
+#endif
 			Pooling = true,
 			KeepAlive = 30,
 			Timeout = 15,

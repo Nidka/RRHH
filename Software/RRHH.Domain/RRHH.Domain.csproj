@@ -2,7 +2,7 @@
   <PropertyGroup>
     <AssemblyName>RRHH.Domain</AssemblyName>
     <RootNamespace>RRHH.Domain</RootNamespace>
-    <TargetFramework>net48</TargetFramework>
+    <TargetFrameworks>net48;net8.0</TargetFrameworks>
     <LangVersion>12.0</LangVersion>
   </PropertyGroup>
 </Project>
