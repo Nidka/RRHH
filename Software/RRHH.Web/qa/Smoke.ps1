@@ -106,6 +106,20 @@ INSERT INTO "RRHH_Feriado" VALUES (1, '2026-11-11', 'Feriado ficticio');
     Assert-Http 201 (Post 'periodos' $parcial $session)
     $reporteParcial = Invoke-RestMethod "$url/api/reporte?empleado=102&desde=2026-11-09&hasta=2026-11-15" -WebSession $session
     if ($reporteParcial.Count -ne 1 -or $reporteParcial[0].dias -ne 2) { throw 'El patrón lunes, miércoles y viernes debía dar dos días por el feriado.' }
+
+    $clasificacionUrl = "$url/api/clasificacion-teletrabajo?desde=2026-11-09&hasta=2026-11-15"
+    Assert-Http 401 (Invoke-WebRequest $clasificacionUrl -SkipHttpErrorCheck)
+    $clasificacion = Invoke-RestMethod $clasificacionUrl -WebSession $session
+    if ($clasificacion.Count -ne 2 -or $clasificacion[0].idEmpleado -ne 101 -or
+        $clasificacion[0].clasificacion -ne 0 -or $clasificacion[0].diasLaborables -ne 4 -or
+        $clasificacion[1].idEmpleado -ne 102 -or $clasificacion[1].clasificacion -ne 1 -or
+        $clasificacion[1].diasRemotos -ne 2) { throw 'Clasificación Total/Parcial incorrecta.' }
+    $totales = Invoke-RestMethod "$clasificacionUrl&clase=T" -WebSession $session
+    $parciales = Invoke-RestMethod "$clasificacionUrl&clase=P" -WebSession $session
+    if ($totales.Count -ne 1 -or $totales[0].idEmpleado -ne 101 -or
+        $parciales.Count -ne 1 -or $parciales[0].idEmpleado -ne 102) { throw 'Filtro de clasificación incorrecto.' }
+    Assert-Http 400 (Invoke-WebRequest "$clasificacionUrl&clase=X" -WebSession $session -SkipHttpErrorCheck)
+    Assert-Http 400 (Invoke-WebRequest "$url/api/clasificacion-teletrabajo?desde=2026-11-15&hasta=2026-11-09" -WebSession $session -SkipHttpErrorCheck)
     Assert-Http 204 (Post 'salir' @{} $session)
     Assert-Http 401 (Invoke-WebRequest "$url/api/periodos?empleado=101" -WebSession $session -SkipHttpErrorCheck)
     Write-Output 'QA correcta: sesión, rol, CSRF, altas total y parcial, solapamiento, listado, calendario y cierre de sesión.'

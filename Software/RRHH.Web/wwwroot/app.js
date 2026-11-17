@@ -9,7 +9,9 @@ function sesion(activa) {
   if (!activa) {
     byId('periodos').replaceChildren();
     byId('dias').replaceChildren();
-    for (const formulario of ['alta', 'listado', 'reporte']) byId(formulario).reset();
+    byId('personal-remoto').replaceChildren();
+    byId('resumen-clasificacion').textContent = '';
+    for (const formulario of ['alta', 'listado', 'reporte', 'clasificacion']) byId(formulario).reset();
     byId('patron').hidden = true;
   }
 }
@@ -107,6 +109,19 @@ accion('reporte', async datos => {
   if (!parametros.get('empleado')) parametros.delete('empleado');
   const filas = await api('reporte?' + parametros);
   resultados('dias', ['Empleado', 'Días remotos'], filas.map(fila => [fila.idEmpleado, fila.dias]));
+});
+
+accion('clasificacion', async datos => {
+  const resumen = byId('resumen-clasificacion');
+  resumen.textContent = '';
+  byId('personal-remoto').replaceChildren();
+  const filas = await api('clasificacion-teletrabajo?' + new URLSearchParams(datos));
+  if (byId('panel').hidden) return;
+  const totales = filas.filter(fila => fila.clasificacion === 0).length;
+  resumen.textContent = `${filas.length} personas encontradas: ${totales} total y ${filas.length - totales} parcial.`;
+  resultados('personal-remoto', ['Empleado', 'Clasificación', 'Días remotos', 'Días laborables'], filas.map(fila => [
+    fila.idEmpleado, fila.clasificacion === 0 ? 'Total' : 'Parcial', fila.diasRemotos, fila.diasLaborables
+  ]));
 });
 
 api('sesion').then(() => sesion(true)).catch(() => sesion(false));

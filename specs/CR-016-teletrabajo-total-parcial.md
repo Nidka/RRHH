@@ -73,6 +73,16 @@ Un día laborable es de lunes a viernes y no feriado (`CalendarioLaboral`, igual
 
 ## Reversión
 
+### Adaptación web de RF-16
+
+Base `59a381a`. Mantenimiento adaptativo. Se conserva la regla de cobertura y el origen de datos. `CompositionRoot.Configurar` inyecta el caso de uso existente y `Program.cs` adapta los filtros y errores al contrato HTTP. `index.html` y `app.js` presentan las filas y el resumen. La comprobación de sesión y el límite de rango se reutilizan del reporte RF-14. El host depende del caso de uso y el calendario existentes. No hay cambio de esquema.
+
+Comprobar con PostgreSQL ficticio la sesión obligatoria, los filtros total/parcial, el feriado y el periodo invertido. Verificar en navegador la pantalla y el cierre de sesión. Para revertir el cambio web se retiran su registro, endpoint y formulario.
+
+Resultado del 17/11/2026 con `Smoke.ps1 -RegresionEscritorio` en Windows, SDK 8.0.428 y PostgreSQL 18 ficticio. La compilación web terminó con cero errores y dos avisos NU1900 de auditoría de NuGet. Pasaron 342 pruebas net48 y las comprobaciones HTTP. El reporte devolvió cuatro días laborables con el feriado excluido, empleado 101 Total y 102 Parcial con dos días remotos. Los filtros devolvieron la persona correspondiente. La falta de sesión devolvió 401 y el filtro inválido o el rango invertido devolvieron 400. El recorrido visual del formulario queda pendiente.
+
+### Reversión de escritorio
+
 Revertir el commit `feat(RF-16)`: elimina los archivos nuevos y la entrada de menú. No cambia esquema ni datos; RF-13 y RF-14 no se tocan.
 
 ## Uso de IA y decisiones humanas
