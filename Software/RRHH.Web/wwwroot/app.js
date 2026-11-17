@@ -2,16 +2,19 @@ const byId = id => document.getElementById(id);
 const mostrar = mensaje => { byId('mensaje').textContent = mensaje; };
 const alta = byId('alta');
 
-function sesion(activa) {
+function sesion(activa, puedeConsultarAusencias = false) {
   byId('acceso').hidden = activa;
   byId('panel').hidden = !activa;
   byId('salir').hidden = !activa;
+  byId('seccion-ausencias').hidden = !activa || !puedeConsultarAusencias;
   if (!activa) {
     byId('periodos').replaceChildren();
     byId('dias').replaceChildren();
     byId('personal-remoto').replaceChildren();
     byId('resumen-clasificacion').textContent = '';
-    for (const formulario of ['alta', 'listado', 'reporte', 'clasificacion']) byId(formulario).reset();
+    byId('resultado-ausencias').replaceChildren();
+    byId('ausencias').elements.motivo.length = 1;
+    for (const formulario of ['alta', 'listado', 'reporte', 'clasificacion', 'ausencias']) byId(formulario).reset();
     byId('patron').hidden = true;
   }
 }
@@ -28,10 +31,11 @@ async function api(ruta, datos) {
     });
   }
   const respuesta = await fetch('/api/' + ruta, opciones);
-  if (respuesta.status === 401 || respuesta.status === 403) {
+  if (respuesta.status === 401) {
     sesion(false);
     throw new Error(ruta === 'login' ? 'Credenciales o rol no habilitado.' : 'Vuelve a iniciar sesión.');
   }
+  if (respuesta.status === 403) throw new Error('Tu rol no está habilitado para esta consulta.');
   if (!respuesta.ok) {
     const error = await respuesta.json().catch(() => ({}));
     throw new Error(error.error || (respuesta.status === 429
@@ -76,7 +80,7 @@ function accion(id, ejecutar) {
 accion('login', async datos => {
   try { await api('login', Object.fromEntries(datos)); }
   finally { byId('login').reset(); }
-  sesion(true);
+  await cargarSesion();
 });
 byId('salir').addEventListener('click', async () => {
   try { await api('salir', {}); sesion(false); mostrar('Sesión cerrada.'); }
@@ -124,4 +128,36 @@ accion('clasificacion', async datos => {
   ]));
 });
 
-api('sesion').then(() => sesion(true)).catch(() => sesion(false));
+accion('ausencias', async datos => {
+  const destino = byId('resultado-ausencias');
+  destino.replaceChildren();
+  const parametros = new URLSearchParams(datos);
+  if (!parametros.get('motivo')) parametros.delete('motivo');
+  const filas = await api('ausencias?' + parametros);
+  if (byId('seccion-ausencias').hidden) return;
+  if (!filas.length) {
+    destino.textContent = 'Nadie se ausenta en el periodo consultado.';
+    return;
+  }
+  resultados('resultado-ausencias', ['Código', 'Persona', 'Motivo', 'Inicio', 'Fin', 'Días en el periodo'],
+    filas.map(fila => [
+      fila.idEmpleado, fila.empleado, fila.motivo, fila.inicio.slice(0, 10), fila.fin.slice(0, 10), fila.diasEnPeriodo
+    ]));
+});
+
+async function cargarSesion() {
+  const usuario = await api('sesion');
+  sesion(true, usuario.ausencias);
+  if (!usuario.ausencias) return;
+  try {
+    const motivos = await api('ausencias/motivos');
+    if (byId('seccion-ausencias').hidden) return;
+    const filtro = byId('ausencias').elements.motivo;
+    filtro.length = 1;
+    for (const motivo of motivos) filtro.add(new Option(motivo.descripcion, motivo.id));
+  } catch (error) {
+    mostrar(error.message);
+  }
+}
+
+cargarSesion().catch(() => sesion(false));

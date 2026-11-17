@@ -7,6 +7,7 @@
     <ProjectReference Include="../RRHH.Application/RRHH.Application.csproj" />
     <PackageReference Include="Npgsql" Version="8.0.9" />
     <Compile Include="../RRHH.PostgreSql/IdentificadorSql.cs" />
+    <Compile Include="../RRHH.PostgreSql/Permisos/PostgreSqlAusenciasRepository.cs" />
     <Compile Include="../RRHH.PostgreSql/PostgreSqlExecutor.cs;../RRHH.PostgreSql/PostgreSqlParameterValue.cs;../RRHH.PostgreSql/PostgreSqlConnectionFactory.cs;../RRHH.PostgreSql/EnvironmentFile.cs;../RRHH.PostgreSql/Asistencia/PostgreSqlFeriadoRepository.cs;../RRHH.PostgreSql/Teletrabajo/*.cs;../RRHH.PostgreSql/Seguridad/PostgreSqlAccesoUsuarioRepository.cs" />
   </ItemGroup>
 </Project>

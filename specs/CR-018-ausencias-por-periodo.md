@@ -56,6 +56,16 @@ Una pantalla nueva «Ausencias por periodo» (menú «Reportes», bajo «Permiso
 
 ## Pasos de implementación
 
+### Adaptación web
+
+Base `12e1910`. Mantenimiento adaptativo. Se conservan el solapamiento inclusivo, el cálculo de días calendario, la fuente SQL y el filtro de escritorio. `CompositionRoot.Configurar` inyecta `ReportarAusenciasPorPeriodo` con el repositorio existente. `Program.cs` adapta el rango y el motivo al contrato HTTP de solo lectura. La pantalla reutiliza el renderizado de tablas y limpia los datos al cerrar sesión. La autorización específica exige un ID de rol incluido explícitamente en `RRHH_WEB_ROLES_AUSENCIAS`. El piloto existente sigue exigiendo también un rol admitido para iniciar sesión.
+
+El cambio evita ampliar implícitamente el acceso a motivos de ausencia. Verificar ausencia de sesión, rol sin acceso, permiso que contiene el intervalo, permiso ajeno al intervalo, motivo seleccionado y rango invertido con datos ficticios. No se modifica el esquema. La reversión retira la política, las rutas y el formulario.
+
+Resultado del 17/11/2026 con .NET 8.0.428 y PostgreSQL 18 local ficticio. La compilación web terminó con cero errores y cero advertencias. Pasaron las 342 pruebas net48 y el recorrido HTTP, incluidos el acceso denegado, los filtros y el intervalo inclusivo. En navegador, el intervalo del 10 al 12 de noviembre mostró tres días de vacaciones ficticias y un día de licencia ficticia. El filtro de licencia devolvió una fila y las fechas invertidas mostraron el error. El operador de solo teletrabajo no vio el formulario. Capturas locales 24 a 27 de «caps de evidencia».
+
+### Implementación de escritorio
+
 1. Caracterizar el criterio heredado y definir el contrato (hecho; ver arriba).
 2. Caso de uso, presenter y pruebas con repositorio y vista falsos (hecho, sin ejecutar).
 3. Repositorio PostgreSQL y prueba SQL en base desechable (hecho).

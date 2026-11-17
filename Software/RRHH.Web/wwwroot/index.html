@@ -71,6 +71,16 @@
         <p id="resumen-clasificacion" role="status"></p>
         <div id="personal-remoto" class="resultados"></div>
       </section>
+      <section id="seccion-ausencias" hidden>
+        <h2>Ausencias por periodo</h2>
+        <form id="ausencias">
+          <label>Desde<input type="date" name="desde" required></label>
+          <label>Hasta<input type="date" name="hasta" required></label>
+          <label>Motivo<select name="motivo"><option value="">Todos los motivos</option></select></label>
+          <button>Consultar ausencias</button>
+        </form>
+        <div id="resultado-ausencias" class="resultados"></div>
+      </section>
     </div>
   </main>
 </body>
