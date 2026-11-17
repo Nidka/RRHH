@@ -1,12 +1,14 @@
 const byId = id => document.getElementById(id);
 const mostrar = mensaje => { byId('mensaje').textContent = mensaje; };
 const alta = byId('alta');
+const turno = byId('guardar-turno');
 
-function sesion(activa, puedeConsultarAusencias = false) {
+function sesion(activa, permisos = {}) {
   byId('acceso').hidden = activa;
   byId('panel').hidden = !activa;
   byId('salir').hidden = !activa;
-  byId('seccion-ausencias').hidden = !activa || !puedeConsultarAusencias;
+  byId('seccion-ausencias').hidden = !activa || !permisos.ausencias;
+  byId('seccion-horarios').hidden = !activa || !permisos.horarios;
   if (!activa) {
     byId('periodos').replaceChildren();
     byId('dias').replaceChildren();
@@ -14,7 +16,9 @@ function sesion(activa, puedeConsultarAusencias = false) {
     byId('resumen-clasificacion').textContent = '';
     byId('resultado-ausencias').replaceChildren();
     byId('ausencias').elements.motivo.length = 1;
-    for (const formulario of ['alta', 'listado', 'reporte', 'clasificacion', 'ausencias']) byId(formulario).reset();
+    turno.elements.horario.length = 1;
+    nuevoTurno();
+    for (const formulario of ['alta', 'listado', 'reporte', 'clasificacion', 'ausencias', 'cargar-turno']) byId(formulario).reset();
     byId('patron').hidden = true;
   }
 }
@@ -145,19 +149,60 @@ accion('ausencias', async datos => {
     ]));
 });
 
-async function cargarSesion() {
-  const usuario = await api('sesion');
-  sesion(true, usuario.ausencias);
-  if (!usuario.ausencias) return;
+function nuevoTurno() {
+  turno.reset();
+  turno.elements.numero.value = '0';
+  turno.elements.empleado.readOnly = false;
+  turno.querySelector('button').textContent = 'Registrar turno';
+  byId('nuevo-turno').hidden = true;
+  byId('estado-turno').textContent = '';
+}
+
+byId('nuevo-turno').addEventListener('click', nuevoTurno);
+accion('cargar-turno', async datos => {
+  const asignacion = await api(`horarios/asignaciones/${datos.get('empleado')}/${datos.get('numero')}`);
+  if (byId('seccion-horarios').hidden) return;
+  turno.elements.numero.value = asignacion.numero;
+  turno.elements.empleado.value = asignacion.idEmpleado;
+  turno.elements.empleado.readOnly = true;
+  turno.elements.horario.value = asignacion.idHorario;
+  turno.elements.desde.value = asignacion.desde.slice(0, 10);
+  turno.elements.hasta.value = asignacion.hasta.slice(0, 10);
+  turno.elements.documento.value = asignacion.documento ?? '';
+  turno.elements.sisgedo.value = asignacion.sisgedo ?? '';
+  turno.querySelector('button').textContent = 'Guardar cambios';
+  byId('nuevo-turno').hidden = false;
+  byId('estado-turno').textContent = 'Editando asignación ' + asignacion.numero + '.';
+});
+accion('guardar-turno', async datos => {
+  const entrada = Object.fromEntries(datos);
+  for (const campo of ['empleado', 'numero', 'horario']) entrada[campo] = Number(entrada[campo]);
+  const guardado = await api('horarios/asignaciones', entrada);
+  if (byId('seccion-horarios').hidden) return;
+  byId('cargar-turno').elements.empleado.value = entrada.empleado;
+  byId('cargar-turno').elements.numero.value = guardado.numero;
+  nuevoTurno();
+  byId('estado-turno').textContent = 'Asignación ' + guardado.numero + ' guardada.';
+});
+
+async function cargarOpciones(ruta, seccion, control) {
   try {
-    const motivos = await api('ausencias/motivos');
-    if (byId('seccion-ausencias').hidden) return;
-    const filtro = byId('ausencias').elements.motivo;
-    filtro.length = 1;
-    for (const motivo of motivos) filtro.add(new Option(motivo.descripcion, motivo.id));
+    const filas = await api(ruta);
+    if (byId(seccion).hidden) return;
+    control.length = 1;
+    for (const fila of filas) control.add(new Option(fila.descripcion, fila.id));
   } catch (error) {
     mostrar(error.message);
   }
+}
+
+async function cargarSesion() {
+  const usuario = await api('sesion');
+  sesion(true, usuario);
+  await Promise.all([
+    usuario.ausencias && cargarOpciones('ausencias/motivos', 'seccion-ausencias', byId('ausencias').elements.motivo),
+    usuario.horarios && cargarOpciones('horarios/catalogo', 'seccion-horarios', turno.elements.horario)
+  ]);
 }
 
 cargarSesion().catch(() => sesion(false));
