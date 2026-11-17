@@ -4,11 +4,13 @@ using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
+using RRHH.Application.Asistencia;
 using RRHH.Application.Permisos;
 using RRHH.Application.Seguridad;
 using RRHH.Application.Teletrabajo;
 using RRHH.Domain.Comun;
 using RRHH.Domain.Teletrabajo;
+using RRHH.PostgreSql.Asistencia;
 
 var builder = WebApplication.CreateBuilder(args);
 CompositionRoot.Configurar(builder);
@@ -63,7 +65,8 @@ operador.MapGet("/sesion", async (ClaimsPrincipal usuario, IAuthorizationService
     Results.Ok(new
     {
         usuario = usuario.Identity?.Name,
-        ausencias = (await autorizacion.AuthorizeAsync(usuario, CompositionRoot.PoliticaAusencias)).Succeeded
+        ausencias = (await autorizacion.AuthorizeAsync(usuario, CompositionRoot.PoliticaAusencias)).Succeeded,
+        horarios = (await autorizacion.AuthorizeAsync(usuario, CompositionRoot.PoliticaHorarios)).Succeeded
     }));
 operador.MapPost("/salir", async (HttpContext context, IAntiforgery tokens) =>
 {
@@ -118,6 +121,37 @@ ausencias.MapGet("", (string desde, string hasta, int? motivo, ReportarAusencias
             throw new ReglaNegocioException("Seleccione un motivo válido.");
         return Results.Ok(reporte.Ejecutar(inicio, fin, motivo));
     }));
+var horarios = operador.MapGroup("/horarios").RequireAuthorization(CompositionRoot.PoliticaHorarios);
+horarios.MapGet("/catalogo", (ListarHorarios listado) => Results.Ok(listado.Ejecutar()
+    .Select(horario => new { horario.Id, horario.Descripcion })));
+horarios.MapGet("/asignaciones/{empleado:int}/{numero:int}", (int empleado, int numero,
+    PostgreSqlHorarioTemporalRepository repositorio) =>
+    Ejecutar(() =>
+    {
+        if (empleado <= 0 || numero <= 0) throw new ReglaNegocioException("Indique un empleado y una asignación válidos.");
+        var asignacion = repositorio.Obtener(empleado, numero);
+        return asignacion is null
+            ? Results.NotFound(new { error = "No se encontró la asignación." })
+            : Results.Ok(asignacion);
+    }));
+horarios.MapPost("/asignaciones", async (HttpContext context, Turno entrada, IAntiforgery tokens,
+    AsignarHorarioPorPeriodo guardar) =>
+{
+    if (!await tokens.IsRequestValidAsync(context)) return Results.BadRequest();
+    return Ejecutar(() =>
+    {
+        var dto = new AsignacionHorarioDto
+        {
+            IdEmpleado = entrada.Empleado, Numero = entrada.Numero, IdHorario = entrada.Horario,
+            Desde = Fecha(entrada.Desde), Hasta = Fecha(entrada.Hasta),
+            Documento = entrada.Documento, Sisgedo = entrada.Sisgedo
+        };
+        var resultado = guardar.Ejecutar(dto);
+        return resultado.Exitoso
+            ? Results.Json(new { numero = dto.Numero }, statusCode: entrada.Numero == 0 ? 201 : 200)
+            : Results.BadRequest(new { error = resultado.Mensaje });
+    });
+});
 app.Run();
 
 static (DateTime Inicio, DateTime Fin) PeriodoReporte(string desde, string hasta)
@@ -143,3 +177,4 @@ static IResult Ejecutar(Func<IResult> operacion)
 
 internal sealed record Credenciales(string Login, string Password);
 internal sealed record Alta(int Empleado, string Desde, string Hasta, string Modalidad, int DiasRemotos, string Autorizacion);
+internal sealed record Turno(int Empleado, int Numero, int Horario, string Desde, string Hasta, string Documento, string Sisgedo);

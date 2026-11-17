@@ -55,6 +55,9 @@ CREATE TABLE "Usuario_Rol" ("IdUsuario" integer, "IdRol" integer);
 CREATE TABLE "RRHH_Feriado" ("idFeriado" integer, "Fecha" timestamp, "Motivo" text);
 CREATE TABLE "Motivo_Perm" ("idMotivo" integer, "Descrip_Motivo" text);
 CREATE TABLE "Permiso" ("IdEmpleado" integer, "FechaInicio" timestamp, "FechaFin" timestamp, "idMotivo" integer);
+CREATE TABLE "Horario" ("idHorario" integer, "Descrip_Horario" text, "Ingreso1" text, "Salida1" text, "Ingreso2" text, "Salida2" text, "Estado" boolean);
+CREATE TABLE "HorarioTemporal" ("idEmpleado" integer, "N" integer, "FechaInicio" timestamp, "FechaFin" timestamp,
+  "HorarioAsignado" integer, "NroDocumento" varchar(50), "Sisgedo" varchar(50), "FechaRegistro" timestamp);
 INSERT INTO "Empleado" VALUES (101, 1, 1), (102, 1, 1);
 INSERT INTO "Persona" VALUES (1, 'Ficticio', '', 'Operador');
 INSERT INTO "Usuario" VALUES (1, 'operador', 101, true, '$hash', '$saltText', 210000),
@@ -66,6 +69,7 @@ INSERT INTO "RRHH_Feriado" VALUES (1, '2026-11-11', 'Feriado ficticio');
 INSERT INTO "Motivo_Perm" VALUES (10, 'Vacaciones ficticias'), (20, 'Licencia ficticia');
 INSERT INTO "Permiso" VALUES (101, '2026-11-01', '2026-11-30', 10),
   (102, '2026-11-10', '2026-11-10', 20), (102, '2026-11-13', '2026-11-15', 20);
+INSERT INTO "Horario" VALUES (1, 'Turno ficticio', '08:00:00', NULL, NULL, '17:00:00', true);
 "@
     $fixture | & $psql @argsDb
     if ($LASTEXITCODE) { throw 'Falló la preparación de datos ficticios.' }
@@ -79,6 +83,7 @@ INSERT INTO "Permiso" VALUES (101, '2026-11-01', '2026-11-30', 10),
     $env:RRHH_WEB_POSTGRES = "Host=127.0.0.1;Port=$DatabasePort;Username=qa;Password=$dbPassword;Database=postgres;SSL Mode=Disable"
     $env:RRHH_WEB_ROLES = '1,3'
     $env:RRHH_WEB_ROLES_AUSENCIAS = '1'
+    $env:RRHH_WEB_ROLES_HORARIOS = '1'
     $env:ASPNETCORE_ENVIRONMENT = 'Development'
     $server = Start-Process -FilePath $Dotnet -ArgumentList @('bin/Debug/net8.0/RRHH.Web.dll', '--urls', $url) `
         -WorkingDirectory $hostProject -WindowStyle Hidden -PassThru `
@@ -144,12 +149,31 @@ INSERT INTO "Permiso" VALUES (101, '2026-11-01', '2026-11-30', 10),
     $licencias = Invoke-RestMethod "$ausenciasUrl&motivo=20" -WebSession $session
     if ($licencias.Count -ne 1 -or $licencias[0].idMotivo -ne 20) { throw 'No se aplicó el filtro por motivo.' }
     Assert-Http 400 (Invoke-WebRequest "$url/api/ausencias?desde=2026-11-12&hasta=2026-11-10" -WebSession $session -SkipHttpErrorCheck)
+
+    $horariosUrl = "$url/api/horarios/asignaciones"
+    Assert-Http 401 (Invoke-WebRequest "$url/api/horarios/catalogo" -SkipHttpErrorCheck)
+    Assert-Http 403 (Invoke-WebRequest "$url/api/horarios/catalogo" -WebSession $soloTeletrabajo -SkipHttpErrorCheck)
+    Assert-Http 400 (Invoke-WebRequest $horariosUrl -WebSession $session -Method Post -Body '{}' -ContentType 'application/json' -SkipHttpErrorCheck)
+    $catalogo = Invoke-RestMethod "$url/api/horarios/catalogo" -WebSession $session
+    if ($catalogo.Count -ne 1 -or $catalogo[0].id -ne 1) { throw 'El catálogo de horarios no coincide con los datos ficticios.' }
+    $turno = @{empleado=101; numero=0; horario=1; desde='2026-11-09'; hasta='2026-11-13'; documento='QA'; sisgedo=''}
+    Assert-Http 201 (Post 'horarios/asignaciones' $turno $session)
+    Assert-Http 400 (Post 'horarios/asignaciones' $turno $session)
+    $asignacion = Invoke-RestMethod "$horariosUrl/101/1" -WebSession $session
+    if ($asignacion.documento -ne 'QA') { throw 'La asignación no pudo consultarse para editar.' }
+    $turno.numero = 1
+    $turno.documento = 'QA edición'
+    Assert-Http 200 (Post 'horarios/asignaciones' $turno $session)
+    $editada = Invoke-RestMethod "$horariosUrl/101/1" -WebSession $session
+    if ($editada.documento -ne 'QA edición' -or $editada.fechaRegistro -ne $asignacion.fechaRegistro) {
+        throw 'La edición debe conservar la fecha de registro y actualizar el documento.'
+    }
     Assert-Http 204 (Post 'salir' @{} $session)
     Assert-Http 401 (Invoke-WebRequest "$url/api/periodos?empleado=101" -WebSession $session -SkipHttpErrorCheck)
-    Write-Output 'QA correcta: sesión, roles, CSRF, teletrabajo, clasificación y ausencias por periodo.'
+    Write-Output 'QA correcta: sesión, roles, CSRF, teletrabajo, ausencias y asignación de turnos.'
 } finally {
     if ($server -and !$server.HasExited) { Stop-Process -Id $server.Id }
     if ($dbStarted) { & $pgctl -D $data -m fast -w stop }
-    Remove-Item Env:PGPASSWORD, Env:RRHH_WEB_POSTGRES, Env:RRHH_WEB_ROLES, Env:RRHH_WEB_ROLES_AUSENCIAS, Env:ASPNETCORE_ENVIRONMENT, Env:RRHH_TEST_POSTGRES_CONNECTION -ErrorAction SilentlyContinue
+    Remove-Item Env:PGPASSWORD, Env:RRHH_WEB_POSTGRES, Env:RRHH_WEB_ROLES, Env:RRHH_WEB_ROLES_AUSENCIAS, Env:RRHH_WEB_ROLES_HORARIOS, Env:ASPNETCORE_ENVIRONMENT, Env:RRHH_TEST_POSTGRES_CONNECTION -ErrorAction SilentlyContinue
     Write-Output "Clúster de QA detenido. Diagnósticos ficticios en $workspace."
 }
