@@ -9,6 +9,7 @@ Versión web de RF-13 y RF-14 para operadores de RRHH. Reutiliza dominio, casos 
 - Configurar `RRHH_WEB_POSTGRES` en el entorno del servidor con la cadena de esa base y `RRHH_WEB_ROLES` con los IDs de roles autorizados separados por comas. El piloto admite solo el rol devuelto por el login existente de RRHH. Los operadores habilitados pueden consultar y registrar para distintos empleados. Confirmar ese permiso con el equipo antes de habilitar un rol.
 - Para habilitar el reporte RF-18, configurar `RRHH_WEB_ROLES_AUSENCIAS` con los IDs de roles autorizados para consultar motivos y ausencias. Deben estar también en `RRHH_WEB_ROLES`. Una lista vacía deshabilita el acceso al reporte.
 - Para habilitar el alta y la edición de turnos por periodo (RF-01) y el histórico por empleado (RF-02), configurar `RRHH_WEB_ROLES_HORARIOS` con los IDs de roles autorizados para gestionar horarios. Deben estar también en `RRHH_WEB_ROLES`. Una lista vacía deshabilita el módulo.
+- Para habilitar el alta de motivos (RF-04), configurar `RRHH_WEB_ROLES_MOTIVOS` con los IDs autorizados, también presentes en `RRHH_WEB_ROLES`. Se aplica la política de escritorio para los roles 10, 13 y 14.
 
 ## Ejecutar
 

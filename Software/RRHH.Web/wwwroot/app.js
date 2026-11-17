@@ -2,6 +2,7 @@ const byId = id => document.getElementById(id);
 const mostrar = mensaje => { byId('mensaje').textContent = mensaje; };
 const alta = byId('alta');
 const turno = byId('guardar-turno');
+const altaMotivo = byId('alta-motivo');
 
 function sesion(activa, permisos = {}) {
   byId('acceso').hidden = activa;
@@ -10,6 +11,7 @@ function sesion(activa, permisos = {}) {
   byId('seccion-ausencias').hidden = !activa || !permisos.ausencias;
   byId('seccion-horarios').hidden = !activa || !permisos.horarios;
   byId('seccion-historico').hidden = !activa || !permisos.horarios;
+  byId('seccion-motivos').hidden = !activa || !permisos.motivos;
   if (!activa) {
     byId('periodos').replaceChildren();
     byId('dias').replaceChildren();
@@ -17,6 +19,10 @@ function sesion(activa, permisos = {}) {
     byId('resumen-clasificacion').textContent = '';
     byId('resultado-ausencias').replaceChildren();
     byId('resultado-historico').replaceChildren();
+    byId('resultado-motivos').replaceChildren();
+    byId('estado-motivo').textContent = '';
+    altaMotivo.elements.tipo.length = 1;
+    altaMotivo.reset();
     byId('ausencias').elements.motivo.length = 1;
     turno.elements.horario.length = 1;
     nuevoTurno();
@@ -196,6 +202,38 @@ accion('historico-turnos', async datos => {
       fila.descrip_Horario, fila.nroDocumento ?? '', fila.sisgedo ?? '']));
 });
 
+altaMotivo.elements.tipo.addEventListener('change', () => {
+  byId('resultado-motivos').replaceChildren();
+  byId('estado-motivo').textContent = '';
+});
+
+byId('consultar-motivos').addEventListener('click', async () => {
+  const tipo = altaMotivo.elements.tipo.value;
+  if (!tipo) { altaMotivo.elements.tipo.reportValidity(); return; }
+  byId('resultado-motivos').replaceChildren();
+  try {
+    const filas = await api('motivos-permiso?tipo=' + encodeURIComponent(tipo));
+    if (byId('seccion-motivos').hidden || tipo !== altaMotivo.elements.tipo.value) return;
+    resultados('resultado-motivos', ['Código', 'Descripción', 'Abreviatura', 'Modalidad'],
+      filas.map(fila => [fila.id, fila.descripcion, fila.abreviatura ?? '', fila.modalidad ?? '']));
+  } catch (error) {
+    mostrar(error.message);
+  }
+});
+
+accion('alta-motivo', async datos => {
+  byId('estado-motivo').textContent = '';
+  const entrada = Object.fromEntries(datos);
+  entrada.tipo = Number(entrada.tipo);
+  entrada.salario = entrada.salario === '' ? null : entrada.salario === 'true';
+  const creado = await api('motivos-permiso', entrada);
+  if (byId('seccion-motivos').hidden) return;
+  altaMotivo.elements.descripcion.value = '';
+  altaMotivo.elements.abreviatura.value = '';
+  byId('resultado-motivos').replaceChildren();
+  byId('estado-motivo').textContent = 'Motivo ' + creado.id + ' registrado.';
+});
+
 async function cargarOpciones(ruta, seccion, control) {
   try {
     const filas = await api(ruta);
@@ -212,7 +250,8 @@ async function cargarSesion() {
   sesion(true, usuario);
   await Promise.all([
     usuario.ausencias && cargarOpciones('ausencias/motivos', 'seccion-ausencias', byId('ausencias').elements.motivo),
-    usuario.horarios && cargarOpciones('horarios/catalogo', 'seccion-horarios', turno.elements.horario)
+    usuario.horarios && cargarOpciones('horarios/catalogo', 'seccion-horarios', turno.elements.horario),
+    usuario.motivos && cargarOpciones('motivos-permiso/tipos', 'seccion-motivos', altaMotivo.elements.tipo)
   ]);
 }
 

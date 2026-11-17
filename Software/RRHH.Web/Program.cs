@@ -5,10 +5,12 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using RRHH.Application.Asistencia;
+using RRHH.Application.Catalogos;
 using RRHH.Application.Permisos;
 using RRHH.Application.Seguridad;
 using RRHH.Application.Teletrabajo;
 using RRHH.Domain.Comun;
+using RRHH.Domain.Permisos;
 using RRHH.Domain.Teletrabajo;
 using RRHH.PostgreSql.Asistencia;
 
@@ -66,7 +68,8 @@ operador.MapGet("/sesion", async (ClaimsPrincipal usuario, IAuthorizationService
     {
         usuario = usuario.Identity?.Name,
         ausencias = (await autorizacion.AuthorizeAsync(usuario, CompositionRoot.PoliticaAusencias)).Succeeded,
-        horarios = (await autorizacion.AuthorizeAsync(usuario, CompositionRoot.PoliticaHorarios)).Succeeded
+        horarios = (await autorizacion.AuthorizeAsync(usuario, CompositionRoot.PoliticaHorarios)).Succeeded,
+        motivos = (await autorizacion.AuthorizeAsync(usuario, CompositionRoot.PoliticaMotivos)).Succeeded
     }));
 operador.MapPost("/salir", async (HttpContext context, IAntiforgery tokens) =>
 {
@@ -160,7 +163,28 @@ horarios.MapPost("/asignaciones", async (HttpContext context, Turno entrada, IAn
             : Results.BadRequest(new { error = resultado.Mensaje });
     });
 });
+var motivos = operador.MapGroup("/motivos-permiso").RequireAuthorization(CompositionRoot.PoliticaMotivos);
+motivos.MapGet("/tipos", (ListarCatalogo catalogo) => Results.Ok(catalogo.Ejecutar("")));
+motivos.MapGet("", (int tipo, ClaimsPrincipal usuario, IMotivoPermisoRepository repositorio) =>
+    Ejecutar(() => Results.Ok(new ListarMotivosPermiso(repositorio, AccesoMotivos(usuario)).Ejecutar(tipo))));
+motivos.MapPost("", async (HttpContext context, AltaMotivo entrada, IAntiforgery tokens,
+    IMotivoPermisoRepository repositorio) =>
+{
+    if (!await tokens.IsRequestValidAsync(context)) return Results.BadRequest();
+    var dto = new MotivoPermisoDto
+    {
+        TipoPermisoId = entrada.Tipo, Descripcion = entrada.Descripcion,
+        Abreviatura = entrada.Abreviatura, Salario = entrada.Salario
+    };
+    var resultado = new GuardarMotivoPermiso(repositorio, AccesoMotivos(context.User)).Ejecutar(dto);
+    return resultado.Exitoso
+        ? Results.Json(new { id = dto.Id }, statusCode: 201)
+        : Results.BadRequest(new { error = resultado.Mensaje });
+});
 app.Run();
+
+static AccesoMotivosPermiso AccesoMotivos(ClaimsPrincipal usuario) =>
+    new(int.Parse(usuario.FindFirst(CompositionRoot.RolRrhh).Value, CultureInfo.InvariantCulture));
 
 static (DateTime Inicio, DateTime Fin) PeriodoReporte(string desde, string hasta)
 {
@@ -186,3 +210,4 @@ static IResult Ejecutar(Func<IResult> operacion)
 internal sealed record Credenciales(string Login, string Password);
 internal sealed record Alta(int Empleado, string Desde, string Hasta, string Modalidad, int DiasRemotos, string Autorizacion);
 internal sealed record Turno(int Empleado, int Numero, int Horario, string Desde, string Hasta, string Documento, string Sisgedo);
+internal sealed record AltaMotivo(int Tipo, string Descripcion, string Abreviatura, bool? Salario);
