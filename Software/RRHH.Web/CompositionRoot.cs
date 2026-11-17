@@ -45,6 +45,7 @@ internal static class CompositionRoot
             new PostgreSqlAusenciasRepository(sp.GetRequiredService<PostgreSqlExecutor>())));
         builder.Services.AddScoped<PostgreSqlHorarioTemporalRepository>();
         builder.Services.AddScoped(sp => new AsignarHorarioPorPeriodo(sp.GetRequiredService<PostgreSqlHorarioTemporalRepository>()));
+        builder.Services.AddScoped(sp => new ConsultarHistoricoHorarios(sp.GetRequiredService<PostgreSqlHorarioTemporalRepository>()));
         builder.Services.AddScoped(sp => new ListarHorarios(
             new PostgreSqlHorarioRepository(sp.GetRequiredService<PostgreSqlExecutor>())));
 

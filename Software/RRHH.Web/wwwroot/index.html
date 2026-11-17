@@ -101,6 +101,16 @@
         </form>
         <p id="estado-turno" role="status"></p>
       </section>
+      <section id="seccion-historico" hidden>
+        <h2>Histórico de turnos</h2>
+        <form id="historico-turnos">
+          <label>Código de empleado<input name="empleado" type="number" min="1" max="2147483647" required></label>
+          <label>Desde (opcional)<input name="desde" type="date"></label>
+          <label>Hasta (opcional)<input name="hasta" type="date"></label>
+          <button>Consultar histórico</button>
+        </form>
+        <div id="resultado-historico" class="resultados"></div>
+      </section>
     </div>
   </main>
 </body>
