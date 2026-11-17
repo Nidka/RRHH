@@ -124,6 +124,14 @@ ausencias.MapGet("", (string desde, string hasta, int? motivo, ReportarAusencias
 var horarios = operador.MapGroup("/horarios").RequireAuthorization(CompositionRoot.PoliticaHorarios);
 horarios.MapGet("/catalogo", (ListarHorarios listado) => Results.Ok(listado.Ejecutar()
     .Select(horario => new { horario.Id, horario.Descripcion })));
+horarios.MapGet("/historico", (int empleado, HttpRequest solicitud, ConsultarHistoricoHorarios consulta) =>
+    Ejecutar(() =>
+    {
+        var desde = solicitud.Query["desde"].ToString();
+        var hasta = solicitud.Query["hasta"].ToString();
+        return Results.Ok(consulta.Ejecutar(empleado, desde.Length == 0 ? null : Fecha(desde),
+            hasta.Length == 0 ? null : Fecha(hasta)));
+    }));
 horarios.MapGet("/asignaciones/{empleado:int}/{numero:int}", (int empleado, int numero,
     PostgreSqlHorarioTemporalRepository repositorio) =>
     Ejecutar(() =>
