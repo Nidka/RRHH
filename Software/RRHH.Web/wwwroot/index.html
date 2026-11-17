@@ -60,6 +60,17 @@
         </form>
         <div id="dias" class="resultados"></div>
       </section>
+      <section>
+        <h2>Personal en teletrabajo total o parcial</h2>
+        <form id="clasificacion">
+          <label>Desde<input type="date" name="desde" required></label>
+          <label>Hasta<input type="date" name="hasta" required></label>
+          <label>Clasificación<select name="clase"><option value="">Todas</option><option value="T">Total</option><option value="P">Parcial</option></select></label>
+          <button>Consultar personal</button>
+        </form>
+        <p id="resumen-clasificacion" role="status"></p>
+        <div id="personal-remoto" class="resultados"></div>
+      </section>
     </div>
   </main>
 </body>

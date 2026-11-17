@@ -22,13 +22,17 @@ internal static class CompositionRoot
         builder.Services.AddScoped(sp => new ObtenerAccesoUsuario(
             new PostgreSqlAccesoUsuarioRepository(sp.GetRequiredService<PostgreSqlExecutor>())));
         builder.Services.AddScoped<PostgreSqlTeletrabajoRepository>();
+        builder.Services.AddScoped<PostgreSqlFeriadoRepository>();
         builder.Services.AddScoped(sp => new RegistrarPeriodoTeletrabajo(sp.GetRequiredService<PostgreSqlTeletrabajoRepository>()));
         builder.Services.AddScoped(sp => new ListarPeriodosTeletrabajo(sp.GetRequiredService<PostgreSqlTeletrabajoRepository>()));
         builder.Services.AddScoped(sp =>
         {
             var db = sp.GetRequiredService<PostgreSqlExecutor>();
-            return new ReportarDiasTeletrabajo(new PostgreSqlReporteTeletrabajoRepository(db), new PostgreSqlFeriadoRepository(db));
+            return new ReportarDiasTeletrabajo(new PostgreSqlReporteTeletrabajoRepository(db),
+                sp.GetRequiredService<PostgreSqlFeriadoRepository>());
         });
+        builder.Services.AddScoped(sp => new ReportarTeletrabajoTotalOParcial(
+            sp.GetRequiredService<ReportarDiasTeletrabajo>(), sp.GetRequiredService<PostgreSqlFeriadoRepository>()));
 
         var seguridad = builder.Environment.IsDevelopment() ? CookieSecurePolicy.SameAsRequest : CookieSecurePolicy.Always;
         builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options =>

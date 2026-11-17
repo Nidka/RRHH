@@ -83,13 +83,33 @@ operador.MapPost("/periodos", async (HttpContext context, Alta entrada, IAntifor
 operador.MapGet("/reporte", (int? empleado, string desde, string hasta, ReportarDiasTeletrabajo reporte) =>
     Ejecutar(() =>
     {
-        var inicio = Fecha(desde);
-        var fin = Fecha(hasta);
-        if ((fin - inicio).TotalDays > 366)
-            throw new ReglaNegocioException("Consulte intervalos de hasta 367 días.");
+        var (inicio, fin) = PeriodoReporte(desde, hasta);
         return Results.Ok(reporte.Ejecutar(empleado, inicio, fin));
     }));
+operador.MapGet("/clasificacion-teletrabajo", (string desde, string hasta, HttpRequest solicitud,
+    ReportarTeletrabajoTotalOParcial reporte) =>
+    Ejecutar(() =>
+    {
+        var (inicio, fin) = PeriodoReporte(desde, hasta);
+        ModalidadTeletrabajo? filtro = solicitud.Query["clase"].ToString() switch
+        {
+            "" => null,
+            "T" => ModalidadTeletrabajo.Total,
+            "P" => ModalidadTeletrabajo.Parcial,
+            _ => throw new ReglaNegocioException("Seleccione una clasificación válida.")
+        };
+        return Results.Ok(reporte.Ejecutar(inicio, fin, filtro));
+    }));
 app.Run();
+
+static (DateTime Inicio, DateTime Fin) PeriodoReporte(string desde, string hasta)
+{
+    var inicio = Fecha(desde);
+    var fin = Fecha(hasta);
+    if ((fin - inicio).TotalDays > 366)
+        throw new ReglaNegocioException("Consulte intervalos de hasta 367 días.");
+    return (inicio, fin);
+}
 
 static DateTime Fecha(string texto) =>
     DateTime.TryParseExact(texto, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var fecha)
