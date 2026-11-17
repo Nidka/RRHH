@@ -53,7 +53,9 @@ CREATE TABLE "Usuario" ("IdUsuario" integer, "Login" text, "IdEmpleado" integer,
 CREATE TABLE "Rol" ("IdRol" integer, "IdSistema" text);
 CREATE TABLE "Usuario_Rol" ("IdUsuario" integer, "IdRol" integer);
 CREATE TABLE "RRHH_Feriado" ("idFeriado" integer, "Fecha" timestamp, "Motivo" text);
-CREATE TABLE "Motivo_Perm" ("idMotivo" integer, "Descrip_Motivo" text);
+CREATE TABLE "TipoPermiso" ("idTipoPermiso" integer, "DescripTipoPermiso" text);
+CREATE TABLE "Motivo_Perm" ("idMotivo" integer, "Descrip_Motivo" text, "Abrev" text,
+  "Salario" boolean, "idTipoPermiso" integer, "TipoModalidad" text, "Activo" boolean);
 CREATE TABLE "Permiso" ("IdEmpleado" integer, "FechaInicio" timestamp, "FechaFin" timestamp, "idMotivo" integer);
 CREATE TABLE "Horario" ("idHorario" integer, "Descrip_Horario" text, "Ingreso1" text, "Salida1" text, "Ingreso2" text, "Salida2" text, "Estado" boolean);
 CREATE TABLE "HorarioTemporal" ("idEmpleado" integer, "N" integer, "FechaInicio" timestamp, "FechaFin" timestamp,
@@ -63,10 +65,12 @@ INSERT INTO "Persona" VALUES (1, 'Ficticio', '', 'Operador');
 INSERT INTO "Usuario" VALUES (1, 'operador', 101, true, '$hash', '$saltText', 210000),
   (2, 'sin_permiso', 101, true, '$hash', '$saltText', 210000),
   (3, 'solo_teletrabajo', 102, true, '$hash', '$saltText', 210000);
-INSERT INTO "Rol" VALUES (1, '0500000'), (2, '0500000'), (3, '0500000');
-INSERT INTO "Usuario_Rol" VALUES (1, 1), (2, 2), (3, 3);
+INSERT INTO "Rol" VALUES (10, '0500000'), (2, '0500000'), (3, '0500000');
+INSERT INTO "Usuario_Rol" VALUES (1, 10), (2, 2), (3, 3);
 INSERT INTO "RRHH_Feriado" VALUES (1, '2026-11-11', 'Feriado ficticio');
-INSERT INTO "Motivo_Perm" VALUES (10, 'Vacaciones ficticias'), (20, 'Licencia ficticia');
+INSERT INTO "TipoPermiso" VALUES (1, 'Tipo ficticio');
+INSERT INTO "Motivo_Perm" VALUES (10, 'Vacaciones ficticias', 'VAC', true, 1, 'P', true),
+  (20, 'Licencia ficticia', 'LIC', true, 1, 'C', true);
 INSERT INTO "Permiso" VALUES (101, '2026-11-01', '2026-11-30', 10),
   (102, '2026-11-10', '2026-11-10', 20), (102, '2026-11-13', '2026-11-15', 20);
 INSERT INTO "Horario" VALUES (1, 'Turno ficticio', '08:00:00', NULL, NULL, '17:00:00', true);
@@ -81,9 +85,10 @@ INSERT INTO "Horario" VALUES (1, 'Turno ficticio', '08:00:00', NULL, NULL, '17:0
     }
     Invoke-Checked $Dotnet @('build', (Join-Path $hostProject 'RRHH.Web.csproj'))
     $env:RRHH_WEB_POSTGRES = "Host=127.0.0.1;Port=$DatabasePort;Username=qa;Password=$dbPassword;Database=postgres;SSL Mode=Disable"
-    $env:RRHH_WEB_ROLES = '1,3'
-    $env:RRHH_WEB_ROLES_AUSENCIAS = '1'
-    $env:RRHH_WEB_ROLES_HORARIOS = '1'
+    $env:RRHH_WEB_ROLES = '10,3'
+    $env:RRHH_WEB_ROLES_AUSENCIAS = '10'
+    $env:RRHH_WEB_ROLES_HORARIOS = '10'
+    $env:RRHH_WEB_ROLES_MOTIVOS = '10'
     $env:ASPNETCORE_ENVIRONMENT = 'Development'
     $server = Start-Process -FilePath $Dotnet -ArgumentList @('bin/Debug/net8.0/RRHH.Web.dll', '--urls', $url) `
         -WorkingDirectory $hostProject -WindowStyle Hidden -PassThru `
@@ -184,12 +189,28 @@ INSERT INTO "Horario" VALUES (1, 'Turno ficticio', '08:00:00', NULL, NULL, '17:0
     if ($vacio.Count -ne 0) { throw 'El histórico incluyó una asignación fuera del rango.' }
     Assert-Http 400 (Invoke-WebRequest "$historicoUrl&desde=2026-11-10" -WebSession $session -SkipHttpErrorCheck)
     Assert-Http 400 (Invoke-WebRequest "$historicoUrl&desde=2026-11-12&hasta=2026-11-10" -WebSession $session -SkipHttpErrorCheck)
+
+    $motivosPermisoUrl = "$url/api/motivos-permiso"
+    Assert-Http 403 (Invoke-WebRequest "$motivosPermisoUrl/tipos" -WebSession $soloTeletrabajo -SkipHttpErrorCheck)
+    Assert-Http 400 (Invoke-WebRequest $motivosPermisoUrl -WebSession $session -Method Post -Body '{}' -ContentType 'application/json' -SkipHttpErrorCheck)
+    $tipos = Invoke-RestMethod "$motivosPermisoUrl/tipos" -WebSession $session
+    if ($tipos.Count -ne 1 -or $tipos[0].id -ne 1) { throw 'El catálogo de tipos debe ofrecer el tipo ficticio.' }
+    $nuevoMotivo = @{tipo=1; descripcion='Motivo QA'; abreviatura='QA'; salario=$null}
+    $creado = Post 'motivos-permiso' $nuevoMotivo $session
+    Assert-Http 201 $creado
+    $motivoId = ($creado.Content | ConvertFrom-Json).id
+    $motivosDelTipo = Invoke-RestMethod "$motivosPermisoUrl`?tipo=1" -WebSession $session
+    if ($motivosDelTipo.Count -ne 2 -or @($motivosDelTipo | Where-Object { $_.id -eq $motivoId -and $_.modalidad -eq 'P' }).Count -ne 1) {
+        throw 'El alta debe conservar la modalidad P y excluir motivos de otra modalidad.'
+    }
+    $nuevoMotivo.descripcion = ' '
+    Assert-Http 400 (Post 'motivos-permiso' $nuevoMotivo $session)
     Assert-Http 204 (Post 'salir' @{} $session)
     Assert-Http 401 (Invoke-WebRequest "$url/api/periodos?empleado=101" -WebSession $session -SkipHttpErrorCheck)
     Write-Output 'QA correcta: sesión, roles, CSRF, teletrabajo, ausencias, asignación e histórico de turnos.'
 } finally {
     if ($server -and !$server.HasExited) { Stop-Process -Id $server.Id }
     if ($dbStarted) { & $pgctl -D $data -m fast -w stop }
-    Remove-Item Env:PGPASSWORD, Env:RRHH_WEB_POSTGRES, Env:RRHH_WEB_ROLES, Env:RRHH_WEB_ROLES_AUSENCIAS, Env:RRHH_WEB_ROLES_HORARIOS, Env:ASPNETCORE_ENVIRONMENT, Env:RRHH_TEST_POSTGRES_CONNECTION -ErrorAction SilentlyContinue
+    Remove-Item Env:PGPASSWORD, Env:RRHH_WEB_POSTGRES, Env:RRHH_WEB_ROLES, Env:RRHH_WEB_ROLES_AUSENCIAS, Env:RRHH_WEB_ROLES_HORARIOS, Env:RRHH_WEB_ROLES_MOTIVOS, Env:ASPNETCORE_ENVIRONMENT, Env:RRHH_TEST_POSTGRES_CONNECTION -ErrorAction SilentlyContinue
     Write-Output "Clúster de QA detenido. Diagnósticos ficticios en $workspace."
 }

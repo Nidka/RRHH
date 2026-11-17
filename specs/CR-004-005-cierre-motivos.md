@@ -16,6 +16,16 @@ Preventivo: pruebas de regresión/compatibilidad sobre implementación existente
 
 ## Aceptación y plan
 
+### Adaptación web de RF-04
+
+Mantenimiento adaptativo. El alta conserva la modalidad por rol, los límites de descripción y abreviatura y la generación de ID transaccional en `PostgreSqlMotivoPermisoRepository.Insertar`. La composición de web reutiliza `GuardarMotivoPermiso`, `ListarMotivosPermiso` y `ListarCatalogo`. La política exige un rol admitido por `AccesoMotivosPermiso` e incluido en `RRHH_WEB_ROLES_MOTIVOS`. El formulario y las rutas HTTPS filtran los motivos por tipo y modalidad y protegen escrituras con CSRF.
+
+Validar alta, listado, longitudes, selección inválida, rol y token. Revertir la capa web conserva los motivos registrados y el esquema. La baja se trata en RF-05.
+
+Resultado del 17/11/2026 con PostgreSQL 18 ficticio. Pasaron 342 pruebas net48 y la build web con cero errores y cero advertencias. La prueba HTTP confirmó un alta con ID y modalidad P, filtrado de otra modalidad en el listado, rechazo de descripción vacía y denegación sin rol o token.
+
+### Verificación de escritorio
+
 1. Ejecutar suite actual con fixture local ficticio; comprobar alta, duplicado de ID, edición, baja libre y baja en uso.
 2. Añadir casos con UnaVezPorAnio default false: alta usa default y edición conserva marca true sin reescribirla; el caso RF-06 sigue reconociendo el motivo marcado.
 3. Ejecutar en Windows con BD QA ficticia los CP-04/05; adjuntar capturas reales, incluyendo cancelar, error y permisos por rol. **No sustituir esto por pruebas del repositorio.**
