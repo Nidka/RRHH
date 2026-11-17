@@ -7,6 +7,8 @@ Versión web de RF-13 y RF-14 para operadores de RRHH. Reutiliza dominio, casos 
 - SDK .NET 8 y base PostgreSQL de QA con datos ficticios.
 - Preparar en esa base `BD/schema.sql`, el [esquema de autenticación](../../BD/password-auth.sql) y la [migración de teletrabajo](../../BD/migrations/20261112_03_teletrabajo.sql). Coordinar aplicación y respaldo con Kadin.
 - Configurar `RRHH_WEB_POSTGRES` en el entorno del servidor con la cadena de esa base y `RRHH_WEB_ROLES` con los IDs de roles autorizados separados por comas. El piloto admite solo el rol devuelto por el login existente de RRHH. Los operadores habilitados pueden consultar y registrar para distintos empleados. Confirmar ese permiso con el equipo antes de habilitar un rol.
+- Para habilitar el reporte RF-18, configurar `RRHH_WEB_ROLES_AUSENCIAS` con los IDs de roles autorizados para consultar motivos y ausencias. Deben estar también en `RRHH_WEB_ROLES`. Una lista vacía deshabilita el acceso al reporte.
+- Para habilitar el alta y la edición de turnos por periodo (RF-01), configurar `RRHH_WEB_ROLES_HORARIOS` con los IDs de roles autorizados para gestionar horarios. Deben estar también en `RRHH_WEB_ROLES`. Una lista vacía deshabilita el módulo.
 
 ## Ejecutar
 

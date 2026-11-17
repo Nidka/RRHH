@@ -31,6 +31,16 @@ Guardar comprueba empleado y horario únicos/existentes, clave propia única en 
 
 ## Aceptación y plan de ejecución
 
+### Adaptación web
+
+Base del piloto `12e1910` y adaptación de RF-18. Mantenimiento adaptativo. Se conservan el alta, la edición por clave, los documentos opcionales y el rechazo transaccional de solapamientos. El host compone `AsignarHorarioPorPeriodo` y el catálogo existente en `CompositionRoot.Configurar`. `Program.cs` valida sesión, rol y CSRF y traduce el contrato HTTP al DTO. La vista permite elegir el horario, registrar un periodo y cargar uno existente por empleado y número antes de editarlo. El acceso requiere `RRHH_WEB_ROLES_HORARIOS`. No hay cambio de esquema.
+
+Probar alta, edición de la misma clave, solapamiento, acceso sin rol y escritura sin token. Revertir la adaptación retira rutas y controles y conserva las asignaciones persistidas. El histórico por intervalo corresponde a RF-02.
+
+Resultado automatizado del 17/11/2026 con PostgreSQL 18 ficticio. Build web con cero errores y cero advertencias y 342 pruebas net48 correctas. La prueba HTTP confirmó alta, consulta, edición con la misma fecha de registro, rechazo de solapamiento, y denegación de operaciones sin autorización o sin token.
+
+### Implementación de escritorio
+
 - [x] Test primero (símbolos inicialmente ausentes): rango invertido/un día, igualdad/cruce/contención, distinto empleado, edición propia, texto de 50/51, no escritura al cargar.
 - [x] Implementar dominio/contrato/casos; comprobar pruebas.
 - [x] Implementar repositorio y pruebas PostgreSQL local ficticio: alta, preservación histórica, edición, referencias ambiguas, concurrencia y rollback.

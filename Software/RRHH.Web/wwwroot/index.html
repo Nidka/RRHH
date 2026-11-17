@@ -71,6 +71,36 @@
         <p id="resumen-clasificacion" role="status"></p>
         <div id="personal-remoto" class="resultados"></div>
       </section>
+      <section id="seccion-ausencias" hidden>
+        <h2>Ausencias por periodo</h2>
+        <form id="ausencias">
+          <label>Desde<input type="date" name="desde" required></label>
+          <label>Hasta<input type="date" name="hasta" required></label>
+          <label>Motivo<select name="motivo"><option value="">Todos los motivos</option></select></label>
+          <button>Consultar ausencias</button>
+        </form>
+        <div id="resultado-ausencias" class="resultados"></div>
+      </section>
+      <section id="seccion-horarios" hidden>
+        <h2>Asignar turno por periodo</h2>
+        <form id="cargar-turno">
+          <label>Código de empleado<input name="empleado" type="number" min="1" max="2147483647" required></label>
+          <label>Número de asignación<input name="numero" type="number" min="1" max="2147483647" required></label>
+          <button>Cargar para editar</button>
+        </form>
+        <form id="guardar-turno">
+          <input name="numero" type="hidden" value="0">
+          <label>Código de empleado<input name="empleado" type="number" min="1" max="2147483647" required></label>
+          <label>Horario<select name="horario" required><option value="">Seleccione un horario</option></select></label>
+          <label>Desde<input name="desde" type="date" required></label>
+          <label>Hasta<input name="hasta" type="date" required></label>
+          <label>Documento (opcional)<input name="documento" maxlength="50"></label>
+          <label>Sisgedo (opcional)<input name="sisgedo" maxlength="50"></label>
+          <button>Registrar turno</button>
+          <button type="button" id="nuevo-turno" hidden>Nueva asignación</button>
+        </form>
+        <p id="estado-turno" role="status"></p>
+      </section>
     </div>
   </main>
 </body>

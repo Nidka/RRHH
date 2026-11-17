@@ -1,17 +1,24 @@
 const byId = id => document.getElementById(id);
 const mostrar = mensaje => { byId('mensaje').textContent = mensaje; };
 const alta = byId('alta');
+const turno = byId('guardar-turno');
 
-function sesion(activa) {
+function sesion(activa, permisos = {}) {
   byId('acceso').hidden = activa;
   byId('panel').hidden = !activa;
   byId('salir').hidden = !activa;
+  byId('seccion-ausencias').hidden = !activa || !permisos.ausencias;
+  byId('seccion-horarios').hidden = !activa || !permisos.horarios;
   if (!activa) {
     byId('periodos').replaceChildren();
     byId('dias').replaceChildren();
     byId('personal-remoto').replaceChildren();
     byId('resumen-clasificacion').textContent = '';
-    for (const formulario of ['alta', 'listado', 'reporte', 'clasificacion']) byId(formulario).reset();
+    byId('resultado-ausencias').replaceChildren();
+    byId('ausencias').elements.motivo.length = 1;
+    turno.elements.horario.length = 1;
+    nuevoTurno();
+    for (const formulario of ['alta', 'listado', 'reporte', 'clasificacion', 'ausencias', 'cargar-turno']) byId(formulario).reset();
     byId('patron').hidden = true;
   }
 }
@@ -28,10 +35,11 @@ async function api(ruta, datos) {
     });
   }
   const respuesta = await fetch('/api/' + ruta, opciones);
-  if (respuesta.status === 401 || respuesta.status === 403) {
+  if (respuesta.status === 401) {
     sesion(false);
     throw new Error(ruta === 'login' ? 'Credenciales o rol no habilitado.' : 'Vuelve a iniciar sesión.');
   }
+  if (respuesta.status === 403) throw new Error('Tu rol no está habilitado para esta consulta.');
   if (!respuesta.ok) {
     const error = await respuesta.json().catch(() => ({}));
     throw new Error(error.error || (respuesta.status === 429
@@ -76,7 +84,7 @@ function accion(id, ejecutar) {
 accion('login', async datos => {
   try { await api('login', Object.fromEntries(datos)); }
   finally { byId('login').reset(); }
-  sesion(true);
+  await cargarSesion();
 });
 byId('salir').addEventListener('click', async () => {
   try { await api('salir', {}); sesion(false); mostrar('Sesión cerrada.'); }
@@ -124,4 +132,77 @@ accion('clasificacion', async datos => {
   ]));
 });
 
-api('sesion').then(() => sesion(true)).catch(() => sesion(false));
+accion('ausencias', async datos => {
+  const destino = byId('resultado-ausencias');
+  destino.replaceChildren();
+  const parametros = new URLSearchParams(datos);
+  if (!parametros.get('motivo')) parametros.delete('motivo');
+  const filas = await api('ausencias?' + parametros);
+  if (byId('seccion-ausencias').hidden) return;
+  if (!filas.length) {
+    destino.textContent = 'Nadie se ausenta en el periodo consultado.';
+    return;
+  }
+  resultados('resultado-ausencias', ['Código', 'Persona', 'Motivo', 'Inicio', 'Fin', 'Días en el periodo'],
+    filas.map(fila => [
+      fila.idEmpleado, fila.empleado, fila.motivo, fila.inicio.slice(0, 10), fila.fin.slice(0, 10), fila.diasEnPeriodo
+    ]));
+});
+
+function nuevoTurno() {
+  turno.reset();
+  turno.elements.numero.value = '0';
+  turno.elements.empleado.readOnly = false;
+  turno.querySelector('button').textContent = 'Registrar turno';
+  byId('nuevo-turno').hidden = true;
+  byId('estado-turno').textContent = '';
+}
+
+byId('nuevo-turno').addEventListener('click', nuevoTurno);
+accion('cargar-turno', async datos => {
+  const asignacion = await api(`horarios/asignaciones/${datos.get('empleado')}/${datos.get('numero')}`);
+  if (byId('seccion-horarios').hidden) return;
+  turno.elements.numero.value = asignacion.numero;
+  turno.elements.empleado.value = asignacion.idEmpleado;
+  turno.elements.empleado.readOnly = true;
+  turno.elements.horario.value = asignacion.idHorario;
+  turno.elements.desde.value = asignacion.desde.slice(0, 10);
+  turno.elements.hasta.value = asignacion.hasta.slice(0, 10);
+  turno.elements.documento.value = asignacion.documento ?? '';
+  turno.elements.sisgedo.value = asignacion.sisgedo ?? '';
+  turno.querySelector('button').textContent = 'Guardar cambios';
+  byId('nuevo-turno').hidden = false;
+  byId('estado-turno').textContent = 'Editando asignación ' + asignacion.numero + '.';
+});
+accion('guardar-turno', async datos => {
+  const entrada = Object.fromEntries(datos);
+  for (const campo of ['empleado', 'numero', 'horario']) entrada[campo] = Number(entrada[campo]);
+  const guardado = await api('horarios/asignaciones', entrada);
+  if (byId('seccion-horarios').hidden) return;
+  byId('cargar-turno').elements.empleado.value = entrada.empleado;
+  byId('cargar-turno').elements.numero.value = guardado.numero;
+  nuevoTurno();
+  byId('estado-turno').textContent = 'Asignación ' + guardado.numero + ' guardada.';
+});
+
+async function cargarOpciones(ruta, seccion, control) {
+  try {
+    const filas = await api(ruta);
+    if (byId(seccion).hidden) return;
+    control.length = 1;
+    for (const fila of filas) control.add(new Option(fila.descripcion, fila.id));
+  } catch (error) {
+    mostrar(error.message);
+  }
+}
+
+async function cargarSesion() {
+  const usuario = await api('sesion');
+  sesion(true, usuario);
+  await Promise.all([
+    usuario.ausencias && cargarOpciones('ausencias/motivos', 'seccion-ausencias', byId('ausencias').elements.motivo),
+    usuario.horarios && cargarOpciones('horarios/catalogo', 'seccion-horarios', turno.elements.horario)
+  ]);
+}
+
+cargarSesion().catch(() => sesion(false));
