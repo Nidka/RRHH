@@ -2,11 +2,15 @@ using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using RRHH.Application.Asistencia;
+using RRHH.Application.Catalogos;
 using RRHH.Application.Permisos;
 using RRHH.Application.Seguridad;
 using RRHH.Application.Teletrabajo;
+using RRHH.Domain.Catalogos;
+using RRHH.Domain.Permisos;
 using RRHH.PostgreSql;
 using RRHH.PostgreSql.Asistencia;
+using RRHH.PostgreSql.Catalogos;
 using RRHH.PostgreSql.Permisos;
 using RRHH.PostgreSql.Seguridad;
 using RRHH.PostgreSql.Teletrabajo;
@@ -16,6 +20,7 @@ internal static class CompositionRoot
 {
     internal const string PoliticaAusencias = "ConsultarAusencias";
     internal const string PoliticaHorarios = "GestionarHorarios";
+    internal const string PoliticaMotivos = "GestionarMotivos";
     internal const string RolRrhh = "rrhh:rol";
 
     public static void Configurar(WebApplicationBuilder builder)
@@ -48,6 +53,9 @@ internal static class CompositionRoot
         builder.Services.AddScoped(sp => new ConsultarHistoricoHorarios(sp.GetRequiredService<PostgreSqlHorarioTemporalRepository>()));
         builder.Services.AddScoped(sp => new ListarHorarios(
             new PostgreSqlHorarioRepository(sp.GetRequiredService<PostgreSqlExecutor>())));
+        builder.Services.AddScoped<IMotivoPermisoRepository, PostgreSqlMotivoPermisoRepository>();
+        builder.Services.AddScoped(sp => new ListarCatalogo(new PostgreSqlCatalogoRepository(
+            sp.GetRequiredService<PostgreSqlExecutor>(), MapeosCatalogo.Para(TipoCatalogo.TipoPermiso))));
 
         var seguridad = builder.Environment.IsDevelopment() ? CookieSecurePolicy.SameAsRequest : CookieSecurePolicy.Always;
         builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options =>
@@ -65,6 +73,11 @@ internal static class CompositionRoot
         {
             AgregarPoliticaPorRol(options, PoliticaAusencias, builder.Configuration["RRHH_WEB_ROLES_AUSENCIAS"]);
             AgregarPoliticaPorRol(options, PoliticaHorarios, builder.Configuration["RRHH_WEB_ROLES_HORARIOS"]);
+            var rolesMotivos = (builder.Configuration["RRHH_WEB_ROLES_MOTIVOS"] ?? "")
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            options.AddPolicy(PoliticaMotivos, policy => policy.RequireAssertion(context =>
+                context.User.HasClaim(claim => claim.Type == RolRrhh && rolesMotivos.Contains(claim.Value)
+                    && int.TryParse(claim.Value, out var id) && new AccesoMotivosPermiso(id).Permitido)));
         });
         builder.Services.AddAntiforgery(options =>
         {

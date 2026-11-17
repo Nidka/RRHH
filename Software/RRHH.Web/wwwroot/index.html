@@ -111,6 +111,19 @@
         </form>
         <div id="resultado-historico" class="resultados"></div>
       </section>
+      <section id="seccion-motivos" hidden>
+        <h2>Motivos de permiso</h2>
+        <form id="alta-motivo">
+          <label>Tipo de permiso<select name="tipo" required><option value="">Seleccione un tipo</option></select></label>
+          <label>Descripción<input name="descripcion" maxlength="50" required></label>
+          <label>Abreviatura (opcional)<input name="abreviatura" maxlength="3"></label>
+          <label>Con goce de haber<select name="salario"><option value="">Sin indicar</option><option value="true">Sí</option><option value="false">No</option></select></label>
+          <button>Agregar motivo</button>
+          <button type="button" id="consultar-motivos">Consultar motivos del tipo</button>
+        </form>
+        <p id="estado-motivo" role="status"></p>
+        <div id="resultado-motivos" class="resultados"></div>
+      </section>
     </div>
   </main>
 </body>
