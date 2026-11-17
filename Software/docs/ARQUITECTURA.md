@@ -1,6 +1,6 @@
 # Arquitectura de RRHH
 
-El host de evaluación web y móvil adapta la presentación de teletrabajo conforme al [ADR 0002](adr/0002-web-y-pwa.md). Esta arquitectura sigue siendo la referencia para Domain y Application y para el cliente WinForms.
+El host de evaluación web adapta la presentación de teletrabajo conforme al [ADR 0002](adr/0002-web-y-pwa.md). Esta arquitectura sigue siendo la referencia para Domain y Application y para el cliente WinForms.
 
 Este documento es la especificación de arquitectura del sistema RRHH. Todo
 código nuevo y todo código heredado que se migre debe cumplirla. La decisión y

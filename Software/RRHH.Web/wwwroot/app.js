@@ -110,4 +110,3 @@ accion('reporte', async datos => {
 });
 
 api('sesion').then(() => sesion(true)).catch(() => sesion(false));
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});

@@ -26,4 +26,9 @@ pwsh -NoProfile -File Software/RRHH.Web/qa/Smoke.ps1 -PostgreSqlBin '<ruta a bin
 - El chequeo HTTP registró un periodo parcial de lunes, miércoles y viernes y obtuvo dos días remotos porque el miércoles 11/11/2026 era feriado ficticio.
 - En el navegador de escritorio, el operador inició sesión y registró ese patrón para el empleado ficticio 101 del 9 al 13 de noviembre. El listado mostró el periodo 1, modalidad Parcial y patrón Lun, Mié, Vie. El reporte del 9 al 15 mostró dos días. Repetir el registro mostró el error de solapamiento.
 - Para repetir el recorrido interactivo, ejecutar la [guía de demo local](../README.md#demostración-y-qa). Queda por confirmar con el equipo el alcance académico y con Kadin la selección de roles y datos para la demostración grupal.
-- Pendiente de Jorge y el revisor: compilación completa de WinForms con la distribución autorizada que incluye GRLL y DevExpress. La verificación móvil queda fuera del alcance de esta revisión.
+- Build WinForms en af0df7c: se preparó la distribución local con GRLL y DevExpress, build.cmd terminó con 0 errores y 26 advertencias en el aplicativo, y generó RecursosHumanos.exe x86. Las 342 pruebas de escritorio pasaron con PostgreSQL ficticio. La sesión móvil queda fuera del alcance actual.
+
+## Revalidación del corte web
+
+- Después de retirar la instalación PWA del diff, el host volvió a compilar con 0 errores y 0 advertencias. Pasó la prueba de sesión, rol, CSRF, alta total y parcial, solapamiento, listado, calendario y cierre de sesión contra PostgreSQL 18 ficticio.
+- La suite de escritorio volvió a registrar 342 aprobadas, 0 fallos y 0 omitidas. Queda pendiente el recorrido visual de WinForms. El intento adicional de ejecutar el diagnóstico del binario no produjo un resultado verificable y no se contabiliza como aprobado.

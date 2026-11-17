@@ -7,7 +7,7 @@
 | GitHub Issues y matriz CR, incidencias | Registrar pasos, entorno, esperado, obtenido y decisión | Hacer reproducible el problema y enlazarlo al arreglo | [Matriz CR](../t2/CONTROL_CAMBIOS.csv). Se proponen plantillas de incidencia y mejora. |
 | Markdown y Word, documentación | Mantener specs y ADR cerca del código y consolidar la entrega académica | Distinguir hipótesis, reglas y evidencias | [Spec RF-13](../../specs/CR-013-registro-teletrabajo.md) e [informe T3](../t3/informe/INFORME_T3.docx). |
 | GitHub PR y pruebas de arquitectura, calidad | Revisar diff, dependencias y aceptación con otra persona | Detectar regresiones y acoplamiento | [Plantilla de PR](../../.github/pull_request_template.md), [prueba de capas](../../Software/RRHH.Tests/Arquitectura/DependenciasEntreCapasTests.cs). |
-| xUnit, SQL, QA y matriz CSV, validación | Verificar reglas, persistencia y recorridos con datos ficticios | Asociar cada resultado a un caso y versión | [Matriz T3](../t3/CASOS_DE_PRUEBA.csv), [concurrencia RF-13](../t3/evidencias/RF-13/concurrencia.txt). Propuesta: ampliar los recorridos a navegador y teléfono. |
+| xUnit, SQL, QA y matriz CSV, validación | Verificar reglas, persistencia y recorridos con datos ficticios | Asociar cada resultado a un caso y versión | [Matriz T3](../t3/CASOS_DE_PRUEBA.csv), [concurrencia RF-13](../t3/evidencias/RF-13/concurrencia.txt). Se amplió la verificación al [navegador de escritorio](../../Software/RRHH.Web/qa/RESULTADOS.md). |
 
 ## Mapa de trabajo
 
