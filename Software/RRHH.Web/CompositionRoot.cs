@@ -1,15 +1,20 @@
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using RRHH.Application.Permisos;
 using RRHH.Application.Seguridad;
 using RRHH.Application.Teletrabajo;
 using RRHH.PostgreSql;
 using RRHH.PostgreSql.Asistencia;
+using RRHH.PostgreSql.Permisos;
 using RRHH.PostgreSql.Seguridad;
 using RRHH.PostgreSql.Teletrabajo;
 
 /// <summary>Conecta el host web con los casos de uso y repositorios de T3.</summary>
 internal static class CompositionRoot
 {
+    internal const string PoliticaAusencias = "ConsultarAusencias";
+    internal const string RolRrhh = "rrhh:rol";
+
     public static void Configurar(WebApplicationBuilder builder)
     {
         var roles = (builder.Configuration["RRHH_WEB_ROLES"] ?? "")
@@ -33,6 +38,8 @@ internal static class CompositionRoot
         });
         builder.Services.AddScoped(sp => new ReportarTeletrabajoTotalOParcial(
             sp.GetRequiredService<ReportarDiasTeletrabajo>(), sp.GetRequiredService<PostgreSqlFeriadoRepository>()));
+        builder.Services.AddScoped(sp => new ReportarAusenciasPorPeriodo(
+            new PostgreSqlAusenciasRepository(sp.GetRequiredService<PostgreSqlExecutor>())));
 
         var seguridad = builder.Environment.IsDevelopment() ? CookieSecurePolicy.SameAsRequest : CookieSecurePolicy.Always;
         builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options =>
@@ -46,7 +53,11 @@ internal static class CompositionRoot
             options.Events.OnRedirectToLogin = ctx => { ctx.Response.StatusCode = 401; return Task.CompletedTask; };
             options.Events.OnRedirectToAccessDenied = ctx => { ctx.Response.StatusCode = 403; return Task.CompletedTask; };
         });
-        builder.Services.AddAuthorization();
+        var rolesAusencias = (builder.Configuration["RRHH_WEB_ROLES_AUSENCIAS"] ?? "")
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        builder.Services.AddAuthorization(options => options.AddPolicy(PoliticaAusencias, policy =>
+            policy.RequireAssertion(context =>
+                context.User.HasClaim(claim => claim.Type == RolRrhh && rolesAusencias.Contains(claim.Value)))));
         builder.Services.AddAntiforgery(options =>
         {
             options.HeaderName = "X-RRHH-CSRF";
