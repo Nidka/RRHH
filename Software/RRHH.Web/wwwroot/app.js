@@ -9,16 +9,18 @@ function sesion(activa, permisos = {}) {
   byId('salir').hidden = !activa;
   byId('seccion-ausencias').hidden = !activa || !permisos.ausencias;
   byId('seccion-horarios').hidden = !activa || !permisos.horarios;
+  byId('seccion-historico').hidden = !activa || !permisos.horarios;
   if (!activa) {
     byId('periodos').replaceChildren();
     byId('dias').replaceChildren();
     byId('personal-remoto').replaceChildren();
     byId('resumen-clasificacion').textContent = '';
     byId('resultado-ausencias').replaceChildren();
+    byId('resultado-historico').replaceChildren();
     byId('ausencias').elements.motivo.length = 1;
     turno.elements.horario.length = 1;
     nuevoTurno();
-    for (const formulario of ['alta', 'listado', 'reporte', 'clasificacion', 'ausencias', 'cargar-turno']) byId(formulario).reset();
+    for (const formulario of ['alta', 'listado', 'reporte', 'clasificacion', 'ausencias', 'cargar-turno', 'historico-turnos']) byId(formulario).reset();
     byId('patron').hidden = true;
   }
 }
@@ -183,6 +185,15 @@ accion('guardar-turno', async datos => {
   byId('cargar-turno').elements.numero.value = guardado.numero;
   nuevoTurno();
   byId('estado-turno').textContent = 'Asignación ' + guardado.numero + ' guardada.';
+});
+
+accion('historico-turnos', async datos => {
+  byId('resultado-historico').replaceChildren();
+  const filas = await api('horarios/historico?' + new URLSearchParams(datos));
+  if (byId('seccion-historico').hidden) return;
+  resultados('resultado-historico', ['Asignación', 'Desde', 'Hasta', 'Horario', 'Documento', 'Sisgedo'],
+    filas.map(fila => [fila.n, fila.fechaInicio?.slice(0, 10) ?? '—', fila.fechaFin?.slice(0, 10) ?? '—',
+      fila.descrip_Horario, fila.nroDocumento ?? '', fila.sisgedo ?? '']));
 });
 
 async function cargarOpciones(ruta, seccion, control) {

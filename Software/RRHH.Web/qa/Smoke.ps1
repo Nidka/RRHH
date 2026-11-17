@@ -168,9 +168,25 @@ INSERT INTO "Horario" VALUES (1, 'Turno ficticio', '08:00:00', NULL, NULL, '17:0
     if ($editada.documento -ne 'QA edición' -or $editada.fechaRegistro -ne $asignacion.fechaRegistro) {
         throw 'La edición debe conservar la fecha de registro y actualizar el documento.'
     }
+
+    $turno.numero = 0
+    $turno.desde = '2026-11-16'
+    $turno.hasta = '2026-11-20'
+    Assert-Http 201 (Post 'horarios/asignaciones' $turno $session)
+    $historicoUrl = "$url/api/horarios/historico?empleado=101"
+    Assert-Http 403 (Invoke-WebRequest $historicoUrl -WebSession $soloTeletrabajo -SkipHttpErrorCheck)
+    $historico = Invoke-RestMethod $historicoUrl -WebSession $session
+    if ($historico.Count -ne 2 -or $historico[0].n -ne 2 -or $historico[1].n -ne 1 -or
+        $historico[1].descrip_Horario -ne 'Turno ficticio') { throw 'El histórico no conservó ambas asignaciones en orden.' }
+    $interseccion = Invoke-RestMethod "$historicoUrl&desde=2026-11-10&hasta=2026-11-12" -WebSession $session
+    if ($interseccion.Count -ne 1 -or $interseccion[0].n -ne 1) { throw 'El histórico no encontró el turno que contiene el rango.' }
+    $vacio = Invoke-RestMethod "$historicoUrl&desde=2026-11-21&hasta=2026-11-22" -WebSession $session
+    if ($vacio.Count -ne 0) { throw 'El histórico incluyó una asignación fuera del rango.' }
+    Assert-Http 400 (Invoke-WebRequest "$historicoUrl&desde=2026-11-10" -WebSession $session -SkipHttpErrorCheck)
+    Assert-Http 400 (Invoke-WebRequest "$historicoUrl&desde=2026-11-12&hasta=2026-11-10" -WebSession $session -SkipHttpErrorCheck)
     Assert-Http 204 (Post 'salir' @{} $session)
     Assert-Http 401 (Invoke-WebRequest "$url/api/periodos?empleado=101" -WebSession $session -SkipHttpErrorCheck)
-    Write-Output 'QA correcta: sesión, roles, CSRF, teletrabajo, ausencias y asignación de turnos.'
+    Write-Output 'QA correcta: sesión, roles, CSRF, teletrabajo, ausencias, asignación e histórico de turnos.'
 } finally {
     if ($server -and !$server.HasExited) { Stop-Process -Id $server.Id }
     if ($dbStarted) { & $pgctl -D $data -m fast -w stop }

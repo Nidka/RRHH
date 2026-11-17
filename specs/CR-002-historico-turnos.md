@@ -23,6 +23,16 @@ FrmBuscarPersona → CompositionRoot.CrearHistoricoHorarios → FrmConsultaHorar
 
 ## Plan y aceptación
 
+### Adaptación web
+
+Base del piloto `12e1910` con la asignación web de RF-01. Mantenimiento adaptativo. Se conserva la lectura por empleado, la intersección inclusiva y la visualización de datos heredados con campos faltantes. `CompositionRoot.Configurar` compone `ConsultarHistoricoHorarios` con el repositorio de RF-01. `Program.cs` adapta la consulta al host y usa el permiso de horarios. El formulario usa la tabla web existente y solo consulta. La baja y la exportación siguen disponibles en escritorio.
+
+Verificar consulta completa con dos asignaciones, filtro con contención, periodo sin filas, un único extremo y fechas invertidas. La reversión retira la consulta y su formulario. No hay cambio de esquema ni escritura.
+
+Resultado del 17/11/2026 con PostgreSQL 18 ficticio. Pasaron 342 pruebas net48 y el recorrido HTTP de turnos, ausencias y teletrabajo. La build web terminó con 0 errores y 0 advertencias y el aplicativo WinForms x86 con 0 errores y 26 advertencias. En navegador se comprobó RF-01 con alta, edición y rechazo de solapamiento. Para RF-02, la consulta completa mostró dos turnos del empleado 101 y el filtro del 10 al 12 de noviembre mostró solo el turno del 9 al 13. Capturas 28 a 31 en «caps de evidencia».
+
+### Implementación de escritorio
+
 - [x] Tests primero: empleado/rango, contención/extremos, filtro omitido, orden, catálogo faltante, conservación tras nueva alta, consulta sin escrituras.
 - [x] Implementar DTO histórico y casos; extender repositorio con listado/baja sin duplicar horario.
 - [x] Probar SQL real en fixture local y selección/cancelación/errores del presenter.
