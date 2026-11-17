@@ -23,6 +23,16 @@ En móvil, abrir la URL en el navegador y elegir **Instalar aplicación** o **A�
 
 ## Demostración y QA
 
+Para una demo local desde cero, con PowerShell 7, SDK .NET 8 y los binarios de PostgreSQL instalados:
+
+```powershell
+pwsh -NoProfile -File Software/RRHH.Web/qa/Smoke.ps1 -PostgreSqlBin 'C:\Program Files\PostgreSQL\18\bin' -Demo
+```
+
+El comando genera un clúster de prueba, aplica la migración, crea dos empleados ficticios y muestra la URL y las credenciales del operador. Mantén la consola abierta mientras pruebas. Presiona Enter para detener ambos servicios. La contraseña del operador cambia en cada ejecución. Puedes usar `-Dotnet '<ruta a dotnet.exe>'` si usas un SDK local.
+
+Para repetir la prueba HTTP y la suite de escritorio con sus casos de PostgreSQL, usa el mismo comando con `-RegresionEscritorio` en lugar de `-Demo`. Las pruebas de escritorio tienen una BD independiente de los registros de la demo dentro del clúster temporal.
+
 1. Iniciar sesión con un operador ficticio de un rol habilitado.
 2. Registrar un periodo total de lunes a viernes para un empleado ficticio. Consultar el periodo y anotar el ID.
 3. Repetir el intervalo para el mismo empleado y verificar el mensaje de rechazo.

@@ -20,4 +20,10 @@ Comando reproducible en PowerShell 7 con puertos locales libres:
 pwsh -NoProfile -File Software/RRHH.Web/qa/Smoke.ps1 -PostgreSqlBin '<ruta a bin de PostgreSQL>'
 ```
 
-Pendientes para Jorge y el revisor: recorrido visual en navegador de escritorio, alta parcial en la interfaz e instalación y recorrido en teléfono sobre HTTPS. Validar con Kadin los roles y la base ficticia que se usarán en la demostración.
+## Verificación del 17 de noviembre de 2026
+
+- `Smoke.ps1 -RegresionEscritorio` compiló la web con 0 errores y 0 advertencias. En net48 pasaron **342 de 342**, con 0 omitidas y 0 fallidas. Las 36 pruebas anteriormente omitidas usaron `rrhh_tec004_tests` dentro de un clúster PostgreSQL 18 desechable.
+- El chequeo HTTP registró un periodo parcial de lunes, miércoles y viernes y obtuvo dos días remotos porque el miércoles 11/11/2026 era feriado ficticio.
+- En el navegador de escritorio, el operador inició sesión y registró ese patrón para el empleado ficticio 101 del 9 al 13 de noviembre. El listado mostró el periodo 1, modalidad Parcial y patrón Lun, Mié, Vie. El reporte del 9 al 15 mostró dos días. Repetir el registro mostró el error de solapamiento.
+- Para repetir el recorrido interactivo, ejecutar la [guía de demo local](../README.md#demostración-y-qa). Queda por confirmar con el equipo el alcance académico y con Kadin la selección de roles y datos para la demostración grupal.
+- Pendiente de Jorge y el revisor: compilación completa de WinForms con la distribución autorizada que incluye GRLL y DevExpress. La verificación móvil queda fuera del alcance de esta revisión.

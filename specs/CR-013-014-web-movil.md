@@ -20,3 +20,5 @@ Mantenimiento adaptativo. Se conserva el contrato de fechas inclusivas, patrón 
 ## Pruebas y reversión
 
 Verificar compilación del host, sesión, token contra solicitudes cruzadas, alta/listado e informe con PostgreSQL ficticio. Registrar un recorrido separado en teléfono. El host requiere la migración existente de Teletrabajo y el esquema de contraseña. Se revierte retirando el host sin modificar los periodos guardados.
+
+El entorno de QA ejecuta las pruebas de escritorio en una base desechable separada de la demo. La [evidencia de escritorio y navegador](../Software/RRHH.Web/qa/RESULTADOS.md) registra el caso parcial, el feriado y el rechazo de solapamiento. Móvil se conserva como alcance de la rama y queda fuera de la verificación del 17/11.

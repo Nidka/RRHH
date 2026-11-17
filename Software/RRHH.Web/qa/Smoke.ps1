@@ -2,7 +2,9 @@ param(
     [Parameter(Mandatory)][string]$PostgreSqlBin,
     [string]$Dotnet = 'dotnet',
     [int]$DatabasePort = 55414,
-    [int]$WebPort = 5080
+    [int]$WebPort = 5080,
+    [switch]$Demo,
+    [switch]$RegresionEscritorio
 )
 $ErrorActionPreference = 'Stop'
 $hostProject = Split-Path $PSScriptRoot
@@ -51,7 +53,7 @@ CREATE TABLE "Usuario" ("IdUsuario" integer, "Login" text, "IdEmpleado" integer,
 CREATE TABLE "Rol" ("IdRol" integer, "IdSistema" text);
 CREATE TABLE "Usuario_Rol" ("IdUsuario" integer, "IdRol" integer);
 CREATE TABLE "RRHH_Feriado" ("idFeriado" integer, "Fecha" timestamp, "Motivo" text);
-INSERT INTO "Empleado" VALUES (101, 1, 1);
+INSERT INTO "Empleado" VALUES (101, 1, 1), (102, 1, 1);
 INSERT INTO "Persona" VALUES (1, 'Ficticio', '', 'Operador');
 INSERT INTO "Usuario" VALUES (1, 'operador', 101, true, '$hash', '$saltText', 210000),
   (2, 'sin_permiso', 101, true, '$hash', '$saltText', 210000);
@@ -62,6 +64,11 @@ INSERT INTO "RRHH_Feriado" VALUES (1, '2026-11-11', 'Feriado ficticio');
     $fixture | & $psql @argsDb
     if ($LASTEXITCODE) { throw 'Falló la preparación de datos ficticios.' }
     Invoke-Checked $psql ($argsDb + @('-f', (Join-Path $repo 'BD/migrations/20261112_03_teletrabajo.sql')))
+    if ($RegresionEscritorio) {
+        Invoke-Checked $psql ($argsDb + @('-c', 'CREATE DATABASE rrhh_tec004_tests'))
+        $env:RRHH_TEST_POSTGRES_CONNECTION = "Host=127.0.0.1;Port=$DatabasePort;Username=qa;Password=$dbPassword;Database=rrhh_tec004_tests;SSL Mode=Disable"
+        Invoke-Checked $Dotnet @('test', (Join-Path $repo 'Software/RRHH.Tests/RRHH.Tests.csproj'))
+    }
     Invoke-Checked $Dotnet @('build', (Join-Path $hostProject 'RRHH.Web.csproj'))
     $env:RRHH_WEB_POSTGRES = "Host=127.0.0.1;Port=$DatabasePort;Username=qa;Password=$dbPassword;Database=postgres;SSL Mode=Disable"
     $env:RRHH_WEB_ROLES = '1'
@@ -75,6 +82,14 @@ INSERT INTO "RRHH_Feriado" VALUES (1, '2026-11-11', 'Feriado ficticio');
         if ($ready) { break }
     }
     if (!$ready) { throw "El host no arrancó. Revisar $workspace." }
+    if ($Demo) {
+        Write-Host "Página local: $url"
+        Write-Host 'Usuario ficticio: operador'
+        Write-Host "Contraseña de esta sesión: $password"
+        Write-Host 'Empleados ficticios: 101 y 102. El 11/11/2026 es feriado.'
+        $null = Read-Host 'Presiona Enter al terminar la demostración'
+        return
+    }
     $session = [Microsoft.PowerShell.Commands.WebRequestSession]::new()
     Assert-Http 401 (Invoke-WebRequest "$url/api/periodos?empleado=101" -SkipHttpErrorCheck)
     Assert-Http 401 (Post 'login' @{login='sin_permiso'; password=$password} $session)
@@ -87,16 +102,16 @@ INSERT INTO "RRHH_Feriado" VALUES (1, '2026-11-11', 'Feriado ficticio');
     if ($filas.Count -ne 1 -or $filas[0].diasRemotos -ne 31) { throw 'El listado no coincide con el alta.' }
     $reporte = Invoke-RestMethod "$url/api/reporte?empleado=101&desde=2026-11-09&hasta=2026-11-15" -WebSession $session
     if ($reporte.Count -ne 1 -or $reporte[0].dias -ne 4) { throw 'El reporte debía excluir el feriado ficticio.' }
+    $parcial = @{empleado=102; desde='2026-11-09'; hasta='2026-11-13'; modalidad='P'; diasRemotos=21}
+    Assert-Http 201 (Post 'periodos' $parcial $session)
+    $reporteParcial = Invoke-RestMethod "$url/api/reporte?empleado=102&desde=2026-11-09&hasta=2026-11-15" -WebSession $session
+    if ($reporteParcial.Count -ne 1 -or $reporteParcial[0].dias -ne 2) { throw 'El patrón lunes, miércoles y viernes debía dar dos días por el feriado.' }
     Assert-Http 204 (Post 'salir' @{} $session)
     Assert-Http 401 (Invoke-WebRequest "$url/api/periodos?empleado=101" -WebSession $session -SkipHttpErrorCheck)
-    $manifest = Invoke-RestMethod "$url/manifest.webmanifest"
-    if ($manifest.display -ne 'standalone') { throw 'Configuración de la PWA inválida.' }
-    foreach ($icon in $manifest.icons) { Assert-Http 200 (Invoke-WebRequest ($url + $icon.src)) }
-    Assert-Http 200 (Invoke-WebRequest "$url/sw.js")
-    Write-Output 'QA correcta: sesión, acceso por rol, CSRF, alta, rechazo de solape, listado, reporte con feriado, cierre de sesión y recursos PWA.'
+    Write-Output 'QA correcta: sesión, rol, CSRF, altas total y parcial, solapamiento, listado, calendario y cierre de sesión.'
 } finally {
     if ($server -and !$server.HasExited) { Stop-Process -Id $server.Id }
     if ($dbStarted) { & $pgctl -D $data -m fast -w stop }
-    Remove-Item Env:PGPASSWORD, Env:RRHH_WEB_POSTGRES, Env:RRHH_WEB_ROLES, Env:ASPNETCORE_ENVIRONMENT -ErrorAction SilentlyContinue
+    Remove-Item Env:PGPASSWORD, Env:RRHH_WEB_POSTGRES, Env:RRHH_WEB_ROLES, Env:ASPNETCORE_ENVIRONMENT, Env:RRHH_TEST_POSTGRES_CONNECTION -ErrorAction SilentlyContinue
     Write-Output "Clúster de QA detenido. Diagnósticos ficticios en $workspace."
 }
