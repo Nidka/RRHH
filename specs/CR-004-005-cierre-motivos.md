@@ -24,6 +24,14 @@ Validar alta, listado, longitudes, selección inválida, rol y token. Revertir l
 
 Resultado del 17/11/2026 con PostgreSQL 18 ficticio. Pasaron 342 pruebas net48 y la build web con cero errores y cero advertencias. La prueba HTTP confirmó un alta con ID y modalidad P, filtrado de otra modalidad en el listado, rechazo de descripción vacía y denegación sin rol o token.
 
+### Adaptación web de RF-05
+
+Mantenimiento adaptativo. Se conserva la política de modalidad y la protección transaccional de permisos y auditoría. `Program.cs` expone la baja protegida por la política de motivos y CSRF. El caso de uso `EliminarMotivoPermiso` y `PostgreSqlMotivoPermisoRepository.Eliminar` controlan la escritura. La vista exige seleccionar un motivo del listado y confirmar la operación antes de enviarla.
+
+Validar eliminación libre, bloqueo por permiso activo o auditoría, modalidad ajena, id inexistente y solicitud sin token. La reversión retira el flujo web; no recupera motivos eliminados deliberadamente.
+
+Resultado del 17/11/2026. Build web con cero errores y cero advertencias. La prueba HTTP, con PostgreSQL 18 ficticio, eliminó solo el motivo libre. Se denegaron los casos con permisos, auditoría, modalidad ajena, id inexistente, rol insuficiente y sin CSRF. El script retira el encabezado CSRF de la sesión de pruebas después de cada POST para probar la ausencia real del token. Queda pendiente la comprobación visual de los formularios de motivos.
+
 ### Verificación de escritorio
 
 1. Ejecutar suite actual con fixture local ficticio; comprobar alta, duplicado de ID, edición, baja libre y baja en uso.

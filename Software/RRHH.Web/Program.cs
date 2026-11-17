@@ -181,6 +181,13 @@ motivos.MapPost("", async (HttpContext context, AltaMotivo entrada, IAntiforgery
         ? Results.Json(new { id = dto.Id }, statusCode: 201)
         : Results.BadRequest(new { error = resultado.Mensaje });
 });
+motivos.MapPost("/{id:int}/eliminar", async (int id, HttpContext context, IAntiforgery tokens,
+    IMotivoPermisoRepository repositorio) =>
+{
+    if (!await tokens.IsRequestValidAsync(context)) return Results.BadRequest();
+    var resultado = new EliminarMotivoPermiso(repositorio, AccesoMotivos(context.User)).Ejecutar(id);
+    return resultado.Exitoso ? Results.NoContent() : Results.BadRequest(new { error = resultado.Mensaje });
+});
 app.Run();
 
 static AccesoMotivosPermiso AccesoMotivos(ClaimsPrincipal usuario) =>

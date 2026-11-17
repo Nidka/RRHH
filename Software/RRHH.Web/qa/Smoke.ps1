@@ -25,12 +25,19 @@ function Invoke-Checked($executable, [string[]]$arguments) {
     if ($LASTEXITCODE) { throw "Falló $executable con código $LASTEXITCODE." }
 }
 function Assert-Http($expected, $response) {
-    if ([int]$response.StatusCode -ne $expected) { throw "HTTP esperado $expected, obtenido $($response.StatusCode)." }
+    if ([int]$response.StatusCode -ne $expected) {
+        $request = $response.BaseResponse.RequestMessage
+        throw "HTTP esperado $expected, obtenido $($response.StatusCode) para $($request.Method) $($request.RequestUri)."
+    }
 }
 function Post($route, $body, $session) {
     $token = (Invoke-RestMethod "$url/api/token" -WebSession $session).token
-    Invoke-WebRequest "$url/api/$route" -WebSession $session -Method Post -SkipHttpErrorCheck `
-        -ContentType 'application/json' -Headers @{'X-RRHH-CSRF' = $token} -Body ($body | ConvertTo-Json -Compress)
+    try {
+        Invoke-WebRequest "$url/api/$route" -WebSession $session -Method Post -SkipHttpErrorCheck `
+            -ContentType 'application/json' -Headers @{'X-RRHH-CSRF' = $token} -Body ($body | ConvertTo-Json -Compress)
+    } finally {
+        $null = $session.Headers.Remove('X-RRHH-CSRF')
+    }
 }
 try {
     $data = Join-Path $workspace 'data'
@@ -57,6 +64,7 @@ CREATE TABLE "TipoPermiso" ("idTipoPermiso" integer, "DescripTipoPermiso" text);
 CREATE TABLE "Motivo_Perm" ("idMotivo" integer, "Descrip_Motivo" text, "Abrev" text,
   "Salario" boolean, "idTipoPermiso" integer, "TipoModalidad" text, "Activo" boolean);
 CREATE TABLE "Permiso" ("IdEmpleado" integer, "FechaInicio" timestamp, "FechaFin" timestamp, "idMotivo" integer);
+CREATE TABLE "Permiso_Aud" ("idMotivo_Ant" integer, "idMotivo_Act" integer);
 CREATE TABLE "Horario" ("idHorario" integer, "Descrip_Horario" text, "Ingreso1" text, "Salida1" text, "Ingreso2" text, "Salida2" text, "Estado" boolean);
 CREATE TABLE "HorarioTemporal" ("idEmpleado" integer, "N" integer, "FechaInicio" timestamp, "FechaFin" timestamp,
   "HorarioAsignado" integer, "NroDocumento" varchar(50), "Sisgedo" varchar(50), "FechaRegistro" timestamp);
@@ -70,7 +78,10 @@ INSERT INTO "Usuario_Rol" VALUES (1, 10), (2, 2), (3, 3);
 INSERT INTO "RRHH_Feriado" VALUES (1, '2026-11-11', 'Feriado ficticio');
 INSERT INTO "TipoPermiso" VALUES (1, 'Tipo ficticio');
 INSERT INTO "Motivo_Perm" VALUES (10, 'Vacaciones ficticias', 'VAC', true, 1, 'P', true),
-  (20, 'Licencia ficticia', 'LIC', true, 1, 'C', true);
+  (20, 'Licencia ficticia', 'LIC', true, 1, 'C', true),
+  (30, 'Motivo auditado', 'AUD', true, 1, 'P', true),
+  (40, 'Motivo de otra modalidad', 'OTR', true, 1, 'C', true);
+INSERT INTO "Permiso_Aud" VALUES (30, NULL);
 INSERT INTO "Permiso" VALUES (101, '2026-11-01', '2026-11-30', 10),
   (102, '2026-11-10', '2026-11-10', 20), (102, '2026-11-13', '2026-11-15', 20);
 INSERT INTO "Horario" VALUES (1, 'Turno ficticio', '08:00:00', NULL, NULL, '17:00:00', true);
@@ -147,7 +158,7 @@ INSERT INTO "Horario" VALUES (1, 'Turno ficticio', '08:00:00', NULL, NULL, '17:0
     if ((Invoke-RestMethod "$url/api/sesion" -WebSession $soloTeletrabajo).ausencias) { throw 'El rol de teletrabajo obtuvo acceso a ausencias.' }
     if (-not (Invoke-RestMethod "$url/api/sesion" -WebSession $session).ausencias) { throw 'La sesión autorizada perdió acceso a ausencias.' }
     $motivos = Invoke-RestMethod "$url/api/ausencias/motivos" -WebSession $session
-    if ($motivos.Count -ne 2) { throw 'El catálogo de motivos debía incluir los dos motivos ficticios.' }
+    if ($motivos.Count -ne 4) { throw 'El catálogo de motivos debía incluir los cuatro motivos ficticios.' }
     $ausencias = Invoke-RestMethod $ausenciasUrl -WebSession $session
     if ($ausencias.Count -ne 2 -or $ausencias[0].idEmpleado -ne 101 -or
         $ausencias[0].diasEnPeriodo -ne 3 -or $ausencias[1].diasEnPeriodo -ne 1) { throw 'El reporte RF-18 no respetó el solapamiento inclusivo.' }
@@ -200,14 +211,25 @@ INSERT INTO "Horario" VALUES (1, 'Turno ficticio', '08:00:00', NULL, NULL, '17:0
     Assert-Http 201 $creado
     $motivoId = ($creado.Content | ConvertFrom-Json).id
     $motivosDelTipo = Invoke-RestMethod "$motivosPermisoUrl`?tipo=1" -WebSession $session
-    if ($motivosDelTipo.Count -ne 2 -or @($motivosDelTipo | Where-Object { $_.id -eq $motivoId -and $_.modalidad -eq 'P' }).Count -ne 1) {
+    if ($motivosDelTipo.Count -ne 3 -or @($motivosDelTipo | Where-Object { $_.id -eq $motivoId -and $_.modalidad -eq 'P' }).Count -ne 1) {
         throw 'El alta debe conservar la modalidad P y excluir motivos de otra modalidad.'
     }
     $nuevoMotivo.descripcion = ' '
     Assert-Http 400 (Post 'motivos-permiso' $nuevoMotivo $session)
+    Assert-Http 400 (Invoke-WebRequest "$motivosPermisoUrl/$motivoId/eliminar" -WebSession $session -Method Post -SkipHttpErrorCheck)
+    Assert-Http 403 (Post "motivos-permiso/$motivoId/eliminar" @{} $soloTeletrabajo)
+    Assert-Http 400 (Post 'motivos-permiso/10/eliminar' @{} $session)
+    Assert-Http 400 (Post 'motivos-permiso/30/eliminar' @{} $session)
+    Assert-Http 400 (Post 'motivos-permiso/40/eliminar' @{} $session)
+    Assert-Http 204 (Post "motivos-permiso/$motivoId/eliminar" @{} $session)
+    Assert-Http 400 (Post "motivos-permiso/$motivoId/eliminar" @{} $session)
+    $despuesDeBaja = Invoke-RestMethod "$motivosPermisoUrl`?tipo=1" -WebSession $session
+    if ($despuesDeBaja.Count -ne 2 -or $despuesDeBaja.id -contains $motivoId) {
+        throw 'La baja eliminó un motivo incorrecto o no quitó el seleccionado.'
+    }
     Assert-Http 204 (Post 'salir' @{} $session)
     Assert-Http 401 (Invoke-WebRequest "$url/api/periodos?empleado=101" -WebSession $session -SkipHttpErrorCheck)
-    Write-Output 'QA correcta: sesión, roles, CSRF, teletrabajo, ausencias, asignación e histórico de turnos.'
+    Write-Output 'QA correcta: sesión, roles, CSRF, teletrabajo, ausencias, turnos y catálogo de motivos.'
 } finally {
     if ($server -and !$server.HasExited) { Stop-Process -Id $server.Id }
     if ($dbStarted) { & $pgctl -D $data -m fast -w stop }
