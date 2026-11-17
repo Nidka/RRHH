@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#122837">
+  <title>Teletrabajo · RRHH</title>
+
+  <link rel="icon" href="/icon.svg">
+  <link rel="stylesheet" href="/app.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header><div><strong>RRHH</strong><span>Gestión de asistencia</span></div><button id="salir" hidden>Cerrar sesión</button></header>
+  <main>
+    <h1>Teletrabajo</h1>
+    <p id="mensaje" role="status" aria-live="polite"></p>
+    <section id="acceso">
+      <h2>Iniciar sesión</h2>
+      <form id="login">
+        <label>Usuario RRHH<input name="login" autocomplete="username" maxlength="128" required></label>
+        <label>Contraseña<input name="password" type="password" autocomplete="current-password" maxlength="256" required></label>
+        <button>Entrar</button>
+      </form>
+    </section>
+    <div id="panel" hidden>
+      <section>
+        <h2>Registrar periodo</h2>
+        <form id="alta">
+          <label>Código de empleado<input name="empleado" type="number" min="1" max="2147483647" required></label>
+          <label>Modalidad<select name="modalidad"><option value="T">Total</option><option value="P">Parcial</option></select></label>
+          <label>Desde<input type="date" name="desde" required></label>
+          <label>Hasta<input type="date" name="hasta" required></label>
+          <fieldset id="patron" hidden><legend>Días remotos</legend>
+            <label><input type="checkbox" name="dia" value="1">Lunes</label>
+            <label><input type="checkbox" name="dia" value="2">Martes</label>
+            <label><input type="checkbox" name="dia" value="4">Miércoles</label>
+            <label><input type="checkbox" name="dia" value="8">Jueves</label>
+            <label><input type="checkbox" name="dia" value="16">Viernes</label>
+          </fieldset>
+          <label class="completo">Referencia de autorización (opcional)<input name="autorizacion" maxlength="200"></label>
+          <button>Registrar</button>
+        </form>
+      </section>
+      <section>
+        <h2>Periodos vigentes</h2>
+        <form id="listado">
+          <label>Código de empleado<input name="empleado" type="number" min="1" max="2147483647" required></label>
+          <button>Consultar periodos</button>
+        </form>
+        <div id="periodos" class="resultados"></div>
+      </section>
+      <section>
+        <h2>Reporte de días remotos</h2>
+        <form id="reporte">
+          <label>Empleado (vacío para todos)<input name="empleado" type="number" min="1" max="2147483647"></label>
+          <label>Desde<input type="date" name="desde" required></label>
+          <label>Hasta<input type="date" name="hasta" required></label>
+          <button>Calcular días</button>
+        </form>
+        <div id="dias" class="resultados"></div>
+      </section>
+    </div>
+  </main>
+</body>
+</html>
