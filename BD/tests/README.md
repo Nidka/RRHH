@@ -64,6 +64,10 @@ desechable completa al terminar.
 
 ## RF-06: marca `UnaVezPorAnio`
 
+La migración `20261119_01_grupo_licencia_anual.sql` agrega `GrupoReglaAnual` después de TEC-002 y de la marca anual. Una clave común permite validar códigos distintos como una misma restricción. La migración no decide qué motivos reales se agrupan. El ejecutor `Invoke-IntegridadQa.ps1` crea los motivos ficticios 900 y 901 bajo `PILOTO-FAMILIAR` y 902 bajo otra clave, prueba las restricciones, repetición y rollback. Las pruebas C# del repositorio verifican la detección cruzada entre 900 y 901.
+
+Antes de configurar motivos reales, Kadin debe confirmar los IDs únicos y la regla del grupo. La validación anual sigue separada de la escritura heredada, por lo que la concurrencia requiere la migración transaccional del flujo RF-03.
+
 Misma regla: BD local desechable, nunca `.env` ni la instancia compartida. La
 migración parte del fixture de TEC-002 y de su migración 02, que da identidad a
 `"idMotivo"` y usan las aserciones.

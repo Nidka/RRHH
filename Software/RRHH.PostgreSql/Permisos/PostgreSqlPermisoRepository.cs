@@ -62,6 +62,7 @@ AND column_name = 'UnaVezPorAnio' AND data_type = 'boolean';
                 "Solicite al responsable de BD aplicar BD/migrations/20261111_01_licencia_una_vez_anio.sql " +
                 "en esta base y comprobar que UnaVezPorAnio es boolean.");
 
+        ExigirMotivoUnico(idMotivo);
 		return _database.ScalarInt(
 			"SELECT 1 FROM public.\"Motivo_Perm\" " +
 			"WHERE \"idMotivo\" = @motivoId AND COALESCE(\"UnaVezPorAnio\", false) = true " +
@@ -70,17 +71,22 @@ AND column_name = 'UnaVezPorAnio' AND data_type = 'boolean';
 	}
 
 	/// <summary>
-	/// Busca otro permiso del mismo empleado y motivo cuya fecha de inicio cae en el año indicado. El año se compara
+	/// Busca otro permiso del empleado bajo el mismo motivo o grupo anual cuya fecha de inicio cae en el año indicado. El año se compara
 	/// como rango de fechas tipadas (<c>[1 de enero, 1 de enero siguiente)</c>) y no con texto.
 	/// </summary>
 	public bool ExistePermisoDelMotivoEnAnio(int idEmpleado, int idMotivo, int anio, int excluirNPermiso)
 	{
+        ExigirMotivoUnico(idMotivo);
 		return _database.ScalarInt(
-			"SELECT 1 FROM public.\"Permiso\" " +
-			"WHERE \"IdEmpleado\" = @empleadoId " +
-			"AND \"idMotivo\" = @motivoId " +
-			"AND \"NPermiso\" <> @excluirNPermiso " +
-			"AND \"FechaInicio\"::date >= @inicioAnio AND \"FechaInicio\"::date < @inicioAnioSiguiente " +
+			"SELECT 1 FROM public.\"Permiso\" p " +
+            "JOIN public.\"Motivo_Perm\" elegido ON elegido.\"idMotivo\" = @motivoId " +
+            "LEFT JOIN public.\"Motivo_Perm\" previo ON previo.\"idMotivo\" = p.\"idMotivo\" " +
+			"WHERE p.\"IdEmpleado\" = @empleadoId " +
+            "AND (p.\"idMotivo\" = @motivoId OR " +
+            "(NULLIF(to_jsonb(elegido)->>'GrupoReglaAnual', '') IS NOT NULL " +
+            "AND to_jsonb(previo)->>'GrupoReglaAnual' = to_jsonb(elegido)->>'GrupoReglaAnual')) " +
+			"AND p.\"NPermiso\" <> @excluirNPermiso " +
+			"AND p.\"FechaInicio\"::date >= @inicioAnio AND p.\"FechaInicio\"::date < @inicioAnioSiguiente " +
 			"LIMIT 1;",
 			new PostgreSqlParameterValue("empleadoId", idEmpleado, DbType.Int32),
 			new PostgreSqlParameterValue("motivoId", idMotivo, DbType.Int32),
@@ -88,4 +94,11 @@ AND column_name = 'UnaVezPorAnio' AND data_type = 'boolean';
 			new PostgreSqlParameterValue("inicioAnio", new DateTime(anio, 1, 1), DbType.Date),
 			new PostgreSqlParameterValue("inicioAnioSiguiente", new DateTime(anio, 1, 1).AddYears(1), DbType.Date)) == 1;
 	}
+
+    private void ExigirMotivoUnico(int idMotivo)
+    {
+        if (_database.ScalarInt("SELECT COUNT(*) FROM public.\"Motivo_Perm\" WHERE \"idMotivo\" = @id;",
+            new PostgreSqlParameterValue("id", idMotivo, DbType.Int32)) > 1)
+            throw new ReglaNegocioException("El motivo tiene un ID duplicado. Solicite revisar la integridad de BD antes de validar la licencia.");
+    }
 }
