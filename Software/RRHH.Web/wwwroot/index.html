@@ -184,6 +184,13 @@
         </form>
         <p id="resumen-saldo" role="status"></p>
         <div id="consumos-vacaciones" class="resultados"></div>
+        <h3>Simular vacaciones truncas al cese</h3>
+        <form id="truncas-vacaciones">
+          <label>Código de empleado<input name="empleado" type="number" min="1" max="2147483647" required></label>
+          <label>Último día de servicio, incluido<input name="cese" type="date" required></label>
+          <button>Calcular truncas</button>
+        </form>
+        <p id="resultado-truncas" role="status"></p>
       </section>
     </div>
   </main>

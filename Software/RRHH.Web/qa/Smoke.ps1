@@ -309,6 +309,11 @@ VALUES (900,'Licencia ficticia A',1,true,true,'PILOTO-FAMILIAR'),(901,'Licencia 
     Assert-Http 403 (Invoke-WebRequest $saldoUrl -WebSession $soloTeletrabajo -SkipHttpErrorCheck)
     $saldo=Invoke-RestMethod $saldoUrl -WebSession $session
     if ($saldo.generadas -ne 60 -or $saldo.usadas -ne 12.5 -or $saldo.pendientes -ne 47.5 -or $saldo.consumos.Count -ne 2) { throw 'RF-08: saldo 60 - 12,5 debe dar 47,5.' }
+    $truncasUrl="$url/api/vacaciones/truncas?empleado=101&cese=2026-11-12"
+    Assert-Http 401 (Invoke-WebRequest $truncasUrl -SkipHttpErrorCheck)
+    Assert-Http 403 (Invoke-WebRequest $truncasUrl -WebSession $soloTeletrabajo -SkipHttpErrorCheck)
+    if ((Invoke-RestMethod $truncasUrl -WebSession $session).truncas -ne 21) { throw 'RF-09: ejemplo del grupo debe generar 21,00.' }
+    Assert-Http 400 (Invoke-WebRequest "$url/api/vacaciones/truncas?empleado=101&cese=2024-02-29" -WebSession $session -SkipHttpErrorCheck)
     $media=@{idEmpleado=101;numero=0;idMotivo=10;desde='2026-06-15';hasta='2026-06-15';estado='Aprobado';mediaJornadaVacaciones=$true}
     $altaMedia=Post 'permisos' $media $session
     Assert-Http 200 $altaMedia

@@ -31,6 +31,8 @@ function sesion(activa, permisos = {}) {
     byId('saldo-vacaciones').reset();
     byId('resumen-saldo').textContent='';
     byId('consumos-vacaciones').replaceChildren();
+    byId('truncas-vacaciones').reset();
+    byId('resultado-truncas').textContent='';
     byId('cargar-permiso').reset();
     nuevoPermiso();
     limpiarMotivos();
@@ -116,6 +118,11 @@ accion('saldo-vacaciones',async datos => {
   const saldo=await api('vacaciones/saldo?'+new URLSearchParams(datos));
   byId('resumen-saldo').textContent=`Generadas: ${saldo.generadas} · usadas: ${saldo.usadas} · pendientes: ${saldo.pendientes} días`;
   resultados('consumos-vacaciones',['Permiso','Desde','Hasta','Días'],saldo.consumos.map(c => [c.numero,c.desde.slice(0,10),c.hasta.slice(0,10),c.dias]));
+});
+accion('truncas-vacaciones',async datos => {
+  byId('resultado-truncas').textContent='';
+  const calculo=await api('vacaciones/truncas?'+new URLSearchParams(datos));
+  byId('resultado-truncas').textContent=`Truncas al cese ${calculo.cese.slice(0,10)} (día incluido): ${calculo.truncas.toFixed(2)} días`;
 });
 byId('nuevo-permiso').addEventListener('click', nuevoPermiso);
 accion('cargar-permiso', async datos => {

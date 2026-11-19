@@ -47,6 +47,9 @@ internal static class CompositionRoot
         builder.Services.AddScoped(sp => new ConsultarSaldoVacaciones(
             new PostgreSqlSaldoVacacionesRepository(sp.GetRequiredService<PostgreSqlExecutor>()),
             new RRHH.Domain.Asistencia.RegimenVacacionesPiloto(diasVacaciones)));
+        builder.Services.AddScoped(sp => new ConsultarVacacionesTruncas(
+            new PostgreSqlIngresoVacacionesRepository(sp.GetRequiredService<PostgreSqlExecutor>()),
+            new RRHH.Domain.Asistencia.RegimenVacacionesPiloto(diasVacaciones)));
         builder.Services.AddScoped(sp => new ReportarAsistenciaConFeriados(
             new PostgreSqlFechasAsistenciaRepository(sp.GetRequiredService<PostgreSqlExecutor>()),
             sp.GetRequiredService<PostgreSqlFeriadoRepository>()));

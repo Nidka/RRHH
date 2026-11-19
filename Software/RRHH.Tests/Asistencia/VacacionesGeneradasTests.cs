@@ -47,4 +47,21 @@ public sealed class VacacionesGeneradasTests
         Assert.Throws<ReglaNegocioException>(() => new ReportarVacacionesGeneradas(new Ingreso(), new RegimenVacacionesPiloto())
             .Ejecutar(101, new DateTime(2024, 2, 29)));
     }
+
+    [Theory]
+    [InlineData(30,2026,11,12,"21.00")]
+    [InlineData(15,2026,11,12,"10.50")]
+    [InlineData(30,2024,3,1,"0.08")]
+    [InlineData(30,2025,2,28,"30.00")]
+    public void RF09TruncasIncluyenCeseYRespetanRegimen(int anual,int anio,int mes,int dia,string esperado)
+    {
+        var resultado=new ConsultarVacacionesTruncas(new Ingreso(),new RegimenVacacionesPiloto(anual))
+            .Ejecutar(101,new DateTime(anio,mes,dia));
+        Assert.Equal(decimal.Parse(esperado,System.Globalization.CultureInfo.InvariantCulture),resultado.Truncas);
+    }
+
+    [Fact]
+    public void RF09RechazaCesePrevioAlIngreso() =>
+        Assert.Throws<ReglaNegocioException>(() => new ConsultarVacacionesTruncas(new Ingreso(),new RegimenVacacionesPiloto())
+            .Ejecutar(101,new DateTime(2024,2,29)));
 }

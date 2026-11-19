@@ -41,4 +41,17 @@ public sealed class RegimenVacacionesPiloto
             throw new ReglaNegocioException("La media jornada requiere una única fecha laborable.");
         return mediaJornada ? 0.5m : (hasta.Date-desde.Date).Days+1m;
     }
+
+    /// <summary>Trunca académica del periodo en curso: meses completos y días 30/360, incluido el cese.</summary>
+    /// <remarks>Usa AddMonths para meses completos y redondea a dos decimales alejándose de cero.</remarks>
+    public decimal Truncas(DateTime ingreso,DateTime cese)
+    {
+        int anios=AniosCumplidos(ingreso,cese);
+        if (cese.Year>9998) throw new ReglaNegocioException("Fecha de cese fuera del rango del piloto.");
+        DateTime aniversario=ingreso.Date.AddYears(anios), fin=cese.Date.AddDays(1);
+        int meses=0;
+        while (meses<12 && aniversario.AddMonths(meses+1)<=fin) meses++;
+        int dias=(fin-aniversario.AddMonths(meses)).Days;
+        return Math.Round(meses*DiasAnuales/12m+Math.Min(dias,30)*DiasAnuales/360m,2,MidpointRounding.AwayFromZero);
+    }
 }
