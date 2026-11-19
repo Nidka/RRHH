@@ -130,6 +130,16 @@ a ejecutar la migración para alinear secuencias.
 
 ## Verificación ejecutada y pendientes
 
+### Continuación del 19 de noviembre de 2026
+
+Kadin reportó 281 filas y 141 IDs en Motivo_Perm y 190 filas y 95 IDs en Usuario. La identidad de contenido de cada grupo sigue pendiente de contrastar en el destino. El reporte aportado no acredita que todos los pares sean intercambiables.
+
+Se prepara diagnóstico de solo lectura para Usuario y los cuatro catálogos de TEC-002. Informa únicamente cantidades, variantes por ID, columnas y restricciones, sin exponer contraseñas, hashes, salts, nombres ni logins. La lectura de referencias declaradas se complementa con columnas candidatas que necesitan revisión del responsable de BD.
+
+La etapa siguiente se ensaya exclusivamente en rrhh_integridad_qa local. Solo se pueden consolidar copias exactas por ID, conservando una instantánea local y los IDs. Cualquier variante de contenido o ID nulo aborta la transacción. Se rechazan tablas con triggers de usuario o herencia. Después se reutiliza la migración existente de TEC-002 y se añade la clave de Usuario. Los casos negativos y la repetición deben verificarse sobre datos ficticios antes de preparar el despliegue de Kadin.
+
+Resultado del ensayo del 19/11/2026 con PostgreSQL 18 local. Se conservaron las referencias de Usuario_Rol, Permiso y Permiso_Aud y una fila por ID en cinco tablas. Las instantáneas mantuvieron las dos filas iniciales por tabla. Se verificaron cinco PK, nueve FK, repetición del saneamiento, repetición de las migraciones TEC-002 y RF-06, backup con pg_dump y restauración del fixture original en otra base local. Cuatro casos negativos rechazaron variantes de Usuario, variantes de Motivo_Perm, ID nulo y referencia huérfana sin crear respaldos ni retirar filas. Son resultados ficticios de QA. El estado real y la aplicación en la instancia compartida siguen pendientes de Kadin.
+
 En PostgreSQL local 14.23 con datos ficticios se aprobaron: migración limpia,
 4 PK, 4 identidades, 8 FK, fecha única, secuencias, repetición idempotente,
 rechazo de FK/fecha inválidas, dos inserts concurrentes con IDs distintos,
