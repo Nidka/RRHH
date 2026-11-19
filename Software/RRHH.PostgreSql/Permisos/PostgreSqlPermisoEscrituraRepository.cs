@@ -11,13 +11,45 @@ namespace RRHH.PostgreSql.Permisos;
 /// integridad frente a clientes externos que validen fuera de esta transacción.
 /// No modifica Hora_Sal, Hora_Ret ni AutorizacionRRHH al editar.
 /// </remarks>
-public sealed class PostgreSqlPermisoEscrituraRepository : IPermisoEscrituraRepository
+public sealed class PostgreSqlPermisoEscrituraRepository : IPermisoEscrituraRepository, IPermisoConsultaRepository
 {
     private readonly PostgreSqlExecutor _db;
-    public PostgreSqlPermisoEscrituraRepository(PostgreSqlExecutor db)
+    private readonly bool _permitirSalidasAutorizadas;
+    /// <summary>Configura el alcance del host; web excluye salidas cuyo control de marcación sigue en escritorio.</summary>
+    /// <param name="db">Ejecutor para consultas y transacciones PostgreSQL.</param>
+    /// <param name="permitirSalidasAutorizadas">True solo en el host que conserva los controles de salida autorizada.</param>
+    public PostgreSqlPermisoEscrituraRepository(PostgreSqlExecutor db, bool permitirSalidasAutorizadas = true)
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
+        _permitirSalidasAutorizadas = permitirSalidasAutorizadas;
     }
+
+    /// <inheritdoc/>
+    public PermisoGuardarDto Obtener(int empleado, int numero)
+    {
+        DataTable filas = _db.Query("""
+SELECT "IdEmpleado","NPermiso","idMotivo","FechaInicio","FechaFin","EstadoSolicitud",
+"Lugar","Referencia","Autorizacion","Obs","Dia","Retorno" FROM public."Permiso"
+WHERE "IdEmpleado"=@empleado AND "NPermiso"=@numero;
+""", new PostgreSqlParameterValue("empleado", empleado, DbType.Int32),
+            new PostgreSqlParameterValue("numero", numero, DbType.Int32));
+        if (filas.Rows.Count == 0) return null;
+        if (filas.Rows.Count != 1) throw new ReglaNegocioException("El número de permiso está duplicado. Revise la integridad de BD.");
+        DataRow fila = filas.Rows[0];
+        if (fila.IsNull("FechaInicio") || fila.IsNull("FechaFin") || fila.IsNull("idMotivo"))
+            throw new ReglaNegocioException("El permiso histórico tiene fechas o motivo incompletos. Requiere revisión de datos.");
+        return new PermisoGuardarDto
+        {
+            IdEmpleado=empleado, Numero=numero, IdMotivo=Convert.ToInt32(fila["idMotivo"]),
+            Desde=Convert.ToDateTime(fila["FechaInicio"]), Hasta=Convert.ToDateTime(fila["FechaFin"]),
+            Estado=Convert.ToString(fila["EstadoSolicitud"]), Lugar=Texto(fila,"Lugar"),
+            Referencia=Texto(fila,"Referencia"), Autorizacion=Texto(fila,"Autorizacion"),
+            Observacion=Texto(fila,"Obs"), Dia=Booleano(fila,"Dia"), Retorno=Booleano(fila,"Retorno")
+        };
+    }
+
+    private static string Texto(DataRow fila, string campo) => fila.IsNull(campo) ? null : (string)fila[campo];
+    private static bool? Booleano(DataRow fila, string campo) => fila.IsNull(campo) ? (bool?)null : Convert.ToBoolean(fila[campo]);
 
     /// <inheritdoc/>
     public int Guardar(PermisoGuardarDto dto)
@@ -38,12 +70,21 @@ AND table_name='Permiso' AND column_name='EstadoSolicitud';
             if (tx.ScalarInt("SELECT COUNT(*) FROM public.\"Motivo_Perm\" WHERE \"idMotivo\"=@motivo AND \"Activo\" IS TRUE;",
                 new PostgreSqlParameterValue("motivo", dto.IdMotivo, DbType.Int32)) != 1)
                 throw new ReglaNegocioException("El motivo no existe, está inactivo o tiene un ID duplicado.");
+            if (!_permitirSalidasAutorizadas && tx.ScalarInt(
+                "SELECT \"idTipoPermiso\" FROM public.\"Motivo_Perm\" WHERE \"idMotivo\"=@motivo;",
+                new PostgreSqlParameterValue("motivo", dto.IdMotivo, DbType.Int32)) == 2)
+                throw new ReglaNegocioException("Las salidas autorizadas por horas todavía se gestionan desde la aplicación de escritorio.");
             string estado = dto.Estado ?? "Solicitado";
             if (dto.Numero > 0)
             {
                 if (tx.ScalarInt("SELECT COUNT(*) FROM public.\"Permiso\" WHERE \"IdEmpleado\"=@empleado AND \"NPermiso\"=@numeroAnterior;",
                     empleado, numeroAnterior) != 1)
                     throw new ReglaNegocioException("El permiso no existe o su número está duplicado. Actualice el listado.");
+                if (!_permitirSalidasAutorizadas && tx.ScalarInt("""
+SELECT COUNT(*) FROM public."Permiso" p JOIN public."Motivo_Perm" m ON m."idMotivo"=p."idMotivo"
+WHERE p."IdEmpleado"=@empleado AND p."NPermiso"=@numeroAnterior AND m."idTipoPermiso"=2;
+""", empleado, numeroAnterior) > 0)
+                    throw new ReglaNegocioException("Esta salida autorizada debe editarse desde la aplicación de escritorio.");
                 if (dto.Estado == null)
                     estado = (string)tx.Scalar("SELECT \"EstadoSolicitud\" FROM public.\"Permiso\" WHERE \"IdEmpleado\"=@empleado AND \"NPermiso\"=@numeroAnterior;",
                         empleado, numeroAnterior);

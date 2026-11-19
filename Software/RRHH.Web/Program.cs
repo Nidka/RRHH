@@ -71,7 +71,8 @@ operador.MapGet("/sesion", async (ClaimsPrincipal usuario, IAuthorizationService
         horarios = (await autorizacion.AuthorizeAsync(usuario, CompositionRoot.PoliticaHorarios)).Succeeded,
         motivos = (await autorizacion.AuthorizeAsync(usuario, CompositionRoot.PoliticaMotivos)).Succeeded,
         asistencia = (await autorizacion.AuthorizeAsync(usuario, CompositionRoot.PoliticaAsistencia)).Succeeded,
-        vacaciones = (await autorizacion.AuthorizeAsync(usuario, CompositionRoot.PoliticaVacaciones)).Succeeded
+        vacaciones = (await autorizacion.AuthorizeAsync(usuario, CompositionRoot.PoliticaVacaciones)).Succeeded,
+        permisos = (await autorizacion.AuthorizeAsync(usuario, CompositionRoot.PoliticaPermisos)).Succeeded
     }));
 operador.MapPost("/salir", async (HttpContext context, IAntiforgery tokens) =>
 {
@@ -200,6 +201,17 @@ operador.MapGet("/asistencia", (int empleado, string desde, string hasta, string
 operador.MapGet("/vacaciones/generadas", (int empleado, string corte, ReportarVacacionesGeneradas reporte) =>
     Ejecutar(() => Results.Ok(reporte.Ejecutar(empleado, Fecha(corte)))))
     .RequireAuthorization(CompositionRoot.PoliticaVacaciones);
+var permisos = operador.MapGroup("/permisos").RequireAuthorization(CompositionRoot.PoliticaPermisos);
+permisos.MapGet("", (int empleado, int numero, ConsultarPermiso consulta) =>
+    Ejecutar(() => Results.Ok(consulta.Ejecutar(empleado, numero))));
+permisos.MapPost("", async (HttpContext context, PermisoGuardarDto entrada, IAntiforgery tokens,
+    GuardarPermiso guardar) =>
+{
+    if (!await tokens.IsRequestValidAsync(context)) return Results.BadRequest();
+    var resultado = guardar.Ejecutar(entrada);
+    return resultado.Exitoso ? Results.Ok(new { numero=entrada.Numero })
+        : Results.BadRequest(new { error=resultado.Mensaje });
+});
 app.Run();
 
 static AccesoMotivosPermiso AccesoMotivos(ClaimsPrincipal usuario) =>

@@ -11,6 +11,26 @@ Versión web de RF-13 y RF-14 para operadores de RRHH. Reutiliza dominio, casos 
 - Para habilitar el alta y la edición de turnos por periodo (RF-01) y el histórico por empleado (RF-02), configurar `RRHH_WEB_ROLES_HORARIOS` con los IDs de roles autorizados para gestionar horarios. Deben estar también en `RRHH_WEB_ROLES`. Una lista vacía deshabilita el módulo.
 - Para habilitar el alta (RF-04) y la baja (RF-05) de motivos, configurar `RRHH_WEB_ROLES_MOTIVOS` con los IDs autorizados, también presentes en `RRHH_WEB_ROLES`. Se aplica la política de escritorio para los roles 10, 13 y 14.
 
+## Permisos RF-03 / RF-06
+
+La continuación `codex/rf-03-permisos-web` añade alta, carga y edición de
+permisos del piloto, incluidos Solicitado, Aprobado, Rechazado y Anulado.
+Se habilita mediante `RRHH_WEB_ROLES_PERMISOS`, con IDs también admitidos
+en `RRHH_WEB_ROLES`. Una lista vacía deja el módulo deshabilitado.
+No conceder este acceso a roles de autoservicio: permite gestionar permisos
+de otros empleados. GET `/api/permisos?empleado=101&numero=1` carga la edición;
+POST `/api/permisos` utiliza el caso de uso transaccional de escritorio.
+
+Requiere las migraciones RF-06, agrupación anual y
+`BD/migrations/20261119_02_estados_permiso.sql`. La demo las aplica solo al
+clúster ficticio local. Los motivos 900/901 se usan en QA; no se crean en la
+base compartida. El formulario permite introducir el código de un motivo
+activo del catálogo; el servidor comprueba su existencia y unicidad.
+Las salidas autorizadas por horas (tipo 2) siguen limitadas al escritorio:
+el endpoint las rechaza para conservar los controles de marcación y reloj
+que aún están en el formulario heredado. No se presenta este incremento
+como una migración completa de ese flujo.
+
 ## Ejecutar
 
 Para RF-07, habilitar `RRHH_WEB_ROLES_VACACIONES` con roles admitidos también en `RRHH_WEB_ROLES`. El régimen del piloto genera 30 días por año cumplido desde FechaIngreso. `RRHH_VACACIONES_DIAS_ANUALES` permite cambiar la cantidad anual. En escritorio se usa el mismo parámetro y los roles de consulta se habilitan con `RRHH_VACACIONES_ROLES`. La consulta muestra únicamente días generados.

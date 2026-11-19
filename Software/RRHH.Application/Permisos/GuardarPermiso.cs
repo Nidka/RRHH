@@ -51,6 +51,8 @@ public sealed class GuardarPermiso
         {
             if (dto.IdEmpleado <= 0 || dto.IdMotivo <= 0 || dto.Numero < 0)
                 throw new ReglaNegocioException("Empleado, motivo o número de permiso inválido.");
+            if (dto.Dia == true && dto.Retorno == true)
+                throw new ReglaNegocioException("Día completo y con retorno no pueden seleccionarse simultáneamente.");
             RangoFechas.Crear(dto.Desde, dto.Hasta);
             if (dto.Desde.Year < 1900 || dto.Hasta.Year > 9998)
                 throw new ReglaNegocioException("Las fechas deben estar entre 1900 y 9998.");

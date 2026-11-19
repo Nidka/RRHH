@@ -1,5 +1,28 @@
 # Verificación del piloto web y móvil
 
+## Continuación local RF-03 / RF-06 — 19/11/2026
+
+Rama `codex/rf-03-permisos-web`, sobre `f496a90` (PR #57).
+Solo datos ficticios en PostgreSQL 18 local. No modifica el despliegue compartido.
+
+| Comprobación ejecutada | Resultado |
+|---|---|
+| Regresión net48 con PostgreSQL local | 362/362 aprobadas, ninguna omitida |
+| Compilación del host web | 0 errores y 0 advertencias |
+| GET/POST de permisos sin sesión/rol, y POST sin CSRF | 401 / 403 / 400 según el caso |
+| Alta y carga con observación | Número confirmado y datos recuperados |
+| Segundo permiso en la misma fecha | Rechazado sin alta |
+| Anulación y reutilización de la fecha | Admitidas; reactivar el permiso anterior se rechaza y conserva Anulado |
+| Dos códigos de motivo del mismo grupo anual | Segundo rechazado aunque las fechas sean diferentes |
+| Recorrido real en navegador local | Login, alta del permiso 2 para empleado ficticio 101, rechazo de solapamiento, carga y anulación; mensajes observados en pantalla |
+
+El recorrido en navegador usó otra instancia de demo desechable. No se
+guardaron capturas de este recorrido; no se presentan resultados de WinForms
+visual ni del servidor compartido. La evidencia del guardado común está en
+[RF-03](../../../qa/RF-03-ESTADOS-RESULTADOS.md).
+
+## Evidencia histórica del primer corte
+
 Base T3: `bb5add4`. Entorno de verificación: Windows, SDK .NET 8.0.428, PostgreSQL 18 local desechable y datos ficticios. La migración de teletrabajo se ejecutó en un clúster separado limitado a loopback.
 
 | Comprobación | Resultado obtenido |
