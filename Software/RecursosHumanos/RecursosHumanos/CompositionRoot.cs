@@ -48,6 +48,11 @@ internal static class CompositionRoot
 		return new ObtenerAccesoUsuario(new PostgreSqlAccesoUsuarioRepository(Database.Value));
 	}
 
+    /// <summary>Compone el total diario de asistencia sin duplicar marcaciones en días no laborables.</summary>
+    public static ReportarAsistenciaConFeriados CrearReporteAsistenciaConFeriados() =>
+        new ReportarAsistenciaConFeriados(new PostgreSqlFechasAsistenciaRepository(Database.Value),
+            new PostgreSqlFeriadoRepository(Database.Value));
+
 	public static bool EstablecerContrasenaUsuario(string login, string password)
 	{
 		return new PostgreSqlAccesoUsuarioRepository(Database.Value)

@@ -57,6 +57,16 @@ En el modo «Asistencias», los días no laborables del rango se suman a los dí
 
 ## Pasos de implementación
 
+### Corrección del piloto de noviembre de 2026
+
+Base `d12f4a4`. Regla proporcionada por el grupo para datos ficticios. Cada fecha aporta como máximo un día al modo Asistencias, conservando el detalle de las marcaciones. El modo Productividad conserva el conteo de fechas asistidas. Mantenimiento correctivo mediante extracción de un caso de uso tipado con Repository y reutilización de CalendarioLaboral. Application calcula la unión de fechas asistidas y no laborables y PostgreSql recupera las fechas distintas de Asistencia por empleado. No se agrega un mapper ni se modifica el esquema.
+
+Archivos afectados son ReportarAsistenciaConFeriados, su contrato y repositorio, CompositionRoot y la asignación de DiasAsistidos en FrmConsultaAsistencias. El host web reutiliza el caso de uso y exige un rol explícito mediante RRHH_WEB_ROLES_ASISTENCIA. La vista muestra total y detalle por fecha.
+
+Pruebas necesarias son marcación en feriado y sábado, registros repetidos, ausencia de marcaciones, Productividad, fecha invertida, datos fuera del rango y rechazo de acceso sin rol. La reversión restaura la fórmula anterior. El despliegue utiliza la tabla Asistencia y el catálogo de feriados existentes.
+
+Resultado del 19/11/2026 en Windows con SDK 8.0.428 y PostgreSQL 18 ficticio. Pasaron 347 pruebas net48, incluidas cinco regresiones nuevas del total por fecha. La web compiló con cero errores y cero advertencias. La prueba HTTP confirmó total 4 en Asistencias y 3 en Productividad con marcación en feriado, sábado y un duplicado, y conservó ambos días no laborables en el detalle. El build.cmd completo generó el aplicativo x86 con cero errores y 26 advertencias. El recorrido visual de esta nueva corrección está pendiente.
+
 1. Caracterizar la fórmula heredada (hecho; ver arriba).
 2. Caso de uso y pruebas con repositorio falso (hecho).
 3. Conectar en `CompositionRoot` y reemplazar el conteo del formulario (hecho).
