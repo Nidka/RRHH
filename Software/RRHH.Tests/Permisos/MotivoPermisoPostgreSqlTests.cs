@@ -1,8 +1,10 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Npgsql;
 using RRHH.Application.Comun;
+using RRHH.Application.Permisos;
 using RRHH.Domain.Comun;
 using RRHH.Domain.Permisos;
 using RRHH.PostgreSql;
@@ -291,6 +293,146 @@ UPDATE public."Motivo_Perm" SET "GrupoReglaAnual" = 'PILOTO-OTRA' WHERE "idMotiv
 
     private static MotivoPermiso Nuevo(string descripcion, string modalidad) =>
         MotivoPermiso.Nuevo(1, descripcion, null, null, modalidad);
+
+    [PostgreSqlLocalFact]
+    public void RF03YRF06SoloEstadosOcupantesBloquean()
+    {
+        PrepararLicenciasAnuales(true);
+        _db.Execute("""
+ALTER TABLE public."Permiso" ADD COLUMN "FechaFin" timestamp;
+ALTER TABLE public."Permiso" ADD COLUMN "EstadoSolicitud" varchar(10);
+UPDATE public."Permiso" SET "FechaFin"='2026-03-12';
+""");
+        var repo = new PostgreSqlPermisoRepository(_db);
+        var rango = RangoFechas.Crear(new DateTime(2026, 3, 9), new DateTime(2026, 3, 13));
+        foreach (string estado in new[] { "Solicitado", "Aprobado", "Rechazado", "Anulado", "Otro" })
+        {
+            _db.Execute("UPDATE public.\"Permiso\" SET \"EstadoSolicitud\"=@estado;",
+                new PostgreSqlParameterValue("estado", estado));
+            bool ocupa = estado != "Rechazado" && estado != "Anulado";
+            Assert.Equal(ocupa, repo.ExisteSolapamiento(101, rango, 0));
+            Assert.Equal(ocupa, repo.ExistePermisoDelMotivoEnAnio(101, 901, 2026, 0));
+            Assert.False(repo.ExisteSolapamiento(101, rango, 1));
+        }
+        _db.Execute("ALTER TABLE public.\"Permiso\" DROP COLUMN \"EstadoSolicitud\";");
+        Assert.True(repo.ExisteSolapamiento(101, rango, 0));
+        Assert.True(repo.ExistePermisoDelMotivoEnAnio(101, 901, 2026, 0));
+    }
+
+    [PostgreSqlLocalFact]
+    public void MigracionEstadosEsIdempotenteYCompatibleConAutorizadoHeredado()
+    {
+        PrepararLicenciasAnuales(true);
+        _db.Execute("ALTER TABLE public.\"Permiso\" ADD COLUMN \"Autorizado\" boolean;");
+        string migracion = LeerMigracion("20261119_02_estados_permiso.sql");
+        _db.Execute(migracion);
+        Assert.Equal("Solicitado", EstadoActual());
+        _db.Execute("UPDATE public.\"Permiso\" SET \"Autorizado\"=true;");
+        Assert.Equal("Aprobado", EstadoActual());
+        _db.Execute("UPDATE public.\"Permiso\" SET \"EstadoSolicitud\"='Anulado';");
+        Assert.Equal(0, _db.ScalarInt("SELECT COUNT(*) FROM public.\"Permiso\" WHERE \"Autorizado\";"));
+        _db.Execute(migracion);
+        Assert.Equal("Anulado", EstadoActual());
+        var error = Assert.Throws<PostgresException>(() => _db.Execute(
+            "UPDATE public.\"Permiso\" SET \"EstadoSolicitud\"='Invalido';"));
+        Assert.Equal("23514", error.SqlState);
+        Assert.Equal("Anulado", EstadoActual());
+        Assert.Throws<PostgresException>(() => _db.Execute(LeerMigracion("20261119_02_estados_permiso.rollback.sql")));
+        Assert.Equal("Anulado", EstadoActual());
+        _db.Execute("UPDATE public.\"Permiso\" SET \"EstadoSolicitud\"='Solicitado';");
+        _db.Execute(LeerMigracion("20261119_02_estados_permiso.rollback.sql"));
+        Assert.Equal(0, _db.ScalarInt("SELECT COUNT(*) FROM information_schema.columns WHERE table_schema='public' AND table_name='Permiso' AND column_name='EstadoSolicitud';"));
+    }
+
+    private string EstadoActual() => (string)_db.Scalar("SELECT \"EstadoSolicitud\" FROM public.\"Permiso\";");
+
+    private GuardarPermiso PrepararGuardado()
+    {
+        PrepararLicenciasAnuales(true);
+        _db.Execute("""
+DELETE FROM public."Permiso";
+DROP TABLE IF EXISTS public."Empleado" CASCADE;
+CREATE TABLE public."Empleado" ("IdEmpleado" integer);
+INSERT INTO public."Empleado" VALUES (101),(102);
+UPDATE public."Motivo_Perm" SET "Activo"=true;
+ALTER TABLE public."Permiso" ADD COLUMN "FechaFin" timestamp;
+ALTER TABLE public."Permiso" ADD COLUMN "Autorizado" boolean;
+ALTER TABLE public."Permiso" ADD COLUMN "Lugar" varchar(20);
+ALTER TABLE public."Permiso" ADD COLUMN "Referencia" varchar(100);
+ALTER TABLE public."Permiso" ADD COLUMN "Autorizacion" varchar(50);
+ALTER TABLE public."Permiso" ADD COLUMN "Obs" varchar(200);
+ALTER TABLE public."Permiso" ADD COLUMN "Dia" boolean;
+ALTER TABLE public."Permiso" ADD COLUMN "Retorno" boolean;
+ALTER TABLE public."Permiso" ADD COLUMN "Hora_Sal" varchar(8);
+ALTER TABLE public."Permiso" ADD COLUMN "Hora_Ret" varchar(8);
+ALTER TABLE public."Permiso" ADD COLUMN "AutorizacionRRHH" varchar(50);
+""");
+        _db.Execute(LeerMigracion("20261119_02_estados_permiso.sql"));
+        return new GuardarPermiso(new PostgreSqlPermisoEscrituraRepository(_db));
+    }
+
+    private static PermisoGuardarDto Solicitud(int motivo = 900, int dia = 10) => new PermisoGuardarDto
+    {
+        IdEmpleado=101, IdMotivo=motivo, Desde=new DateTime(2026, 3, dia), Hasta=new DateTime(2026, 3, dia)
+    };
+
+    [PostgreSqlLocalFact]
+    public void GuardadoPermisoConservaMarcacionesYLiberaCupoAlAnular()
+    {
+        var guardar = PrepararGuardado();
+        var primera = Solicitud();
+        Assert.True(guardar.Ejecutar(primera).Exitoso);
+        Assert.Equal(1, primera.Numero);
+        Assert.Equal("Solicitado", EstadoActual());
+        var segunda = Solicitud(901, 20);
+        Assert.False(guardar.Ejecutar(segunda).Exitoso);
+        Assert.Equal(0, segunda.Numero);
+        _db.Execute("UPDATE public.\"Permiso\" SET \"Hora_Sal\"='12:00:00', \"AutorizacionRRHH\"='Conservar';");
+        primera.Estado="Anulado";
+        Assert.True(guardar.Ejecutar(primera).Exitoso);
+        Assert.Equal("12:00:00", _db.Scalar("SELECT \"Hora_Sal\" FROM public.\"Permiso\";"));
+        Assert.Equal("Conservar", _db.Scalar("SELECT \"AutorizacionRRHH\" FROM public.\"Permiso\";"));
+        Assert.True(guardar.Ejecutar(segunda).Exitoso);
+        Assert.Equal(2, segunda.Numero);
+        primera.Estado="Aprobado";
+        Assert.False(guardar.Ejecutar(primera).Exitoso);
+        Assert.Equal("Anulado", _db.Scalar("SELECT \"EstadoSolicitud\" FROM public.\"Permiso\" WHERE \"NPermiso\"=1;"));
+        segunda.Observacion=new string('x',201);
+        Assert.False(guardar.Ejecutar(segunda).Exitoso);
+        Assert.Equal(2, _db.ScalarInt("SELECT COUNT(*) FROM public.\"Permiso\";"));
+    }
+
+    [PostgreSqlLocalFact]
+    public async Task GuardadoConcurrenteSerializaSolapamientoYCupoCompartido()
+    {
+        var guardar = PrepararGuardado();
+        foreach (bool porFechas in new[] { true, false })
+        {
+            _db.Execute("DELETE FROM public.\"Permiso\";");
+            // Motivos diferentes: las fechas coincidentes ejercitan RF-03; las
+            // fechas distintas ejercitan RF-06 mediante el grupo compartido.
+            var primera=Solicitud(900,10);
+            var segunda=Solicitud(901,porFechas ? 10 : 20);
+            var resultados=await Task.WhenAll(
+                Task.Run(() => guardar.Ejecutar(primera)), Task.Run(() => guardar.Ejecutar(segunda)));
+            Assert.Single(resultados, r => r.Exitoso);
+            Assert.Single(resultados, r => !r.Exitoso);
+            Assert.Equal(1,_db.ScalarInt("SELECT COUNT(*) FROM public.\"Permiso\";"));
+            Assert.Equal(1, primera.Numero + segunda.Numero);
+        }
+    }
+
+    private static string LeerMigracion(string nombre)
+    {
+        var carpeta = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory);
+        while (carpeta != null)
+        {
+            string archivo = Path.Combine(carpeta.FullName, "BD", "migrations", nombre);
+            if (File.Exists(archivo)) return File.ReadAllText(archivo);
+            carpeta = carpeta.Parent;
+        }
+        throw new FileNotFoundException("Ejecutar las pruebas dentro del checkout que contiene BD/migrations.", nombre);
+    }
 }
 
 public sealed class PostgreSqlLocalFactAttribute : FactAttribute
