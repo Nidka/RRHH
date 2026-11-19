@@ -27,4 +27,18 @@ public sealed class RegimenVacacionesPiloto
         int anios = corte.Year - ingreso.Year;
         return ingreso.Date.AddYears(anios) > corte.Date ? anios - 1 : anios;
     }
+
+    /// <summary>Consumo calendario inclusivo; media jornada requiere una única fecha laborable.</summary>
+    /// <param name="desde">Fecha inicial, sin hora.</param>
+    /// <param name="hasta">Fecha final inclusiva.</param>
+    /// <param name="mediaJornada">Solicita un consumo de 0,5 días.</param>
+    /// <param name="esLaborable">Resultado del calendario del piloto para la fecha inicial.</param>
+    /// <exception cref="ReglaNegocioException">Rango inválido o media jornada fuera de un día laborable.</exception>
+    public decimal Consumo(DateTime desde,DateTime hasta,bool mediaJornada,bool esLaborable)
+    {
+        RangoFechas.Crear(desde,hasta);
+        if (mediaJornada && (desde.Date!=hasta.Date || !esLaborable))
+            throw new ReglaNegocioException("La media jornada requiere una única fecha laborable.");
+        return mediaJornada ? 0.5m : (hasta.Date-desde.Date).Days+1m;
+    }
 }

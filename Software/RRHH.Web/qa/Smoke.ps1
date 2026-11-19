@@ -309,6 +309,19 @@ VALUES (900,'Licencia ficticia A',1,true,true,'PILOTO-FAMILIAR'),(901,'Licencia 
     Assert-Http 403 (Invoke-WebRequest $saldoUrl -WebSession $soloTeletrabajo -SkipHttpErrorCheck)
     $saldo=Invoke-RestMethod $saldoUrl -WebSession $session
     if ($saldo.generadas -ne 60 -or $saldo.usadas -ne 12.5 -or $saldo.pendientes -ne 47.5 -or $saldo.consumos.Count -ne 2) { throw 'RF-08: saldo 60 - 12,5 debe dar 47,5.' }
+    $media=@{idEmpleado=101;numero=0;idMotivo=10;desde='2026-06-15';hasta='2026-06-15';estado='Aprobado';mediaJornadaVacaciones=$true}
+    $altaMedia=Post 'permisos' $media $session
+    Assert-Http 200 $altaMedia
+    $media.numero=($altaMedia.Content | ConvertFrom-Json).numero
+    $saldo=Invoke-RestMethod $saldoUrl -WebSession $session
+    if ($saldo.usadas -ne 13 -or $saldo.pendientes -ne 47) { throw 'RF-10: media jornada no descontó 0,5.' }
+    $media.estado='Anulado'
+    Assert-Http 200 (Post 'permisos' $media $session)
+    if ((Invoke-RestMethod $saldoUrl -WebSession $session).usadas -ne 12.5) { throw 'RF-10: anular no devolvió 0,5.' }
+    $media.numero=0
+    $media.estado='Aprobado'
+    $media.desde=$media.hasta='2026-06-13'
+    Assert-Http 400 (Post 'permisos' $media $session)
     $permiso.numero=0
     $permiso.idMotivo=900
     $permiso.desde='2026-03-10'

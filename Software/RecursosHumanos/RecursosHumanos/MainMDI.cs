@@ -2279,6 +2279,11 @@ public class MainMDI : Form
 			RecordAsistenciasSemanalesToolStripMenuItem.Visible = true;
 		}
 		if (frmLogin.DialogResult == DialogResult.OK && HorariosToolStripMenuItem.Available) AgregarMenuTeletrabajo();
+        if (frmLogin.DialogResult==DialogResult.OK && CompositionRoot.PuedeGestionarPermisos())
+            MantenimientosToolStripMenuItem1.DropDownItems.Add("Permisos y vacaciones del piloto",null,(_,_) =>
+            {
+                using (var vista=CompositionRoot.CrearPermisoPiloto()) vista.ShowDialog(this);
+            });
         if (frmLogin.DialogResult == DialogResult.OK && CompositionRoot.PuedeConsultarVacaciones())
         {
             var vacaciones = new ToolStripMenuItem("Vacaciones generadas del piloto");
