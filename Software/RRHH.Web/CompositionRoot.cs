@@ -22,6 +22,7 @@ internal static class CompositionRoot
     internal const string PoliticaHorarios = "GestionarHorarios";
     internal const string PoliticaMotivos = "GestionarMotivos";
     internal const string PoliticaAsistencia = "ConsultarAsistencia";
+    internal const string PoliticaVacaciones = "ConsultarVacaciones";
     internal const string RolRrhh = "rrhh:rol";
 
     public static void Configurar(WebApplicationBuilder builder)
@@ -37,6 +38,11 @@ internal static class CompositionRoot
             new PostgreSqlAccesoUsuarioRepository(sp.GetRequiredService<PostgreSqlExecutor>())));
         builder.Services.AddScoped<PostgreSqlTeletrabajoRepository>();
         builder.Services.AddScoped<PostgreSqlFeriadoRepository>();
+        var diasVacaciones = decimal.Parse(builder.Configuration["RRHH_VACACIONES_DIAS_ANUALES"] ?? "30",
+            System.Globalization.CultureInfo.InvariantCulture);
+        builder.Services.AddScoped(sp => new ReportarVacacionesGeneradas(
+            new PostgreSqlIngresoVacacionesRepository(sp.GetRequiredService<PostgreSqlExecutor>()),
+            new RRHH.Domain.Asistencia.RegimenVacacionesPiloto(diasVacaciones)));
         builder.Services.AddScoped(sp => new ReportarAsistenciaConFeriados(
             new PostgreSqlFechasAsistenciaRepository(sp.GetRequiredService<PostgreSqlExecutor>()),
             sp.GetRequiredService<PostgreSqlFeriadoRepository>()));
@@ -78,6 +84,7 @@ internal static class CompositionRoot
             AgregarPoliticaPorRol(options, PoliticaAusencias, builder.Configuration["RRHH_WEB_ROLES_AUSENCIAS"]);
             AgregarPoliticaPorRol(options, PoliticaHorarios, builder.Configuration["RRHH_WEB_ROLES_HORARIOS"]);
             AgregarPoliticaPorRol(options, PoliticaAsistencia, builder.Configuration["RRHH_WEB_ROLES_ASISTENCIA"]);
+            AgregarPoliticaPorRol(options, PoliticaVacaciones, builder.Configuration["RRHH_WEB_ROLES_VACACIONES"]);
             var rolesMotivos = (builder.Configuration["RRHH_WEB_ROLES_MOTIVOS"] ?? "")
                 .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
             options.AddPolicy(PoliticaMotivos, policy => policy.RequireAssertion(context =>

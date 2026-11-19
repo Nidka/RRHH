@@ -8,6 +8,7 @@
     <PackageReference Include="Npgsql" Version="8.0.9" />
     <Compile Include="../RRHH.PostgreSql/IdentificadorSql.cs" />
     <Compile Include="../RRHH.PostgreSql/Asistencia/PostgreSqlFechasAsistenciaRepository.cs" />
+    <Compile Include="../RRHH.PostgreSql/Asistencia/PostgreSqlIngresoVacacionesRepository.cs" />
     <Compile Include="../RRHH.PostgreSql/Permisos/PostgreSqlAusenciasRepository.cs" />
     <Compile Include="../RRHH.PostgreSql/Permisos/PostgreSqlMotivoPermisoRepository.cs;../RRHH.PostgreSql/Catalogos/*.cs" />
     <Compile Include="../RRHH.PostgreSql/Asistencia/PostgreSqlHorarioRepository.cs;../RRHH.PostgreSql/Asistencia/PostgreSqlHorarioTemporalRepository.cs" />
