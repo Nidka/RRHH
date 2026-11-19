@@ -129,6 +129,27 @@
           <button>Eliminar motivo</button>
         </form>
       </section>
+      <section id="seccion-asistencia" hidden>
+        <h2>Asistencia y días no laborables</h2>
+        <form id="reporte-asistencia">
+          <label>Código de empleado<input name="empleado" type="number" min="1" max="2147483647" required></label>
+          <label>Desde<input name="desde" type="date" required></label>
+          <label>Hasta<input name="hasta" type="date" required></label>
+          <label>Modo<select name="modo"><option value="A">Asistencias</option><option value="P">Productividad</option></select></label>
+          <button>Consultar asistencia</button>
+        </form>
+        <p id="total-asistencia" role="status"></p>
+        <div id="detalle-asistencia" class="resultados"></div>
+      </section>
+      <section id="seccion-vacaciones" hidden>
+        <h2>Vacaciones generadas del piloto</h2>
+        <form id="vacaciones-generadas">
+          <label>Código de empleado<input name="empleado" type="number" min="1" max="2147483647" required></label>
+          <label>Fecha de corte<input name="corte" type="date" required></label>
+          <button>Consultar vacaciones generadas</button>
+        </form>
+        <div id="resultado-vacaciones" class="resultados"></div>
+      </section>
     </div>
   </main>
 </body>
