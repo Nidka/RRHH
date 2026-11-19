@@ -1,5 +1,11 @@
 # Semana 14 y evaluación final
 
+**Continuación local de 19/11/2026:** consultar el
+[estado de RF, verificaciones y pendientes](ESTADO_LOCAL_20261119.md).
+Incluye el guardado transaccional de permisos y su adaptador web en ramas
+de revisión; no acredita integración en main ni despliegue compartido.
+El resto de esta página conserva el alcance histórico del primer corte.
+
 Base de comparación: T3, etiqueta `v1.5.0` y consolidación `bb5add4`. La entrega de T3 es una reconstrucción de escritorio con PostgreSQL. La propuesta final expone un flujo de esa reconstrucción en una web para el navegador. El ejecutable original sirve de referencia de ingeniería inversa.
 
 ## Alcance propuesto

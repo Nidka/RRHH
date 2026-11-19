@@ -15,6 +15,7 @@ function sesion(activa, permisos = {}) {
   byId('seccion-motivos').hidden = !activa || !permisos.motivos;
   byId('seccion-asistencia').hidden = !activa || !permisos.asistencia;
   byId('seccion-vacaciones').hidden = !activa || !permisos.vacaciones;
+  byId('seccion-permisos').hidden = !activa || !permisos.permisos;
   if (!activa) {
     byId('periodos').replaceChildren();
     byId('dias').replaceChildren();
@@ -27,6 +28,8 @@ function sesion(activa, permisos = {}) {
     byId('reporte-asistencia').reset();
     byId('vacaciones-generadas').reset();
     byId('resultado-vacaciones').replaceChildren();
+    byId('cargar-permiso').reset();
+    nuevoPermiso();
     limpiarMotivos();
     byId('estado-motivo').textContent = '';
     altaMotivo.elements.tipo.length = 1;
@@ -96,6 +99,40 @@ function accion(id, ejecutar) {
     finally { boton.disabled = false; }
   });
 }
+
+function nuevoPermiso() {
+  const form = byId('guardar-permiso');
+  form.reset();
+  form.elements.numero.value = '0';
+  form.elements.idEmpleado.readOnly = false;
+  byId('estado-permiso').textContent = 'Nuevo permiso';
+}
+byId('nuevo-permiso').addEventListener('click', nuevoPermiso);
+accion('cargar-permiso', async datos => {
+  nuevoPermiso();
+  const permiso = await api('permisos?' + new URLSearchParams(datos));
+  const form = byId('guardar-permiso');
+  for (const campo of ['numero', 'idEmpleado', 'idMotivo', 'estado', 'lugar', 'referencia', 'autorizacion', 'observacion']) {
+    form.elements[campo].value = permiso[campo] ?? '';
+  }
+  for (const campo of ['desde', 'hasta']) form.elements[campo].value = permiso[campo].slice(0, 10);
+  for (const campo of ['dia', 'retorno']) form.elements[campo].checked = permiso[campo] === true;
+  form.elements.idEmpleado.readOnly = true;
+  byId('estado-permiso').textContent = 'Editando permiso ' + permiso.numero + ' del empleado ' + permiso.idEmpleado;
+});
+accion('guardar-permiso', async datos => {
+  const entrada = Object.fromEntries(datos);
+  for (const campo of ['numero', 'idEmpleado', 'idMotivo']) entrada[campo] = Number(entrada[campo]);
+  for (const campo of ['dia', 'retorno']) entrada[campo] = datos.has(campo);
+  const resultado = await api('permisos', entrada);
+  const form = byId('guardar-permiso');
+  form.elements.numero.value = resultado.numero;
+  form.elements.idEmpleado.readOnly = true;
+  byId('cargar-permiso').elements.empleado.value = entrada.idEmpleado;
+  byId('cargar-permiso').elements.numero.value = resultado.numero;
+  byId('estado-permiso').textContent = 'Permiso ' + resultado.numero + ' guardado: ' + entrada.estado;
+  mostrar('Permiso guardado correctamente.');
+});
 
 accion('login', async datos => {
   try { await api('login', Object.fromEntries(datos)); }
