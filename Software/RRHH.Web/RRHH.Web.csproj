@@ -10,6 +10,7 @@
     <Compile Include="../RRHH.PostgreSql/Asistencia/PostgreSqlFechasAsistenciaRepository.cs" />
     <Compile Include="../RRHH.PostgreSql/Asistencia/PostgreSqlIngresoVacacionesRepository.cs" />
     <Compile Include="../RRHH.PostgreSql/Asistencia/PostgreSqlSaldoVacacionesRepository.cs" />
+    <Compile Include="../RRHH.PostgreSql/Asistencia/PostgreSqlReporteVacacionesRepository.cs" />
     <Compile Include="../RRHH.PostgreSql/Permisos/PostgreSqlAusenciasRepository.cs" />
     <Compile Include="../RRHH.PostgreSql/Permisos/PostgreSqlPermisoRepository.cs;../RRHH.PostgreSql/Permisos/PostgreSqlPermisoEscrituraRepository.cs" />
     <Compile Include="../RRHH.PostgreSql/Permisos/PostgreSqlMotivoPermisoRepository.cs;../RRHH.PostgreSql/Catalogos/*.cs" />

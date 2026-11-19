@@ -86,6 +86,16 @@ internal static class CompositionRoot
         return vista;
     }
 
+    /// <summary>Compone el reporte anual de saldos con acceso RRHH explícito.</summary>
+    public static FrmReporteVacaciones CrearReporteVacaciones()
+    {
+        if(!PuedeConsultarVacaciones()) throw new InvalidOperationException("Rol sin acceso a vacaciones.");
+        var dias=decimal.Parse(Environment.GetEnvironmentVariable("RRHH_VACACIONES_DIAS_ANUALES") ?? "30",CultureInfo.InvariantCulture);
+        var vista=new FrmReporteVacaciones();
+        _=new ReporteVacacionesPresenter(vista,new ReportarSaldoVacaciones(new PostgreSqlReporteVacacionesRepository(Database.Value),new RegimenVacacionesPiloto(dias)));
+        return vista;
+    }
+
 	public static bool EstablecerContrasenaUsuario(string login, string password)
 	{
 		return new PostgreSqlAccesoUsuarioRepository(Database.Value)

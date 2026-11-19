@@ -33,6 +33,8 @@ function sesion(activa, permisos = {}) {
     byId('consumos-vacaciones').replaceChildren();
     byId('truncas-vacaciones').reset();
     byId('resultado-truncas').textContent='';
+    byId('reporte-vacaciones').reset();
+    byId('tabla-vacaciones').replaceChildren();
     byId('cargar-permiso').reset();
     nuevoPermiso();
     limpiarMotivos();
@@ -123,6 +125,14 @@ accion('truncas-vacaciones',async datos => {
   byId('resultado-truncas').textContent='';
   const calculo=await api('vacaciones/truncas?'+new URLSearchParams(datos));
   byId('resultado-truncas').textContent=`Truncas al cese ${calculo.cese.slice(0,10)} (día incluido): ${calculo.truncas.toFixed(2)} días`;
+});
+accion('reporte-vacaciones',async datos=>{
+  byId('tabla-vacaciones').replaceChildren();
+  const filtros=new URLSearchParams(datos);
+  for(const campo of ['area','empleado']) if(!filtros.get(campo)) filtros.delete(campo);
+  const filas=await api('vacaciones/reporte?'+filtros);
+  resultados('tabla-vacaciones',['Empleado','Área','Generadas','Usadas','Pendientes','Truncas al corte','Observación'],
+    filas.map(f=>[f.empleado,f.area??'',f.generadas??'—',f.usadas??'—',f.pendientes??'—',f.truncasAlCorte??'—',f.error??'']));
 });
 byId('nuevo-permiso').addEventListener('click', nuevoPermiso);
 accion('cargar-permiso', async datos => {

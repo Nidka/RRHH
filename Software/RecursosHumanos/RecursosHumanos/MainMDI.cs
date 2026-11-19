@@ -2296,6 +2296,10 @@ public class MainMDI : Form
             {
                 using (var vista=CompositionRoot.CrearSaldoVacaciones()) vista.ShowDialog(this);
             });
+            MantenimientosToolStripMenuItem1.DropDownItems.Add("Reporte de vacaciones del piloto",null,(_,_) =>
+            {
+                using(var vista=CompositionRoot.CrearReporteVacaciones()) vista.ShowDialog(this);
+            });
         }
 	}
 
