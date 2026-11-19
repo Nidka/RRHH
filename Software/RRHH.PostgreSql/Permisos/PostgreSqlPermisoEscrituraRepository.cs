@@ -3,6 +3,7 @@ using System.Data;
 using System.Linq;
 using RRHH.Application.Permisos;
 using RRHH.Domain.Asistencia;
+using RRHH.Domain.Permisos;
 using RRHH.PostgreSql.Asistencia;
 using RRHH.Domain.Comun;
 
@@ -19,15 +20,18 @@ public sealed class PostgreSqlPermisoEscrituraRepository : IPermisoEscrituraRepo
     private readonly PostgreSqlExecutor _db;
     private readonly bool _permitirSalidasAutorizadas;
     private readonly RegimenVacacionesPiloto _regimen;
+    private readonly Func<DateTime> _hoy;
     /// <summary>Configura el alcance del host; web excluye salidas cuyo control de marcación sigue en escritorio.</summary>
     /// <param name="db">Ejecutor para consultas y transacciones PostgreSQL.</param>
     /// <param name="permitirSalidasAutorizadas">True solo en el host que conserva los controles de salida autorizada.</param>
     /// <param name="diasAnuales">Días anuales del régimen académico; debe coincidir con las consultas de saldo.</param>
-    public PostgreSqlPermisoEscrituraRepository(PostgreSqlExecutor db, bool permitirSalidasAutorizadas = true,decimal diasAnuales=30m)
+    /// <param name="hoy">Reloj local del host; se inyecta en QA para evitar pruebas dependientes de la fecha real.</param>
+    public PostgreSqlPermisoEscrituraRepository(PostgreSqlExecutor db, bool permitirSalidasAutorizadas = true,decimal diasAnuales=30m,Func<DateTime> hoy=null)
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
         _permitirSalidasAutorizadas = permitirSalidasAutorizadas;
         _regimen=new RegimenVacacionesPiloto(diasAnuales);
+        _hoy=hoy ?? (()=>DateTime.Today);
     }
 
     /// <inheritdoc/>
@@ -89,6 +93,8 @@ OR (table_name='Motivo_Perm' AND column_name='EsVacacionesPiloto'));
                 throw new ReglaNegocioException("Las salidas autorizadas por horas todavía se gestionan desde la aplicación de escritorio.");
             string estado = dto.Estado ?? "Solicitado";
             bool media=dto.MediaJornadaVacaciones ?? false;
+            bool salida=tx.ScalarInt("SELECT \"idTipoPermiso\" FROM public.\"Motivo_Perm\" WHERE \"idMotivo\"=@motivo;",
+                new PostgreSqlParameterValue("motivo",dto.IdMotivo,DbType.Int32))==2;
             if (dto.Numero > 0)
             {
                 if (tx.ScalarInt("SELECT COUNT(*) FROM public.\"Permiso\" WHERE \"IdEmpleado\"=@empleado AND \"NPermiso\"=@numeroAnterior;",
@@ -108,6 +114,16 @@ WHERE p."IdEmpleado"=@empleado AND p."NPermiso"=@numeroAnterior AND m."idTipoPer
             bool vacaciones=tx.ScalarInt("SELECT COUNT(*) FROM public.\"Motivo_Perm\" m WHERE m.\"idMotivo\"=@motivo AND COALESCE((to_jsonb(m)->>'EsVacacionesPiloto')::boolean,false);",
                 new PostgreSqlParameterValue("motivo",dto.IdMotivo,DbType.Int32))==1;
             if (media && !vacaciones) throw new ReglaNegocioException("La media jornada vacacional requiere un motivo de vacaciones del piloto.");
+            if(vacaciones && salida)throw new ReglaNegocioException("Un motivo de salida autorizada no puede configurarse como vacaciones.");
+            if(salida && estado!="Anulado" && estado!="Rechazado")
+            {
+                tx.Execute("LOCK TABLE public.\"Asistencia\" IN SHARE ROW EXCLUSIVE MODE;");
+                DateTime hoy=_hoy().Date;
+                var registros=tx.Query("SELECT \"Hor_Sal\" AS salida FROM public.\"Asistencia\" WHERE \"IdEmpleado\"=@empleado AND \"Fecha\"::date=@hoy;",
+                    empleado,new PostgreSqlParameterValue("hoy",hoy,DbType.Date));
+                PoliticaSalidaAutorizada.Validar(hoy,dto.Desde,dto.Hasta,registros.Rows.Cast<DataRow>()
+                    .Select(r=>r.IsNull("salida") ? null : Convert.ToString(r["salida"],System.Globalization.CultureInfo.InvariantCulture)).ToList());
+            }
             if (vacaciones && estado!="Anulado" && estado!="Rechazado")
             {
                 // Las referencias y el calendario no cambian mientras se decide la aprobación.

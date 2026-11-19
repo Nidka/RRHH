@@ -241,7 +241,7 @@ internal static class CompositionRoot
     {
         if (!PuedeGestionarPermisos()) throw new InvalidOperationException("Rol sin acceso a permisos del piloto.");
         var dias=decimal.Parse(Environment.GetEnvironmentVariable("RRHH_VACACIONES_DIAS_ANUALES") ?? "30",CultureInfo.InvariantCulture);
-        var repo=new PostgreSqlPermisoEscrituraRepository(Database.Value,false,dias);
+        var repo=new PostgreSqlPermisoEscrituraRepository(Database.Value,true,dias);
         var vista=new FrmPermisoPiloto();
         _=new PermisoEditorPresenter(vista,new ConsultarPermiso(repo),new GuardarPermiso(repo));
         return vista;

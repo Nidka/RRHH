@@ -81,7 +81,7 @@ internal static class CompositionRoot
             new PostgreSqlHorarioRepository(sp.GetRequiredService<PostgreSqlExecutor>())));
         builder.Services.AddScoped<IMotivoPermisoRepository, PostgreSqlMotivoPermisoRepository>();
         builder.Services.AddScoped(sp => new PostgreSqlPermisoEscrituraRepository(
-            sp.GetRequiredService<PostgreSqlExecutor>(), permitirSalidasAutorizadas: false,diasAnuales:diasVacaciones));
+            sp.GetRequiredService<PostgreSqlExecutor>(), permitirSalidasAutorizadas: true,diasAnuales:diasVacaciones));
         builder.Services.AddScoped(sp => new GuardarPermiso(sp.GetRequiredService<PostgreSqlPermisoEscrituraRepository>()));
         builder.Services.AddScoped(sp => new ConsultarPermiso(sp.GetRequiredService<PostgreSqlPermisoEscrituraRepository>()));
         builder.Services.AddScoped(sp => new ListarCatalogo(new PostgreSqlCatalogoRepository(
