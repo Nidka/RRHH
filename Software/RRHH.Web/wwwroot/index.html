@@ -175,6 +175,14 @@
           <button>Consultar vacaciones generadas</button>
         </form>
         <div id="resultado-vacaciones" class="resultados"></div>
+        <h3>Saldo y consumos aprobados</h3>
+        <form id="saldo-vacaciones">
+          <label>Código de empleado<input name="empleado" type="number" min="1" max="2147483647" required></label>
+          <label>Fecha de corte<input name="corte" type="date" required></label>
+          <button>Consultar saldo</button>
+        </form>
+        <p id="resumen-saldo" role="status"></p>
+        <div id="consumos-vacaciones" class="resultados"></div>
       </section>
     </div>
   </main>

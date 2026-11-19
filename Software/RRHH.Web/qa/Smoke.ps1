@@ -102,7 +102,7 @@ ALTER TABLE "Permiso" ADD "Retorno" boolean;
     $fixture | & $psql @argsDb
     if ($LASTEXITCODE) { throw 'Falló la preparación de datos ficticios.' }
     Invoke-Checked $psql ($argsDb + @('-f', (Join-Path $repo 'BD/migrations/20261112_03_teletrabajo.sql')))
-    foreach ($migracion in @('20261111_01_licencia_una_vez_anio.sql', '20261119_01_grupo_licencia_anual.sql', '20261119_02_estados_permiso.sql')) {
+    foreach ($migracion in @('20261111_01_licencia_una_vez_anio.sql', '20261119_01_grupo_licencia_anual.sql', '20261119_02_estados_permiso.sql','20261119_03_vacaciones_piloto.sql')) {
         Invoke-Checked $psql ($argsDb + @('-f', (Join-Path $repo ('BD/migrations/' + $migracion))))
     }
     if ($RegresionEscritorio) {
@@ -294,6 +294,9 @@ ALTER TABLE "Permiso" ADD "Retorno" boolean;
     if ($rechazado.estado -ne 'Anulado') { throw 'RF-03: una reactivación inválida modificó el estado.' }
     Assert-Http 400 (Invoke-WebRequest "$url/api/permisos?empleado=101&numero=2147483647" -WebSession $session -SkipHttpErrorCheck)
     $sqlLicencias = @'
+UPDATE "Motivo_Perm" SET "EsVacacionesPiloto"=true WHERE "idMotivo"=10;
+INSERT INTO "Permiso" ("IdEmpleado","NPermiso","idMotivo","FechaInicio","FechaFin","EstadoSolicitud","MediaJornadaVacaciones") VALUES
+(101,100,10,'2026-05-01','2026-05-12','Aprobado',false),(101,101,10,'2026-05-13','2026-05-13','Aprobado',true);
 INSERT INTO "TipoPermiso" VALUES (2,'Salida autorizada ficticia');
 INSERT INTO "Motivo_Perm" ("idMotivo","Descrip_Motivo","idTipoPermiso","Activo","UnaVezPorAnio","GrupoReglaAnual")
 VALUES (900,'Licencia ficticia A',1,true,true,'PILOTO-FAMILIAR'),(901,'Licencia ficticia B',1,true,true,'PILOTO-FAMILIAR'),
@@ -301,6 +304,11 @@ VALUES (900,'Licencia ficticia A',1,true,true,'PILOTO-FAMILIAR'),(901,'Licencia 
 '@
     $sqlLicencias | & $psql @argsDb
     if ($LASTEXITCODE) { throw 'Falló la preparación del grupo anual ficticio.' }
+    $saldoUrl="$url/api/vacaciones/saldo?empleado=101&corte=2026-11-12"
+    Assert-Http 401 (Invoke-WebRequest $saldoUrl -SkipHttpErrorCheck)
+    Assert-Http 403 (Invoke-WebRequest $saldoUrl -WebSession $soloTeletrabajo -SkipHttpErrorCheck)
+    $saldo=Invoke-RestMethod $saldoUrl -WebSession $session
+    if ($saldo.generadas -ne 60 -or $saldo.usadas -ne 12.5 -or $saldo.pendientes -ne 47.5 -or $saldo.consumos.Count -ne 2) { throw 'RF-08: saldo 60 - 12,5 debe dar 47,5.' }
     $permiso.numero=0
     $permiso.idMotivo=900
     $permiso.desde='2026-03-10'

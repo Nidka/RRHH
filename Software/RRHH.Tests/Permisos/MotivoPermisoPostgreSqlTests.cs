@@ -433,6 +433,50 @@ ALTER TABLE public."Permiso" ADD COLUMN "AutorizacionRRHH" varchar(50);
         }
         throw new FileNotFoundException("Ejecutar las pruebas dentro del checkout que contiene BD/migrations.", nombre);
     }
+
+    private RRHH.Application.Asistencia.ConsultarSaldoVacaciones PrepararSaldo()
+    {
+        PrepararGuardado();
+        _db.Execute(LeerMigracion("20261119_03_vacaciones_piloto.sql"));
+        _db.Execute(LeerMigracion("20261119_03_vacaciones_piloto.sql"));
+        _db.Execute("""
+ALTER TABLE public."Empleado" ADD COLUMN "FechaIngreso" timestamp;
+UPDATE public."Empleado" SET "FechaIngreso"='2024-03-01';
+UPDATE public."Motivo_Perm" SET "EsVacacionesPiloto"=true WHERE "idMotivo"=900;
+INSERT INTO public."Permiso" ("IdEmpleado","NPermiso","idMotivo","FechaInicio","FechaFin","EstadoSolicitud","MediaJornadaVacaciones") VALUES
+(101,1,900,'2026-05-01','2026-05-12','Aprobado',false),
+(101,2,900,'2026-05-13','2026-05-13','Aprobado',true),
+(101,3,900,'2026-06-01','2026-06-10','Solicitado',false),
+(101,4,900,'2026-07-01','2026-07-10','Rechazado',false),
+(101,5,900,'2026-08-01','2026-08-10','Anulado',false);
+""");
+        return new RRHH.Application.Asistencia.ConsultarSaldoVacaciones(
+            new RRHH.PostgreSql.Asistencia.PostgreSqlSaldoVacacionesRepository(_db),new RRHH.Domain.Asistencia.RegimenVacacionesPiloto());
+    }
+
+    [PostgreSqlLocalFact]
+    public void RF08SaldoConciliadoArrastraYAnulacionDevuelveDias()
+    {
+        var caso=PrepararSaldo();
+        var saldo=caso.Ejecutar(101,new DateTime(2026,11,12));
+        Assert.Equal(60m,saldo.Generadas);
+        Assert.Equal(12.5m,saldo.Usadas);
+        Assert.Equal(47.5m,saldo.Pendientes);
+        Assert.Equal(2,saldo.Consumos.Count);
+        _db.Execute("UPDATE public.\"Permiso\" SET \"EstadoSolicitud\"='Anulado' WHERE \"NPermiso\"=1;");
+        Assert.Equal(59.5m,caso.Ejecutar(101,new DateTime(2026,11,12)).Pendientes);
+        Assert.Equal(0m,caso.Ejecutar(101,new DateTime(2026,4,30)).Usadas);
+    }
+
+    [PostgreSqlLocalFact]
+    public void RF08RechazaCatalogoAmbiguoEIngresoIncompleto()
+    {
+        var caso=PrepararSaldo();
+        _db.Execute("UPDATE public.\"Empleado\" SET \"FechaIngreso\"=NULL WHERE \"IdEmpleado\"=101;");
+        Assert.Throws<ReglaNegocioException>(() => caso.Ejecutar(101,new DateTime(2026,11,12)));
+        _db.Execute("UPDATE public.\"Empleado\" SET \"FechaIngreso\"='2024-03-01'; INSERT INTO public.\"Motivo_Perm\" SELECT * FROM public.\"Motivo_Perm\" WHERE \"idMotivo\"=900;");
+        Assert.Throws<ReglaNegocioException>(() => caso.Ejecutar(101,new DateTime(2026,11,12)));
+    }
 }
 
 public sealed class PostgreSqlLocalFactAttribute : FactAttribute

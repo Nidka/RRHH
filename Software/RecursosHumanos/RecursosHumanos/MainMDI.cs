@@ -2287,6 +2287,10 @@ public class MainMDI : Form
                 using (var vista = CompositionRoot.CrearVacacionesGeneradas()) vista.ShowDialog(this);
             };
             MantenimientosToolStripMenuItem1.DropDownItems.Add(vacaciones);
+            MantenimientosToolStripMenuItem1.DropDownItems.Add("Saldo de vacaciones del piloto",null,(_,_) =>
+            {
+                using (var vista=CompositionRoot.CrearSaldoVacaciones()) vista.ShowDialog(this);
+            });
         }
 	}
 
