@@ -2211,6 +2211,13 @@ public class MainMDI : Form
 	{
 		FrmLogin frmLogin = new FrmLogin();
 		frmLogin.ShowDialog(this);
+        if(frmLogin.DialogResult==DialogResult.OK && CompositionRoot.EsAutoservicio(frmLogin.AccesoActual))
+        {
+            MenuStrip1.Enabled=false;ToolStrip1.Enabled=false;Hide();
+            using(var vista=CompositionRoot.CrearMisVacaciones(frmLogin.AccesoActual)) vista.ShowDialog();
+            Dispose();
+            return;
+        }
 		if (frmLogin.DialogResult == DialogResult.OK)
 		{
 			// El nombre ya fue obtenido mediante PostgreSQL durante el login.

@@ -32,6 +32,11 @@ internal static class CompositionRoot
             .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             .Select(int.Parse).ToHashSet();
         builder.Services.AddSingleton(new RolesOperador(roles));
+        var autoservicio=(builder.Configuration["RRHH_WEB_ROLES_AUTOCONSULTA"] ?? "")
+            .Split(',',StringSplitOptions.RemoveEmptyEntries|StringSplitOptions.TrimEntries).Select(int.Parse).ToHashSet();
+        if(roles.Overlaps(autoservicio)) throw new InvalidOperationException("Los roles de operador y autoconsulta deben ser distintos.");
+        builder.Services.AddSingleton(new RolesAutoservicio(autoservicio));
+        builder.Services.AddScoped<IUsuarioEmpleadoRepository,PostgreSqlUsuarioEmpleadoRepository>();
         builder.Services.AddSingleton(_ => new PostgreSqlExecutor(
             new PostgreSqlConnectionFactory(builder.Configuration["RRHH_WEB_POSTGRES"]
                 ?? throw new InvalidOperationException("Configure RRHH_WEB_POSTGRES para este host."))));
@@ -47,6 +52,7 @@ internal static class CompositionRoot
         builder.Services.AddScoped(sp => new ConsultarSaldoVacaciones(
             new PostgreSqlSaldoVacacionesRepository(sp.GetRequiredService<PostgreSqlExecutor>()),
             new RRHH.Domain.Asistencia.RegimenVacacionesPiloto(diasVacaciones)));
+        builder.Services.AddScoped<ConsultarMisVacaciones>();
         builder.Services.AddScoped(sp => new ConsultarVacacionesTruncas(
             new PostgreSqlIngresoVacacionesRepository(sp.GetRequiredService<PostgreSqlExecutor>()),
             new RRHH.Domain.Asistencia.RegimenVacacionesPiloto(diasVacaciones)));
@@ -133,4 +139,9 @@ internal static class CompositionRoot
 internal sealed record RolesOperador(HashSet<int> Ids)
 {
     public bool Contiene(int id) => Ids.Contains(id);
+}
+/// <summary>Roles exclusivos de empleado; no heredan permisos del operador.</summary>
+internal sealed record RolesAutoservicio(HashSet<int> Ids)
+{
+    public bool Contiene(int id)=>Ids.Contains(id);
 }

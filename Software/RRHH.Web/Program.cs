@@ -44,29 +44,38 @@ api.MapGet("/token", (HttpContext context, IAntiforgery tokens) =>
     Results.Ok(new { token = tokens.GetAndStoreTokens(context).RequestToken }));
 
 api.MapPost("/login", async (HttpContext context, Credenciales entrada, IAntiforgery tokens,
-    ObtenerAccesoUsuario acceso, RolesOperador roles) =>
+    ObtenerAccesoUsuario acceso, RolesOperador roles,RolesAutoservicio autoservicio,IUsuarioEmpleadoRepository vinculos) =>
 {
     if (!await tokens.IsRequestValidAsync(context)) return Results.BadRequest(new { error = "Actualice la página e intente de nuevo." });
     if (entrada.Login is null || entrada.Password is null || entrada.Login.Length > 128 || entrada.Password.Length > 256)
         return Results.Unauthorized();
     var usuario = acceso.Ejecutar("0500000", entrada.Login, entrada.Password);
-    if (usuario is null || !roles.Contiene(usuario.IdRol)) return Results.Unauthorized();
+    if (usuario is null || (!roles.Contiene(usuario.IdRol) && !autoservicio.Contiene(usuario.IdRol))) return Results.Unauthorized();
+    bool empleado=autoservicio.Contiene(usuario.IdRol);
+    if(empleado)
+    {
+        try{vinculos.ObtenerEmpleado(usuario.IdUsuario);}
+        catch(ReglaNegocioException){return Results.Unauthorized();}
+    }
     var identidad = new ClaimsIdentity(new[]
     {
         new Claim(ClaimTypes.NameIdentifier, usuario.IdUsuario.ToString(CultureInfo.InvariantCulture)),
         new Claim(ClaimTypes.Name, usuario.Login),
         new Claim(CompositionRoot.RolRrhh, usuario.IdRol.ToString(CultureInfo.InvariantCulture)),
-        new Claim(ClaimTypes.Role, "OperadorTeletrabajo")
+        new Claim(ClaimTypes.Role, empleado ? "Empleado" : "OperadorTeletrabajo")
     }, CookieAuthenticationDefaults.AuthenticationScheme);
     await context.SignInAsync(new ClaimsPrincipal(identidad));
     return Results.NoContent();
 }).RequireRateLimiting("login");
 
 var operador = api.MapGroup("").RequireAuthorization(policy => policy.RequireRole("OperadorTeletrabajo"));
-operador.MapGet("/sesion", async (ClaimsPrincipal usuario, IAuthorizationService autorizacion) =>
+var sesionApi=api.MapGroup("").RequireAuthorization();
+sesionApi.MapGet("/sesion", async (ClaimsPrincipal usuario, IAuthorizationService autorizacion) =>
     Results.Ok(new
     {
         usuario = usuario.Identity?.Name,
+        operador=usuario.IsInRole("OperadorTeletrabajo"),
+        autoconsulta=usuario.IsInRole("Empleado"),
         ausencias = (await autorizacion.AuthorizeAsync(usuario, CompositionRoot.PoliticaAusencias)).Succeeded,
         horarios = (await autorizacion.AuthorizeAsync(usuario, CompositionRoot.PoliticaHorarios)).Succeeded,
         motivos = (await autorizacion.AuthorizeAsync(usuario, CompositionRoot.PoliticaMotivos)).Succeeded,
@@ -74,12 +83,15 @@ operador.MapGet("/sesion", async (ClaimsPrincipal usuario, IAuthorizationService
         vacaciones = (await autorizacion.AuthorizeAsync(usuario, CompositionRoot.PoliticaVacaciones)).Succeeded,
         permisos = (await autorizacion.AuthorizeAsync(usuario, CompositionRoot.PoliticaPermisos)).Succeeded
     }));
-operador.MapPost("/salir", async (HttpContext context, IAntiforgery tokens) =>
+sesionApi.MapPost("/salir", async (HttpContext context, IAntiforgery tokens) =>
 {
     if (!await tokens.IsRequestValidAsync(context)) return Results.BadRequest();
     await context.SignOutAsync();
     return Results.NoContent();
 });
+api.MapGet("/mi/vacaciones",(ClaimsPrincipal usuario,string corte,ConsultarMisVacaciones consulta)=>
+    Ejecutar(()=>Results.Ok(consulta.Ejecutar(int.Parse(usuario.FindFirstValue(ClaimTypes.NameIdentifier),CultureInfo.InvariantCulture),Fecha(corte)))))
+    .RequireAuthorization(p=>p.RequireRole("Empleado"));
 operador.MapGet("/periodos", (int empleado, ListarPeriodosTeletrabajo listado) =>
     Ejecutar(() => Results.Ok(listado.Ejecutar(empleado))));
 operador.MapPost("/periodos", async (HttpContext context, Alta entrada, IAntiforgery tokens,

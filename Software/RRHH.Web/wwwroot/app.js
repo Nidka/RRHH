@@ -9,6 +9,9 @@ function sesion(activa, permisos = {}) {
   byId('acceso').hidden = activa;
   byId('panel').hidden = !activa;
   byId('salir').hidden = !activa;
+  for(const id of ['seccion-alta-remoto','seccion-listado-remoto','seccion-reporte-remoto','seccion-clasificacion-remoto'])
+    byId(id).hidden=!activa || !permisos.operador;
+  byId('seccion-mis-vacaciones').hidden=!activa || !permisos.autoconsulta;
   byId('seccion-ausencias').hidden = !activa || !permisos.ausencias;
   byId('seccion-horarios').hidden = !activa || !permisos.horarios;
   byId('seccion-historico').hidden = !activa || !permisos.horarios;
@@ -17,6 +20,7 @@ function sesion(activa, permisos = {}) {
   byId('seccion-vacaciones').hidden = !activa || !permisos.vacaciones;
   byId('seccion-permisos').hidden = !activa || !permisos.permisos;
   if (!activa) {
+    byId('mis-vacaciones').reset();byId('mi-saldo').textContent='';byId('mis-consumos').replaceChildren();
     byId('periodos').replaceChildren();
     byId('dias').replaceChildren();
     byId('personal-remoto').replaceChildren();
@@ -133,6 +137,12 @@ accion('reporte-vacaciones',async datos=>{
   const filas=await api('vacaciones/reporte?'+filtros);
   resultados('tabla-vacaciones',['Empleado','Área','Generadas','Usadas','Pendientes','Truncas al corte','Observación'],
     filas.map(f=>[f.empleado,f.area??'',f.generadas??'—',f.usadas??'—',f.pendientes??'—',f.truncasAlCorte??'—',f.error??'']));
+});
+accion('mis-vacaciones',async datos=>{
+  byId('mi-saldo').textContent='';byId('mis-consumos').replaceChildren();
+  const saldo=await api('mi/vacaciones?'+new URLSearchParams(datos));
+  byId('mi-saldo').textContent=`Empleado ${saldo.empleado} · generadas ${saldo.generadas} · usadas ${saldo.usadas} · pendientes ${saldo.pendientes} días`;
+  resultados('mis-consumos',['Permiso','Desde','Hasta','Días'],saldo.consumos.map(c=>[c.numero,c.desde.slice(0,10),c.hasta.slice(0,10),c.dias]));
 });
 byId('nuevo-permiso').addEventListener('click', nuevoPermiso);
 accion('cargar-permiso', async datos => {

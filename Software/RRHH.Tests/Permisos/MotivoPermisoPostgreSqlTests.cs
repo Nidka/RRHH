@@ -542,6 +542,25 @@ UPDATE public."Empleado" SET "FechaIngreso"=NULL WHERE "IdEmpleado"=102;
         Assert.Empty(caso.Ejecutar(2025,new DateTime(2025,11,12)));
         Assert.Throws<ReglaNegocioException>(()=>caso.Ejecutar(2025,new DateTime(2026,11,12)));
     }
+
+    [PostgreSqlLocalFact]
+    public void RF12IdentidadSoloConsultaSuEmpleadoYRechazaVinculosAmbiguos()
+    {
+        var saldos=PrepararSaldo();
+        _db.Execute("""
+DROP TABLE IF EXISTS public."Usuario" CASCADE;
+CREATE TABLE public."Usuario" ("IdUsuario" integer,"IdEmpleado" integer,"Estado" boolean);
+INSERT INTO public."Usuario" VALUES (4,101,true),(5,102,true),(6,NULL,true),(7,101,false);
+""");
+        var caso=new RRHH.Application.Asistencia.ConsultarMisVacaciones(new RRHH.PostgreSql.Seguridad.PostgreSqlUsuarioEmpleadoRepository(_db),saldos);
+        Assert.Equal(101,caso.Ejecutar(4,new DateTime(2026,11,12)).Empleado);
+        Assert.Equal(102,caso.Ejecutar(5,new DateTime(2026,11,12)).Empleado);
+        Assert.Equal(0m,caso.Ejecutar(5,new DateTime(2026,11,12)).Usadas);
+        Assert.Throws<ReglaNegocioException>(()=>caso.Ejecutar(6,new DateTime(2026,11,12)));
+        Assert.Throws<ReglaNegocioException>(()=>caso.Ejecutar(7,new DateTime(2026,11,12)));
+        _db.Execute("INSERT INTO public.\"Usuario\" VALUES (4,101,true);");
+        Assert.Throws<ReglaNegocioException>(()=>caso.Ejecutar(4,new DateTime(2026,11,12)));
+    }
 }
 
 public sealed class PostgreSqlLocalFactAttribute : FactAttribute

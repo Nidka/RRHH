@@ -11,6 +11,8 @@ namespace RecursosHumanos;
 /// </summary>
 public sealed class FrmLogin : Form
 {
+    /// <summary>Identidad de esta instancia de login para componer vistas de autoconsulta sin estado global nuevo.</summary>
+    public AccesoUsuario AccesoActual { get; private set; }
 	private readonly TextBox _userName = new TextBox();
 	private readonly TextBox _password = new TextBox();
 	private readonly Label _status = new Label();
@@ -163,6 +165,7 @@ public sealed class FrmLogin : Form
 
 	private void ApplyAccess(AccesoUsuario access)
 	{
+		AccesoActual=access;
 		_password.Clear();
 		RRHH.LogUser = access.Login;
 		RRHH.codEmple = access.IdEmpleado.Value.ToString();
