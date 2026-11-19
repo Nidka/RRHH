@@ -2279,6 +2279,15 @@ public class MainMDI : Form
 			RecordAsistenciasSemanalesToolStripMenuItem.Visible = true;
 		}
 		if (frmLogin.DialogResult == DialogResult.OK && HorariosToolStripMenuItem.Available) AgregarMenuTeletrabajo();
+        if (frmLogin.DialogResult == DialogResult.OK && CompositionRoot.PuedeConsultarVacaciones())
+        {
+            var vacaciones = new ToolStripMenuItem("Vacaciones generadas del piloto");
+            vacaciones.Click += (_, _) =>
+            {
+                using (var vista = CompositionRoot.CrearVacacionesGeneradas()) vista.ShowDialog(this);
+            };
+            MantenimientosToolStripMenuItem1.DropDownItems.Add(vacaciones);
+        }
 	}
 
     // Conserva el acceso del mantenimiento de Horarios, aplicado tras el login.

@@ -54,6 +54,7 @@ try {
     $argsDb = @('-X', '-v', 'ON_ERROR_STOP=1', '-h', '127.0.0.1', '-p', "$DatabasePort", '-U', 'qa', '-d', 'postgres')
     $fixture = @"
 CREATE TABLE "Empleado" ("IdEmpleado" integer, "IdPersona" integer, "idAreaOrganiz" integer);
+ALTER TABLE "Empleado" ADD "FechaIngreso" timestamp;
 CREATE TABLE "Persona" ("IdPersona" integer, "Apellido_Paterno" text, "Apellido_Materno" text, "Nombres" text);
 CREATE TABLE "Usuario" ("IdUsuario" integer, "Login" text, "IdEmpleado" integer, "Estado" boolean,
   "PasswordHash" text, "PasswordSalt" text, "PasswordIterations" integer);
@@ -69,7 +70,7 @@ CREATE TABLE "Asistencia" ("IdEmpleado" integer, "Fecha" timestamp);
 CREATE TABLE "Horario" ("idHorario" integer, "Descrip_Horario" text, "Ingreso1" text, "Salida1" text, "Ingreso2" text, "Salida2" text, "Estado" boolean);
 CREATE TABLE "HorarioTemporal" ("idEmpleado" integer, "N" integer, "FechaInicio" timestamp, "FechaFin" timestamp,
   "HorarioAsignado" integer, "NroDocumento" varchar(50), "Sisgedo" varchar(50), "FechaRegistro" timestamp);
-INSERT INTO "Empleado" VALUES (101, 1, 1), (102, 1, 1);
+INSERT INTO "Empleado" VALUES (101, 1, 1, '2024-03-01'), (102, 1, 1, NULL);
 INSERT INTO "Persona" VALUES (1, 'Ficticio', '', 'Operador');
 INSERT INTO "Usuario" VALUES (1, 'operador', 101, true, '$hash', '$saltText', 210000),
   (2, 'sin_permiso', 101, true, '$hash', '$saltText', 210000),
@@ -104,6 +105,8 @@ INSERT INTO "Asistencia" VALUES (101, '2026-11-09'), (101, '2026-11-11'),
     $env:RRHH_WEB_ROLES_HORARIOS = '10'
     $env:RRHH_WEB_ROLES_MOTIVOS = '10'
     $env:RRHH_WEB_ROLES_ASISTENCIA = '10'
+    $env:RRHH_WEB_ROLES_VACACIONES = '10'
+    $env:RRHH_VACACIONES_DIAS_ANUALES = '30'
     $env:ASPNETCORE_ENVIRONMENT = 'Development'
     $server = Start-Process -FilePath $Dotnet -ArgumentList @('bin/Debug/net8.0/RRHH.Web.dll', '--urls', $url) `
         -WorkingDirectory $hostProject -WindowStyle Hidden -PassThru `
@@ -245,12 +248,20 @@ INSERT INTO "Asistencia" VALUES (101, '2026-11-09'), (101, '2026-11-11'),
         throw 'RF-17: el detalle debe conservar marcación en feriado y sábado.'
     }
     Assert-Http 400 (Invoke-WebRequest "$asistenciaUrl&modo=X" -WebSession $session -SkipHttpErrorCheck)
+    $vacacionesUrl = "$url/api/vacaciones/generadas?empleado=101&corte=2026-11-12"
+    Assert-Http 403 (Invoke-WebRequest $vacacionesUrl -WebSession $soloTeletrabajo -SkipHttpErrorCheck)
+    $vacaciones = Invoke-RestMethod $vacacionesUrl -WebSession $session
+    if ($vacaciones.generadas -ne 60 -or $vacaciones.aniosCumplidos -ne 2) {
+        throw 'RF-07: dos aniversarios completos deben generar 60 días.'
+    }
+    Assert-Http 400 (Invoke-WebRequest "$url/api/vacaciones/generadas?empleado=102&corte=2026-11-12" -WebSession $session -SkipHttpErrorCheck)
+    Assert-Http 400 (Invoke-WebRequest "$url/api/vacaciones/generadas?empleado=101&corte=2024-02-29" -WebSession $session -SkipHttpErrorCheck)
     Assert-Http 204 (Post 'salir' @{} $session)
     Assert-Http 401 (Invoke-WebRequest "$url/api/periodos?empleado=101" -WebSession $session -SkipHttpErrorCheck)
     Write-Output 'QA correcta: sesión, roles, CSRF, teletrabajo, ausencias, turnos y catálogo de motivos.'
 } finally {
     if ($server -and !$server.HasExited) { Stop-Process -Id $server.Id }
     if ($dbStarted) { & $pgctl -D $data -m fast -w stop }
-    Remove-Item Env:PGPASSWORD, Env:RRHH_WEB_POSTGRES, Env:RRHH_WEB_ROLES, Env:RRHH_WEB_ROLES_AUSENCIAS, Env:RRHH_WEB_ROLES_HORARIOS, Env:RRHH_WEB_ROLES_MOTIVOS, Env:RRHH_WEB_ROLES_ASISTENCIA, Env:ASPNETCORE_ENVIRONMENT, Env:RRHH_TEST_POSTGRES_CONNECTION -ErrorAction SilentlyContinue
+    Remove-Item Env:PGPASSWORD, Env:RRHH_WEB_POSTGRES, Env:RRHH_WEB_ROLES, Env:RRHH_WEB_ROLES_AUSENCIAS, Env:RRHH_WEB_ROLES_HORARIOS, Env:RRHH_WEB_ROLES_MOTIVOS, Env:RRHH_WEB_ROLES_ASISTENCIA, Env:RRHH_WEB_ROLES_VACACIONES, Env:RRHH_VACACIONES_DIAS_ANUALES, Env:ASPNETCORE_ENVIRONMENT, Env:RRHH_TEST_POSTGRES_CONNECTION -ErrorAction SilentlyContinue
     Write-Output "Clúster de QA detenido. Diagnósticos ficticios en $workspace."
 }

@@ -14,6 +14,7 @@ function sesion(activa, permisos = {}) {
   byId('seccion-historico').hidden = !activa || !permisos.horarios;
   byId('seccion-motivos').hidden = !activa || !permisos.motivos;
   byId('seccion-asistencia').hidden = !activa || !permisos.asistencia;
+  byId('seccion-vacaciones').hidden = !activa || !permisos.vacaciones;
   if (!activa) {
     byId('periodos').replaceChildren();
     byId('dias').replaceChildren();
@@ -24,6 +25,8 @@ function sesion(activa, permisos = {}) {
     byId('detalle-asistencia').replaceChildren();
     byId('total-asistencia').textContent = '';
     byId('reporte-asistencia').reset();
+    byId('vacaciones-generadas').reset();
+    byId('resultado-vacaciones').replaceChildren();
     limpiarMotivos();
     byId('estado-motivo').textContent = '';
     altaMotivo.elements.tipo.length = 1;
@@ -293,6 +296,15 @@ accion('reporte-asistencia', async datos => {
   resultados('detalle-asistencia', ['Fecha', 'Asistencia registrada', 'No laborable', 'Cuenta en total'],
     resumen.dias.map(dia => [dia.fecha.slice(0, 10), dia.asistio ? 'Sí' : 'No',
       dia.noLaborable ? 'Sí' : 'No', dia.cuentaEnTotal ? 'Sí' : 'No']));
+});
+
+accion('vacaciones-generadas', async datos => {
+  byId('resultado-vacaciones').replaceChildren();
+  const fila = await api('vacaciones/generadas?' + new URLSearchParams(datos));
+  if (byId('seccion-vacaciones').hidden) return;
+  resultados('resultado-vacaciones', ['Empleado', 'Ingreso', 'Corte', 'Años cumplidos', 'Días por año', 'Días generados'],
+    [[fila.empleado, fila.ingreso.slice(0, 10), fila.corte.slice(0, 10),
+      fila.aniosCumplidos, fila.diasAnuales, fila.generadas]]);
 });
 
 cargarSesion().catch(() => sesion(false));
