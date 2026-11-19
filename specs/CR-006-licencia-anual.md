@@ -70,6 +70,14 @@ ALTER TABLE public."Motivo_Perm" ADD COLUMN IF NOT EXISTS "UnaVezPorAnio" boolea
 
 ## Verificación
 
+### Diagnóstico de migración ausente en el piloto
+
+Base d12f4a4. Mantenimiento correctivo. El grupo reportó ausencia de UnaVezPorAnio en su base. Se verifica el contrato de columna en PostgreSqlPermisoRepository.MotivoSeOtorgaUnaVezPorAnio y se comunica una ReglaNegocioException con el archivo de migración. ValidarLicenciaUnaVezPorAnio convierte ese error en ResultadoOperacion para que FrmPermiso lo muestre con su mecanismo existente.
+
+Se conserva el bloqueo y el año de inicio y no se habilitan motivos reales. La prueba debe demostrar rechazo claro antes de escribir cuando falta la columna y mantener la lectura existente cuando está presente. La corrección no aplica migraciones en la base compartida. Su aplicación y comprobación sigue a cargo de Kadin con destino y alcance autorizados. Reversión mediante el commit de diagnóstico.
+
+El 19/11/2026 pasaron 343 pruebas net48 con PostgreSQL 18 ficticio. La nueva prueba confirmó el resultado de error con el nombre de la migración y cero escrituras. La prueba existente con la columna presente conservó su resultado correcto. El host web compiló con cero errores y cero advertencias y build.cmd generó WinForms x86 con cero errores y 26 advertencias del aplicativo.
+
 | Caso / comando | Resultado esperado | Resultado real / entorno / evidencia |
 |---|---|---|
 | `Software\scripts\build.cmd` | 0 errores | 0 errores (Windows) |

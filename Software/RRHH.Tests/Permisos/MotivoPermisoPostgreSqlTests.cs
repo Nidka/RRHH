@@ -213,6 +213,18 @@ ALTER TABLE public."Motivo_Perm" ALTER COLUMN "idMotivo" SET DEFAULT nextval('pu
     }
 
     [PostgreSqlLocalFact]
+    public void RF06SinMigracionDevuelveDiagnosticoSinEscribir()
+    {
+        var repo = new PostgreSqlPermisoRepository(_db);
+        var validacion = new RRHH.Application.Permisos.ValidarLicenciaUnaVezPorAnio(repo)
+            .Ejecutar(101, 900, new DateTime(2026, 3, 10));
+        Assert.False(validacion.Exitoso);
+        Assert.Contains("20261111_01_licencia_una_vez_anio.sql", validacion.Mensaje);
+        Assert.Equal(0, _db.ScalarInt("SELECT COUNT(*) FROM public.\"Permiso\";"));
+        Assert.Equal(0, _db.ScalarInt("SELECT COUNT(*) FROM public.\"Motivo_Perm\";"));
+    }
+
+    [PostgreSqlLocalFact]
     public void DescripcionRepetidaMantieneElComportamientoActualConIdsDistintos()
     {
         int primero=_repo.Insertar(Nuevo("Motivo ficticio repetido","P"));

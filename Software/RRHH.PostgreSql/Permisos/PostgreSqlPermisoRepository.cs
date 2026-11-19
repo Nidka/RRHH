@@ -46,11 +46,22 @@ public sealed class PostgreSqlPermisoRepository : IPermisoRepository
 
 	/// <summary>
 	/// Lee la marca configurable <c>Motivo_Perm."UnaVezPorAnio"</c> (RF-06). Requiere la migración de BD que crea
-	/// esa columna (<c>infra/rf-06-flag-licencia-anual</c>); sin ella la consulta falla. Un motivo inexistente o con
+	/// esa columna (<c>infra/rf-06-flag-licencia-anual</c>); si falta se devuelve un diagnóstico de negocio. Un motivo inexistente o con
 	/// la marca nula devuelve <c>false</c>.
 	/// </summary>
+    /// <exception cref="ReglaNegocioException">Falta la columna anual o tiene un tipo incompatible con la migración.</exception>
 	public bool MotivoSeOtorgaUnaVezPorAnio(int idMotivo)
 	{
+        if (_database.ScalarInt("""
+SELECT COUNT(*) FROM information_schema.columns
+WHERE table_schema = 'public' AND table_name = 'Motivo_Perm'
+AND column_name = 'UnaVezPorAnio' AND data_type = 'boolean';
+""") != 1)
+            throw new ReglaNegocioException(
+                "No se puede guardar el permiso porque falta la migración RF-06. " +
+                "Solicite al responsable de BD aplicar BD/migrations/20261111_01_licencia_una_vez_anio.sql " +
+                "en esta base y comprobar que UnaVezPorAnio es boolean.");
+
 		return _database.ScalarInt(
 			"SELECT 1 FROM public.\"Motivo_Perm\" " +
 			"WHERE \"idMotivo\" = @motivoId AND COALESCE(\"UnaVezPorAnio\", false) = true " +
