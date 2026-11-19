@@ -1,5 +1,21 @@
 # Pruebas SQL de TEC-002
 
+## Diagnóstico de duplicados y ensayo de saneamiento
+
+`diagnostico_integridad.sql` ejecuta una transacción de solo lectura y reporta cantidades y estructura. Omite valores personales, logins y credenciales. Kadin puede usarlo para aportar el diagnóstico anonimizado del destino. La ausencia de FK declaradas no acredita ausencia de dependencias lógicas.
+
+Para el ensayo local con PostgreSQL 18 y PowerShell 7:
+
+```powershell
+pwsh -NoProfile -File BD/tests/Invoke-IntegridadQa.ps1 -PostgreSqlBin 'C:\Program Files\PostgreSQL\18\bin'
+```
+
+El ejecutor crea un clúster temporal dedicado y usa únicamente datos ficticios. `sanear_copias_exactas_qa.sql` solo admite loopback y la base `rrhh_integridad_qa`. Respalda las filas en un esquema restringido dentro de esa misma base antes de retirar copias exactas, conserva IDs y añade la clave de Usuario. Después se aplican las migraciones existentes de TEC-002 y RF-06. Se prueban referencias, repetición, variantes de contenido, IDs nulos y huérfanos.
+
+El saneamiento y las migraciones son transacciones separadas. Un fallo de migración conserva el estado saneado y el respaldo del ensayo. La base temporal se detiene al terminar. Estos archivos preparan la revisión del grupo y no constituyen un despliegue en la base compartida. Antes de ese despliegue Kadin debe contrastar las referencias reales y preparar respaldo y restauración del destino.
+
+Resultado del 19/11/2026 en PostgreSQL 18 local. El ejecutor aprobó conservación de IDs y referencias, cinco PK y nueve FK, repetición, migración RF-06, backup con pg_dump y restore en una segunda base ficticia. Los cuatro rechazos deliberados aparecen como ERROR en la salida de psql y el ejecutor comprueba después que no hubo cambios.
+
 Estas pruebas usan únicamente datos ficticios y deben ejecutarse en una base
 local desechable. Nunca apunte estos comandos a `.env` ni a la instancia
 compartida, porque el fixture elimina tablas del esquema `public`.
