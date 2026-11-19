@@ -176,10 +176,11 @@ internal static class CompositionRoot
         return form;
     }
 
-	/// <summary>
-	/// Crea la validación de permisos que usa FrmPermiso al guardar: RF-03 (sin permisos solapados, en lugar de
-	/// <c>RRHHClass.ExistePermiso</c>) y RF-06 (licencia de una vez por año), desde un único punto.
-	/// </summary>
+    /// <summary>Crea el guardado que valida y escribe el permiso en una sola transacción PostgreSQL.</summary>
+    public static GuardarPermiso CrearGuardarPermiso() =>
+        new GuardarPermiso(new PostgreSqlPermisoEscrituraRepository(Database.Value));
+
+    /// <summary>Crea la consulta orientativa de RF-03/RF-06; no sustituye al guardado transaccional.</summary>
 	public static ValidarPermiso CrearValidarPermiso()
 	{
 		IPermisoRepository repository = new PostgreSqlPermisoRepository(Database.Value);

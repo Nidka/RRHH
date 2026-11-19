@@ -10,7 +10,8 @@ public interface IPermisoRepository
 {
 	/// <summary>
 	/// Indica si el empleado ya tiene un permiso que comparta al menos un día con
-	/// <paramref name="rango"/>. Reemplaza a <c>RRHHClass.ExistePermiso</c>.
+	/// <paramref name="rango"/>. Rechazados y anulados no bloquean; en esquemas históricos
+    /// sin estado explícito todos cuentan. Reemplaza a <c>RRHHClass.ExistePermiso</c>.
 	/// </summary>
 	/// <param name="idEmpleado">Empleado cuyos permisos se revisan; los de otros empleados no cuentan.</param>
 	/// <param name="rango">Días que se quieren ocupar, ambos extremos incluidos.</param>
@@ -28,6 +29,7 @@ public interface IPermisoRepository
 
 	/// <summary>
 	/// Indica si el empleado tiene un permiso del mismo motivo o grupo de restricción anual que empieza en <paramref name="anio"/>.
+    /// Se excluyen los estados explícitos Rechazado y Anulado; un estado desconocido ocupa el cupo.
 	/// </summary>
 	/// <param name="idEmpleado">Empleado cuyos permisos se revisan; los de otros empleados no cuentan.</param>
 	/// <param name="idMotivo">Motivo (<c>public."Permiso"."idMotivo"</c>) que se busca.</param>

@@ -1430,49 +1430,6 @@ public class FrmPermiso : FrmConsulta
 			MessageBox.Show("Debe Seleccionar un Motivo Válido", "", MessageBoxButtons.OK, MessageBoxIcon.Hand);
 			return;
 		}
-		List<Permiso> list = PermisoMapper.Instance().SelectBy([SpecialName] (Permiso p) =>
-		{
-			bool flag = true;
-			bool? retorno = p.Retorno;
-			bool? obj;
-			if (!retorno.HasValue)
-			{
-				obj = null;
-			}
-			else
-			{
-				bool? flag2 = retorno == true == flag;
-				obj = flag2;
-			}
-			bool? flag3 = obj;
-			bool? flag5;
-			if (!((p.IdEmpleado == idEmpleado) & (Operators.CompareString(p.FechaInicio.Value.ToShortDateString(), UcFechas.Rango.Desde.ToShortDateString(), TextCompare: false) <= 0) & (Operators.CompareString(p.FechaFin.Value.ToShortDateString(), UcFechas.Rango.Desde.ToShortDateString(), TextCompare: false) >= 0)))
-			{
-				bool? flag4 = false;
-				flag5 = flag4;
-			}
-			else
-			{
-				flag5 = flag3;
-			}
-			bool? flag6 = flag5;
-			bool? flag8;
-			if (p.Hora_Ret != null)
-			{
-				bool? flag7 = false;
-				flag8 = flag7;
-			}
-			else
-			{
-				flag8 = flag6;
-			}
-			return (bool)flag8;
-		});
-		if (list.Count >= 1)
-		{
-			MessageBox.Show("El Empleado se Encuentra de Permiso, No se puede agregar Otro Permiso", "", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-			return;
-		}
 		if (Operators.ConditionalCompareObjectEqual(UcCmbTipoPermiso.SelectedValue, 1, TextCompare: false))
 		{
 		}
@@ -1517,41 +1474,27 @@ public class FrmPermiso : FrmConsulta
 				num2 = checked(num2 + 1);
 			}
 		}
-		Permiso permiso = new Permiso();
-		permiso.FechaFin = Conversions.ToDate(UcFechas.Rango.Hasta.ToShortDateString());
-		permiso.FechaInicio = Conversions.ToDate(UcFechas.Rango.Desde.ToShortDateString());
-		object selectedValue = UcCmbMotivo.SelectedValue;
-		int? num5 = default(int?);
-		permiso.idMotivo = ((selectedValue != null) ? ((int?)selectedValue) : num5);
-		permiso.Autorizacion = UcTxtAutorizacion.Text.Trim();
-		permiso.Lugar = UcTxtLugar.Text.Trim();
-		permiso.Referencia = UcTxtRef.Text.Trim();
-		object editValue = CheckEditDia.EditValue;
-		bool? flag9 = default(bool?);
-		permiso.Dia = ((editValue != null) ? ((bool?)editValue) : flag9);
-		object editValue2 = CheckEditRetorno.EditValue;
-		permiso.Retorno = ((editValue2 != null) ? ((bool?)editValue2) : flag9);
-		permiso.IdEmpleado = idEmpleado;
-		permiso.Obs = UcTxtObs.Text.Trim();
-		// RF-03: reemplaza RRHHClass.ExistePermiso (solo cubria el alta y no detectaba un rango que contiene a otro).
-		// RF-06: el mismo punto de validacion rechaza una segunda licencia de una vez por anio en el mismo anio.
-		// Valida tambien al editar, excluyendo el propio permiso (Npermiso).
-		var validacion = CompositionRoot.CrearValidarPermiso().Ejecutar(idEmpleado, Conversions.ToInteger(UcCmbMotivo.SelectedValue), UcFechas.Rango.Desde, UcFechas.Rango.Hasta, Npermiso);
-		if (!validacion.Exitoso)
-		{
-			MessageBox.Show(validacion.Mensaje, "", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-			return;
-		}
-		if (Npermiso == 0)
-		{
-			permiso.NPermiso = objClassRRHH.SgtIdPermiso(idEmpleado);
-			PermisoMapper.Instance().Insert(permiso);
-		}
-		else
-		{
-			permiso.NPermiso = Npermiso;
-			PermisoMapper.Instance().Update(permiso);
-		}
+        var permiso = new global::RRHH.Application.Permisos.PermisoGuardarDto
+        {
+            IdEmpleado = idEmpleado,
+            Numero = Npermiso,
+            IdMotivo = Conversions.ToInteger(UcCmbMotivo.SelectedValue),
+            Desde = UcFechas.Rango.Desde,
+            Hasta = UcFechas.Rango.Hasta,
+            Lugar = UcTxtLugar.Text.Trim(),
+            Referencia = UcTxtRef.Text.Trim(),
+            Autorizacion = UcTxtAutorizacion.Text.Trim(),
+            Observacion = UcTxtObs.Text.Trim(),
+            Dia = CheckEditDia.EditValue == null ? (bool?)null : Conversions.ToBoolean(CheckEditDia.EditValue),
+            Retorno = CheckEditRetorno.EditValue == null ? (bool?)null : Conversions.ToBoolean(CheckEditRetorno.EditValue)
+        };
+        var guardado = CompositionRoot.CrearGuardarPermiso().Ejecutar(permiso);
+        if (!guardado.Exitoso)
+        {
+            MessageBox.Show(guardado.Mensaje, "Permisos", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+            return;
+        }
+        Npermiso = permiso.Numero;
 		if (CheckEquipoMarcacion.CheckState == CheckState.Checked)
 		{
 			AsistenciaAccess asistenciaAccess = new AsistenciaAccess();

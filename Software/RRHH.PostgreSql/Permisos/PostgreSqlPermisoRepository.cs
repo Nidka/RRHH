@@ -11,11 +11,25 @@ namespace RRHH.PostgreSql.Permisos;
 public sealed class PostgreSqlPermisoRepository : IPermisoRepository
 {
 	private readonly PostgreSqlExecutor _database;
+    private readonly PostgreSqlTransactionContext _transaction;
+
+    // Los esquemas anteriores no distinguen rechazo/anulación. Un estado
+    // desconocido sigue ocupando: no se libera una fecha por datos corruptos.
+    private static string OcupaFechasYCupo(string alias) =>
+        "COALESCE(to_jsonb(" + alias + ")->>'EstadoSolicitud', '') NOT IN ('Rechazado', 'Anulado') ";
 
 	public PostgreSqlPermisoRepository(PostgreSqlExecutor database)
 	{
 		_database = database ?? throw new ArgumentNullException(nameof(database));
 	}
+
+    internal PostgreSqlPermisoRepository(PostgreSqlTransactionContext transaction)
+    {
+        _transaction = transaction ?? throw new ArgumentNullException(nameof(transaction));
+    }
+
+    private int ScalarInt(string sql, params PostgreSqlParameterValue[] parameters) =>
+        _transaction == null ? _database.ScalarInt(sql, parameters) : _transaction.ScalarInt(sql, parameters);
 
 	/// <summary>
 	/// Reemplaza <c>RRHHClass.ExistePermiso</c>, que solo comprobaba si el inicio o el fin del rango nuevo
@@ -31,9 +45,10 @@ public sealed class PostgreSqlPermisoRepository : IPermisoRepository
 			throw new ArgumentNullException(nameof(rango));
 		}
 
-		return _database.ScalarInt(
-			"SELECT 1 FROM public.\"Permiso\" " +
+		return ScalarInt(
+			"SELECT 1 FROM public.\"Permiso\" p " +
 			"WHERE \"IdEmpleado\" = @empleadoId " +
+            "AND " + OcupaFechasYCupo("p") +
 			"AND \"NPermiso\" <> @excluirNPermiso " +
 			"AND \"FechaInicio\" IS NOT NULL AND \"FechaFin\" IS NOT NULL " +
 			"AND \"FechaInicio\"::date <= @hasta AND \"FechaFin\"::date >= @desde " +
@@ -52,7 +67,7 @@ public sealed class PostgreSqlPermisoRepository : IPermisoRepository
     /// <exception cref="ReglaNegocioException">Falta la columna anual o tiene un tipo incompatible con la migración.</exception>
 	public bool MotivoSeOtorgaUnaVezPorAnio(int idMotivo)
 	{
-        if (_database.ScalarInt("""
+        if (ScalarInt("""
 SELECT COUNT(*) FROM information_schema.columns
 WHERE table_schema = 'public' AND table_name = 'Motivo_Perm'
 AND column_name = 'UnaVezPorAnio' AND data_type = 'boolean';
@@ -63,7 +78,7 @@ AND column_name = 'UnaVezPorAnio' AND data_type = 'boolean';
                 "en esta base y comprobar que UnaVezPorAnio es boolean.");
 
         ExigirMotivoUnico(idMotivo);
-		return _database.ScalarInt(
+		return ScalarInt(
 			"SELECT 1 FROM public.\"Motivo_Perm\" " +
 			"WHERE \"idMotivo\" = @motivoId AND COALESCE(\"UnaVezPorAnio\", false) = true " +
 			"LIMIT 1;",
@@ -77,11 +92,12 @@ AND column_name = 'UnaVezPorAnio' AND data_type = 'boolean';
 	public bool ExistePermisoDelMotivoEnAnio(int idEmpleado, int idMotivo, int anio, int excluirNPermiso)
 	{
         ExigirMotivoUnico(idMotivo);
-		return _database.ScalarInt(
+		return ScalarInt(
 			"SELECT 1 FROM public.\"Permiso\" p " +
             "JOIN public.\"Motivo_Perm\" elegido ON elegido.\"idMotivo\" = @motivoId " +
             "LEFT JOIN public.\"Motivo_Perm\" previo ON previo.\"idMotivo\" = p.\"idMotivo\" " +
 			"WHERE p.\"IdEmpleado\" = @empleadoId " +
+            "AND " + OcupaFechasYCupo("p") +
             "AND (p.\"idMotivo\" = @motivoId OR " +
             "(NULLIF(to_jsonb(elegido)->>'GrupoReglaAnual', '') IS NOT NULL " +
             "AND to_jsonb(previo)->>'GrupoReglaAnual' = to_jsonb(elegido)->>'GrupoReglaAnual')) " +
@@ -97,7 +113,7 @@ AND column_name = 'UnaVezPorAnio' AND data_type = 'boolean';
 
     private void ExigirMotivoUnico(int idMotivo)
     {
-        if (_database.ScalarInt("SELECT COUNT(*) FROM public.\"Motivo_Perm\" WHERE \"idMotivo\" = @id;",
+        if (ScalarInt("SELECT COUNT(*) FROM public.\"Motivo_Perm\" WHERE \"idMotivo\" = @id;",
             new PostgreSqlParameterValue("id", idMotivo, DbType.Int32)) > 1)
             throw new ReglaNegocioException("El motivo tiene un ID duplicado. Solicite revisar la integridad de BD antes de validar la licencia.");
     }

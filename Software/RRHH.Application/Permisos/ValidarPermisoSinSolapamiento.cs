@@ -10,8 +10,8 @@ namespace RRHH.Application.Permisos;
 /// </summary>
 /// <remarks>
 /// HIPÓTESIS (ver <c>specs/CR-003-permisos-solapados.md</c>): se compara por día calendario completo
-/// (los permisos por horas también ocupan el día) y todo permiso registrado cuenta, porque
-/// <c>public."Permiso"</c> no tiene columna de anulación. Esta clase solo valida: no escribe, de modo
+/// (los permisos por horas también ocupan el día). Se excluyen estados explícitos Rechazado y Anulado;
+/// sin migración se conserva el bloqueo histórico. Esta clase solo valida: no escribe, de modo
 /// que no puede por sí sola evitar que dos solicitudes simultáneas pasen la comprobación a la vez.
 /// </remarks>
 public sealed class ValidarPermisoSinSolapamiento
