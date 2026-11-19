@@ -61,6 +61,18 @@ internal static class CompositionRoot
         (Environment.GetEnvironmentVariable("RRHH_VACACIONES_ROLES") ?? "")
             .Split(',').Select(rol => rol.Trim()).Contains(RRHH.IdROl);
 
+    /// <summary>Acceso explícito al consolidado de asistencia de RRHH.</summary>
+    public static bool PuedeConsolidarAsistencia()=>(Environment.GetEnvironmentVariable("RRHH_ASISTENCIA_ROLES") ?? "")
+        .Split(',').Select(r=>r.Trim()).Contains(RRHH.IdROl);
+    /// <summary>Compone el reporte RF-15 sin usar mappers de compatibilidad.</summary>
+    public static FrmAsistenciaConsolidada CrearAsistenciaConsolidada()
+    {
+        if(!PuedeConsolidarAsistencia())throw new InvalidOperationException("Rol sin acceso a asistencia.");
+        var vista=new FrmAsistenciaConsolidada();
+        _=new AsistenciaConsolidadaPresenter(vista,new ConsolidarAsistencia(new PostgreSqlAsistenciaConsolidadaRepository(Database.Value)));
+        return vista;
+    }
+
     /// <summary>Compone la vista RF-07 con el régimen y los datos de ingreso del piloto.</summary>
     public static FrmVacacionesGeneradas CrearVacacionesGeneradas()
     {

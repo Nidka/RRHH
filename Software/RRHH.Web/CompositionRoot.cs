@@ -44,6 +44,7 @@ internal static class CompositionRoot
             new PostgreSqlAccesoUsuarioRepository(sp.GetRequiredService<PostgreSqlExecutor>())));
         builder.Services.AddScoped<PostgreSqlTeletrabajoRepository>();
         builder.Services.AddScoped<PostgreSqlFeriadoRepository>();
+        builder.Services.AddScoped(sp=>new ConsolidarAsistencia(new PostgreSqlAsistenciaConsolidadaRepository(sp.GetRequiredService<PostgreSqlExecutor>())));
         var diasVacaciones = decimal.Parse(builder.Configuration["RRHH_VACACIONES_DIAS_ANUALES"] ?? "30",
             System.Globalization.CultureInfo.InvariantCulture);
         builder.Services.AddScoped(sp => new ReportarVacacionesGeneradas(

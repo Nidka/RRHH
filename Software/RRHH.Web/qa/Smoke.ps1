@@ -281,6 +281,20 @@ ALTER TABLE "Permiso" ADD "Retorno" boolean;
     Assert-Http 200 $altaPermiso
     $numeroPermiso = ($altaPermiso.Content | ConvertFrom-Json).numero
     Assert-Http 400 (Post 'permisos' $permiso $session)
+    # RF-15: prepara una triple fuente real del piloto sin dejar una solicitud previa ocupando el mes.
+    $anterior=Invoke-RestMethod "$url/api/permisos?empleado=101&numero=1" -WebSession $session
+    $anterior.estado='Anulado'
+    Assert-Http 200 (Post 'permisos' $anterior $session)
+    Assert-Http 201 (Post 'periodos' @{empleado=101;desde='2026-11-16';hasta='2026-11-20';modalidad='T';diasRemotos=31} $session)
+    Assert-Http 200 (Post 'permisos' @{idEmpleado=101;numero=0;idMotivo=20;desde='2026-11-18';hasta='2026-11-18';estado='Aprobado'} $session)
+    'INSERT INTO "Asistencia" VALUES (101,''2026-11-18''),(101,''2026-11-18 16:00'');' | & $psql @argsDb
+    if($LASTEXITCODE){throw 'No se pudieron crear marcaciones ficticias RF-15.'}
+    $consolidadoUrl="$url/api/asistencia/consolidada?empleado=101&desde=2026-11-16&hasta=2026-11-23"
+    Assert-Http 401 (Invoke-WebRequest $consolidadoUrl -SkipHttpErrorCheck)
+    Assert-Http 403 (Invoke-WebRequest $consolidadoUrl -WebSession $soloTeletrabajo -SkipHttpErrorCheck)
+    $consolidado=Invoke-RestMethod $consolidadoUrl -WebSession $session
+    if($consolidado.ausencias -ne 1 -or $consolidado.presenciales -ne 0 -or $consolidado.remotos -ne 4 -or $consolidado.sinRegistro -ne 1 -or $consolidado.inconsistencias -ne 1){throw 'RF-15: no aplica prioridad y categoría única.'}
+    Assert-Http 400 (Invoke-WebRequest "$url/api/asistencia/consolidada?empleado=101&desde=2025-01-01&hasta=2026-11-23" -WebSession $session -SkipHttpErrorCheck)
     $cargado = Invoke-RestMethod "$url/api/permisos?empleado=101&numero=$numeroPermiso" -WebSession $session
     if ($cargado.estado -ne 'Solicitado' -or $cargado.observacion -ne 'Permiso ficticio') { throw 'RF-03: carga incorrecta.' }
     $permiso.numero=$numeroPermiso

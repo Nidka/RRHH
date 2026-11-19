@@ -561,6 +561,32 @@ INSERT INTO public."Usuario" VALUES (4,101,true),(5,102,true),(6,NULL,true),(7,1
         _db.Execute("INSERT INTO public.\"Usuario\" VALUES (4,101,true);");
         Assert.Throws<ReglaNegocioException>(()=>caso.Ejecutar(4,new DateTime(2026,11,12)));
     }
+
+    [PostgreSqlLocalFact]
+    public void RF15TresFuentesSinDobleConteoRespetaFeriadosYPatron()
+    {
+        PrepararGuardado();
+        _db.Execute("""
+DROP TABLE IF EXISTS public."Asistencia",public."Teletrabajo" CASCADE;
+CREATE TABLE public."Asistencia" ("IdEmpleado" integer,"Fecha" timestamp);
+CREATE TABLE public."Teletrabajo" ("IdEmpleado" integer,"FechaInicio" date,"FechaFin" date,"Estado" boolean,"Modalidad" text,"DiasRemotos" integer);
+INSERT INTO public."Asistencia" VALUES (101,'2026-11-18'),(101,'2026-11-18 16:00');
+INSERT INTO public."Teletrabajo" VALUES (101,'2026-11-16','2026-11-20',true,'T',31);
+INSERT INTO public."Permiso" ("IdEmpleado","NPermiso","idMotivo","FechaInicio","FechaFin","EstadoSolicitud") VALUES
+(101,1,900,'2026-11-18','2026-11-18','Aprobado'),(101,2,900,'2026-11-19','2026-11-19','Rechazado');
+""");
+        var caso=new RRHH.Application.Asistencia.ConsolidarAsistencia(new RRHH.PostgreSql.Asistencia.PostgreSqlAsistenciaConsolidadaRepository(_db));
+        var resultado=caso.Ejecutar(101,new DateTime(2026,11,16),new DateTime(2026,11,23));
+        Assert.Equal(6,resultado.Laborables);Assert.Equal(1,resultado.Ausencias);Assert.Equal(0,resultado.Presenciales);
+        Assert.Equal(4,resultado.Remotos);Assert.Equal(1,resultado.SinRegistro);Assert.Equal(1,resultado.Inconsistencias);
+        var miercoles=resultado.Dias.Single(d=>d.Fecha==new DateTime(2026,11,18));
+        Assert.True(miercoles.Ausencia && miercoles.Presencial && miercoles.Remoto && miercoles.Inconsistencia);
+        Assert.Equal("Ausencia",miercoles.Categoria);
+        _db.Execute("INSERT INTO public.\"RRHH_Feriado\" VALUES ('2026-11-17');");
+        Assert.Equal(3,caso.Ejecutar(101,new DateTime(2026,11,16),new DateTime(2026,11,23)).Remotos);
+        _db.Execute("UPDATE public.\"Teletrabajo\" SET \"Modalidad\"='P',\"DiasRemotos\"=1;");
+        Assert.Equal(1,caso.Ejecutar(101,new DateTime(2026,11,16),new DateTime(2026,11,23)).Remotos);
+    }
 }
 
 public sealed class PostgreSqlLocalFactAttribute : FactAttribute
