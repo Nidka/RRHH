@@ -21,6 +21,7 @@ internal static class CompositionRoot
     internal const string PoliticaAusencias = "ConsultarAusencias";
     internal const string PoliticaHorarios = "GestionarHorarios";
     internal const string PoliticaMotivos = "GestionarMotivos";
+    internal const string PoliticaAsistencia = "ConsultarAsistencia";
     internal const string RolRrhh = "rrhh:rol";
 
     public static void Configurar(WebApplicationBuilder builder)
@@ -36,6 +37,9 @@ internal static class CompositionRoot
             new PostgreSqlAccesoUsuarioRepository(sp.GetRequiredService<PostgreSqlExecutor>())));
         builder.Services.AddScoped<PostgreSqlTeletrabajoRepository>();
         builder.Services.AddScoped<PostgreSqlFeriadoRepository>();
+        builder.Services.AddScoped(sp => new ReportarAsistenciaConFeriados(
+            new PostgreSqlFechasAsistenciaRepository(sp.GetRequiredService<PostgreSqlExecutor>()),
+            sp.GetRequiredService<PostgreSqlFeriadoRepository>()));
         builder.Services.AddScoped(sp => new RegistrarPeriodoTeletrabajo(sp.GetRequiredService<PostgreSqlTeletrabajoRepository>()));
         builder.Services.AddScoped(sp => new ListarPeriodosTeletrabajo(sp.GetRequiredService<PostgreSqlTeletrabajoRepository>()));
         builder.Services.AddScoped(sp =>
@@ -73,6 +77,7 @@ internal static class CompositionRoot
         {
             AgregarPoliticaPorRol(options, PoliticaAusencias, builder.Configuration["RRHH_WEB_ROLES_AUSENCIAS"]);
             AgregarPoliticaPorRol(options, PoliticaHorarios, builder.Configuration["RRHH_WEB_ROLES_HORARIOS"]);
+            AgregarPoliticaPorRol(options, PoliticaAsistencia, builder.Configuration["RRHH_WEB_ROLES_ASISTENCIA"]);
             var rolesMotivos = (builder.Configuration["RRHH_WEB_ROLES_MOTIVOS"] ?? "")
                 .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
             options.AddPolicy(PoliticaMotivos, policy => policy.RequireAssertion(context =>
