@@ -27,7 +27,7 @@ public interface IPermisoRepository
 	bool MotivoSeOtorgaUnaVezPorAnio(int idMotivo);
 
 	/// <summary>
-	/// Indica si el empleado ya tiene un permiso de ese motivo cuya fecha de inicio cae en <paramref name="anio"/>.
+	/// Indica si el empleado tiene un permiso del mismo motivo o grupo de restricción anual que empieza en <paramref name="anio"/>.
 	/// </summary>
 	/// <param name="idEmpleado">Empleado cuyos permisos se revisan; los de otros empleados no cuentan.</param>
 	/// <param name="idMotivo">Motivo (<c>public."Permiso"."idMotivo"</c>) que se busca.</param>

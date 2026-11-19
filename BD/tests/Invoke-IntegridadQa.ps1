@@ -17,7 +17,9 @@ function Checked([string]$Exe, [string[]]$Arguments) {
     if ($LASTEXITCODE -ne 0) { throw "Comando de QA falló con código $LASTEXITCODE." }
 }
 function Sql([string]$Statement) {
-    Checked $psql ($qaArgs + @('-c', $Statement))
+    $statementFile = Join-Path $workspace ('statement-' + [Guid]::NewGuid() + '.sql')
+    [IO.File]::WriteAllText($statementFile, $Statement, [Text.UTF8Encoding]::new($false))
+    Checked $psql ($qaArgs + @('-f', $statementFile))
 }
 function File([string]$Relative) {
     Checked $psql ($qaArgs + @('-f', (Join-Path $repo $Relative)))
@@ -70,6 +72,20 @@ try {
     File 'BD/migrations/20261111_01_licencia_una_vez_anio.sql'
     File 'BD/tests/rf06_assertions.sql'
     File 'BD/migrations/20261111_01_licencia_una_vez_anio.sql'
+    File 'BD/migrations/20261119_01_grupo_licencia_anual.sql'
+    File 'BD/tests/rf06_grupos_assertions.sql'
+    File 'BD/migrations/20261119_01_grupo_licencia_anual.sql'
+    File 'BD/migrations/20261119_01_grupo_licencia_anual.rollback.sql'
+    Sql @'
+DO $test$
+BEGIN
+    IF (SELECT count(*) FROM public."Motivo_Perm" WHERE "idMotivo" IN (900,901,902)
+        AND "UnaVezPorAnio") <> 3 THEN
+        RAISE EXCEPTION 'RF-06 QA: rollback perdió motivos ficticios o su marca';
+    END IF;
+END $test$;
+'@
+    File 'BD/migrations/20261119_01_grupo_licencia_anual.sql'
 
     Checked $psql ($serverArgs + @('-d', 'postgres', '-c', 'CREATE DATABASE rrhh_integridad_restore_qa'))
     Checked $psql ($serverArgs + @('-d', 'rrhh_integridad_restore_qa', '-f', $backupFile))
@@ -88,7 +104,7 @@ try {
     Reset-Fixture
     Sql 'UPDATE public."Usuario_Rol" SET "IdUsuario" = 999;'
     Reject-Sanitation
-    Write-Output 'QA correcta: copias exactas, backup/restore, IDs, referencias, claves, repetición, RF-06 y cuatro rechazos sin cambios.'
+    Write-Output 'QA correcta: copias exactas, backup/restore, IDs, referencias, claves, RF-06, grupos, rollback y cuatro rechazos sin cambios.'
 } finally {
     if ($dbStarted) { & $pgctl -D $data -m fast -w stop }
     $env:PGPASSWORD = $previousPassword

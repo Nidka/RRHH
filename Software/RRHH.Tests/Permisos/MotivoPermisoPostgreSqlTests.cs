@@ -224,6 +224,61 @@ ALTER TABLE public."Motivo_Perm" ALTER COLUMN "idMotivo" SET DEFAULT nextval('pu
         Assert.Equal(0, _db.ScalarInt("SELECT COUNT(*) FROM public.\"Motivo_Perm\";"));
     }
 
+    private void PrepararLicenciasAnuales(bool conGrupo)
+    {
+        _db.Execute("""
+ALTER TABLE public."Motivo_Perm" ADD COLUMN "UnaVezPorAnio" boolean NOT NULL DEFAULT false;
+ALTER TABLE public."Permiso" ADD COLUMN "IdEmpleado" integer;
+ALTER TABLE public."Permiso" ADD COLUMN "NPermiso" integer;
+ALTER TABLE public."Permiso" ADD COLUMN "FechaInicio" timestamp;
+INSERT INTO public."Motivo_Perm" ("idMotivo", "Descrip_Motivo", "idTipoPermiso", "UnaVezPorAnio")
+VALUES (900, 'Licencia piloto', 1, true), (901, 'Licencia alternativa piloto', 1, true),
+       (902, 'Otra licencia piloto', 1, true);
+INSERT INTO public."Permiso" ("idMotivo", "IdEmpleado", "NPermiso", "FechaInicio")
+VALUES (900, 101, 1, '2026-03-10');
+""");
+        if (conGrupo)
+            _db.Execute("""
+ALTER TABLE public."Motivo_Perm" ADD COLUMN "GrupoReglaAnual" varchar(64);
+UPDATE public."Motivo_Perm" SET "GrupoReglaAnual" = 'PILOTO-FAMILIAR' WHERE "idMotivo" IN (900,901);
+UPDATE public."Motivo_Perm" SET "GrupoReglaAnual" = 'PILOTO-OTRA' WHERE "idMotivo" = 902;
+""");
+    }
+
+    [PostgreSqlLocalFact]
+    public void RF06GrupoImpideCambiarDeMotivoEnElMismoAnio()
+    {
+        PrepararLicenciasAnuales(true);
+        var caso = new RRHH.Application.Permisos.ValidarLicenciaUnaVezPorAnio(new PostgreSqlPermisoRepository(_db));
+        Assert.False(caso.Ejecutar(101, 901, new DateTime(2026, 9, 1)).Exitoso);
+        Assert.True(caso.Ejecutar(101, 901, new DateTime(2027, 9, 1)).Exitoso);
+        Assert.True(caso.Ejecutar(102, 901, new DateTime(2026, 9, 1)).Exitoso);
+        Assert.True(caso.Ejecutar(101, 902, new DateTime(2026, 9, 1)).Exitoso);
+        Assert.True(caso.Ejecutar(101, 900, new DateTime(2026, 9, 1), 1).Exitoso);
+        Assert.Equal(1, _db.ScalarInt("SELECT COUNT(*) FROM public.\"Permiso\";"));
+    }
+
+    [PostgreSqlLocalFact]
+    public void RF06SinColumnaGrupoConservaLaReglaIndividual()
+    {
+        PrepararLicenciasAnuales(false);
+        var caso = new RRHH.Application.Permisos.ValidarLicenciaUnaVezPorAnio(new PostgreSqlPermisoRepository(_db));
+        Assert.False(caso.Ejecutar(101, 900, new DateTime(2026, 9, 1)).Exitoso);
+        Assert.True(caso.Ejecutar(101, 901, new DateTime(2026, 9, 1)).Exitoso);
+    }
+
+    [PostgreSqlLocalFact]
+    public void RF06MotivoDuplicadoSeRechazaSinElegirUnaFila()
+    {
+        PrepararLicenciasAnuales(true);
+        _db.Execute("INSERT INTO public.\"Motivo_Perm\" SELECT * FROM public.\"Motivo_Perm\" WHERE \"idMotivo\"=901;");
+        var caso = new RRHH.Application.Permisos.ValidarLicenciaUnaVezPorAnio(new PostgreSqlPermisoRepository(_db));
+        var resultado = caso.Ejecutar(101, 901, new DateTime(2026, 9, 1));
+        Assert.False(resultado.Exitoso);
+        Assert.Contains("duplicado", resultado.Mensaje);
+        Assert.Equal(1, _db.ScalarInt("SELECT COUNT(*) FROM public.\"Permiso\";"));
+    }
+
     [PostgreSqlLocalFact]
     public void DescripcionRepetidaMantieneElComportamientoActualConIdsDistintos()
     {
