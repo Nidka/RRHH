@@ -70,6 +70,18 @@ ALTER TABLE public."Motivo_Perm" ADD COLUMN IF NOT EXISTS "UnaVezPorAnio" boolea
 
 ## Verificación
 
+### Grupo de restricción anual del piloto
+
+El grupo comunicó que varios motivos de la Ley 30012 representan una restricción equivalente. Marcar UnaVezPorAnio por separado permite solicitar códigos distintos. Se incorpora GrupoReglaAnual opcional al catálogo. Dos motivos marcados con la misma clave comparten la búsqueda de permisos del empleado y año de inicio. Una clave nula conserva el comportamiento individual existente.
+
+Mantenimiento correctivo y adaptativo. Se modifica PostgreSqlPermisoRepository.ExistePermisoDelMotivoEnAnio, reutilizando ValidarLicenciaUnaVezPorAnio y el mensaje actual. La consulta usa fechas y parámetros tipados y conserva la exclusión de la edición propia. Lectura con to_jsonb permite conservar compatibilidad con una base que tenga la marca anual pero aún no la columna de grupo. Se rechaza un ID seleccionado ambiguo.
+
+La migración exige la marca anual, IDs únicos y PK sobre idMotivo. No activa motivos reales ni asigna grupos. El motivo ficticio 900 y el alternativo 901 se crean exclusivamente en QA con una misma clave, y un tercer motivo con otra clave sirve de control. La aplicación en el servidor compartido y la selección de los IDs 70, 76, 82 y 133 requieren el diagnóstico y criterio del responsable.
+
+Pruebas requeridas son 900 seguido de 901 en el mismo año, otro año, otra persona, otra clave, edición propia, catálogo sin columna de grupo y motivos ambiguos. Reversión mediante la migración rollback y el commit de repositorio. La validación sigue separada del guardado heredado y la concurrencia de escrituras queda pendiente del flujo transaccional RF-03.
+
+Resultado del 19/11/2026 en PostgreSQL 18 local ficticio. Pasaron 358 pruebas net48 con cero fallos y cero omitidas. Los casos nuevos comprobaron bloqueo de 901 después de 900, aceptación en otro año, empleado y grupo, exclusión de edición propia, compatibilidad sin la columna de grupo y rechazo de un motivo duplicado. El ejecutor de integridad probó la migración de grupo, claves inválidas, repetición, rollback y reaplicación conservando los tres motivos ficticios. Web compiló con cero errores y cero advertencias y WinForms x86 con cero errores y 26 advertencias del aplicativo.
+
 ### Diagnóstico de migración ausente en el piloto
 
 Base d12f4a4. Mantenimiento correctivo. El grupo reportó ausencia de UnaVezPorAnio en su base. Se verifica el contrato de columna en PostgreSqlPermisoRepository.MotivoSeOtorgaUnaVezPorAnio y se comunica una ReglaNegocioException con el archivo de migración. ValidarLicenciaUnaVezPorAnio convierte ese error en ResultadoOperacion para que FrmPermiso lo muestre con su mecanismo existente.
