@@ -1,7 +1,10 @@
 using System;
+using System.Globalization;
+using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
 using RRHH.Application.Asistencia;
+using RRHH.Domain.Asistencia;
 using RRHH.Application.Catalogos;
 using RRHH.Application.Seguridad;
 using RRHH.Domain.Catalogos;
@@ -52,6 +55,23 @@ internal static class CompositionRoot
     public static ReportarAsistenciaConFeriados CrearReporteAsistenciaConFeriados() =>
         new ReportarAsistenciaConFeriados(new PostgreSqlFechasAsistenciaRepository(Database.Value),
             new PostgreSqlFeriadoRepository(Database.Value));
+
+    /// <summary>Comprueba los roles del piloto autorizados para consultar vacaciones en escritorio.</summary>
+    public static bool PuedeConsultarVacaciones() =>
+        (Environment.GetEnvironmentVariable("RRHH_VACACIONES_ROLES") ?? "")
+            .Split(',').Select(rol => rol.Trim()).Contains(RRHH.IdROl);
+
+    /// <summary>Compone la vista RF-07 con el régimen y los datos de ingreso del piloto.</summary>
+    public static FrmVacacionesGeneradas CrearVacacionesGeneradas()
+    {
+        if (!PuedeConsultarVacaciones()) throw new InvalidOperationException("Rol sin acceso a vacaciones.");
+        var dias = decimal.Parse(Environment.GetEnvironmentVariable("RRHH_VACACIONES_DIAS_ANUALES") ?? "30",
+            CultureInfo.InvariantCulture);
+        var vista = new FrmVacacionesGeneradas();
+        _ = new VacacionesGeneradasPresenter(vista, new ReportarVacacionesGeneradas(
+            new PostgreSqlIngresoVacacionesRepository(Database.Value), new RegimenVacacionesPiloto(dias)));
+        return vista;
+    }
 
 	public static bool EstablecerContrasenaUsuario(string login, string password)
 	{

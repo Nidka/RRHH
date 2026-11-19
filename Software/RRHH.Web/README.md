@@ -13,6 +13,8 @@ Versión web de RF-13 y RF-14 para operadores de RRHH. Reutiliza dominio, casos 
 
 ## Ejecutar
 
+Para RF-07, habilitar `RRHH_WEB_ROLES_VACACIONES` con roles admitidos también en `RRHH_WEB_ROLES`. El régimen del piloto genera 30 días por año cumplido desde FechaIngreso. `RRHH_VACACIONES_DIAS_ANUALES` permite cambiar la cantidad anual. En escritorio se usa el mismo parámetro y los roles de consulta se habilitan con `RRHH_VACACIONES_ROLES`. La consulta muestra únicamente días generados.
+
 El reporte RF-17 consulta el total y detalle por empleado. Configurar `RRHH_WEB_ROLES_ASISTENCIA` con los roles autorizados, también habilitados en `RRHH_WEB_ROLES`. Asistencias cuenta una fecha una sola vez aunque tenga marcación y sea feriado o fin de semana. Productividad cuenta las fechas con asistencia registrada.
 
 Desde la raíz, con las variables ya configuradas:

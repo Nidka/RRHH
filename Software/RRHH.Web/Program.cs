@@ -70,7 +70,8 @@ operador.MapGet("/sesion", async (ClaimsPrincipal usuario, IAuthorizationService
         ausencias = (await autorizacion.AuthorizeAsync(usuario, CompositionRoot.PoliticaAusencias)).Succeeded,
         horarios = (await autorizacion.AuthorizeAsync(usuario, CompositionRoot.PoliticaHorarios)).Succeeded,
         motivos = (await autorizacion.AuthorizeAsync(usuario, CompositionRoot.PoliticaMotivos)).Succeeded,
-        asistencia = (await autorizacion.AuthorizeAsync(usuario, CompositionRoot.PoliticaAsistencia)).Succeeded
+        asistencia = (await autorizacion.AuthorizeAsync(usuario, CompositionRoot.PoliticaAsistencia)).Succeeded,
+        vacaciones = (await autorizacion.AuthorizeAsync(usuario, CompositionRoot.PoliticaVacaciones)).Succeeded
     }));
 operador.MapPost("/salir", async (HttpContext context, IAntiforgery tokens) =>
 {
@@ -196,6 +197,9 @@ operador.MapGet("/asistencia", (int empleado, string desde, string hasta, string
     if (modo != "A" && modo != "P") throw new ReglaNegocioException("Seleccione Asistencias o Productividad.");
     return Results.Ok(reporte.Ejecutar(empleado, inicio, fin, modo == "P"));
 })).RequireAuthorization(CompositionRoot.PoliticaAsistencia);
+operador.MapGet("/vacaciones/generadas", (int empleado, string corte, ReportarVacacionesGeneradas reporte) =>
+    Ejecutar(() => Results.Ok(reporte.Ejecutar(empleado, Fecha(corte)))))
+    .RequireAuthorization(CompositionRoot.PoliticaVacaciones);
 app.Run();
 
 static AccesoMotivosPermiso AccesoMotivos(ClaimsPrincipal usuario) =>
