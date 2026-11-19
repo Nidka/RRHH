@@ -1,5 +1,6 @@
 using System;
 using RRHH.Application.Comun;
+using RRHH.Domain.Comun;
 
 namespace RRHH.Application.Permisos;
 
@@ -35,18 +36,22 @@ public sealed class ValidarLicenciaUnaVezPorAnio
 	/// <param name="excluirNPermiso">Número del permiso en edición, o 0 para un alta.</param>
 	/// <returns>
 	/// Error con mensaje para el usuario si el motivo es de una vez por año y el empleado ya tiene otro permiso de
-	/// ese motivo que empieza en el mismo año; éxito en caso contrario.
+	/// ese motivo que empieza en el mismo año, o si el repositorio detecta una migración ausente; éxito en caso contrario.
 	/// </returns>
 	public ResultadoOperacion Ejecutar(int idEmpleado, int idMotivo, DateTime fechaInicio, int excluirNPermiso = 0)
 	{
-		if (idMotivo <= 0 || !_repository.MotivoSeOtorgaUnaVezPorAnio(idMotivo))
-		{
-			return ResultadoOperacion.Ok();
-		}
-
-		int anio = fechaInicio.Year;
-		return _repository.ExistePermisoDelMotivoEnAnio(idEmpleado, idMotivo, anio, excluirNPermiso)
-			? ResultadoOperacion.Error(MensajeLicenciaYaOtorgada(anio))
-			: ResultadoOperacion.Ok();
+        try
+        {
+            if (idMotivo <= 0 || !_repository.MotivoSeOtorgaUnaVezPorAnio(idMotivo))
+                return ResultadoOperacion.Ok();
+            int anio = fechaInicio.Year;
+            return _repository.ExistePermisoDelMotivoEnAnio(idEmpleado, idMotivo, anio, excluirNPermiso)
+                ? ResultadoOperacion.Error(MensajeLicenciaYaOtorgada(anio))
+                : ResultadoOperacion.Ok();
+        }
+        catch (ReglaNegocioException ex)
+        {
+            return ResultadoOperacion.Error(ex.Message);
+        }
 	}
 }
