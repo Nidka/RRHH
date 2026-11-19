@@ -69,7 +69,8 @@ operador.MapGet("/sesion", async (ClaimsPrincipal usuario, IAuthorizationService
         usuario = usuario.Identity?.Name,
         ausencias = (await autorizacion.AuthorizeAsync(usuario, CompositionRoot.PoliticaAusencias)).Succeeded,
         horarios = (await autorizacion.AuthorizeAsync(usuario, CompositionRoot.PoliticaHorarios)).Succeeded,
-        motivos = (await autorizacion.AuthorizeAsync(usuario, CompositionRoot.PoliticaMotivos)).Succeeded
+        motivos = (await autorizacion.AuthorizeAsync(usuario, CompositionRoot.PoliticaMotivos)).Succeeded,
+        asistencia = (await autorizacion.AuthorizeAsync(usuario, CompositionRoot.PoliticaAsistencia)).Succeeded
     }));
 operador.MapPost("/salir", async (HttpContext context, IAntiforgery tokens) =>
 {
@@ -188,6 +189,13 @@ motivos.MapPost("/{id:int}/eliminar", async (int id, HttpContext context, IAntif
     var resultado = new EliminarMotivoPermiso(repositorio, AccesoMotivos(context.User)).Ejecutar(id);
     return resultado.Exitoso ? Results.NoContent() : Results.BadRequest(new { error = resultado.Mensaje });
 });
+operador.MapGet("/asistencia", (int empleado, string desde, string hasta, string modo,
+    ReportarAsistenciaConFeriados reporte) => Ejecutar(() =>
+{
+    var (inicio, fin) = PeriodoReporte(desde, hasta);
+    if (modo != "A" && modo != "P") throw new ReglaNegocioException("Seleccione Asistencias o Productividad.");
+    return Results.Ok(reporte.Ejecutar(empleado, inicio, fin, modo == "P"));
+})).RequireAuthorization(CompositionRoot.PoliticaAsistencia);
 app.Run();
 
 static AccesoMotivosPermiso AccesoMotivos(ClaimsPrincipal usuario) =>

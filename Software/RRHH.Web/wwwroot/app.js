@@ -13,6 +13,7 @@ function sesion(activa, permisos = {}) {
   byId('seccion-horarios').hidden = !activa || !permisos.horarios;
   byId('seccion-historico').hidden = !activa || !permisos.horarios;
   byId('seccion-motivos').hidden = !activa || !permisos.motivos;
+  byId('seccion-asistencia').hidden = !activa || !permisos.asistencia;
   if (!activa) {
     byId('periodos').replaceChildren();
     byId('dias').replaceChildren();
@@ -20,6 +21,9 @@ function sesion(activa, permisos = {}) {
     byId('resumen-clasificacion').textContent = '';
     byId('resultado-ausencias').replaceChildren();
     byId('resultado-historico').replaceChildren();
+    byId('detalle-asistencia').replaceChildren();
+    byId('total-asistencia').textContent = '';
+    byId('reporte-asistencia').reset();
     limpiarMotivos();
     byId('estado-motivo').textContent = '';
     altaMotivo.elements.tipo.length = 1;
@@ -279,5 +283,16 @@ async function cargarSesion() {
     usuario.motivos && cargarOpciones('motivos-permiso/tipos', 'seccion-motivos', altaMotivo.elements.tipo)
   ]);
 }
+
+accion('reporte-asistencia', async datos => {
+  byId('detalle-asistencia').replaceChildren();
+  byId('total-asistencia').textContent = '';
+  const resumen = await api('asistencia?' + new URLSearchParams(datos));
+  if (byId('seccion-asistencia').hidden) return;
+  byId('total-asistencia').textContent = 'Total de días computados: ' + resumen.total;
+  resultados('detalle-asistencia', ['Fecha', 'Asistencia registrada', 'No laborable', 'Cuenta en total'],
+    resumen.dias.map(dia => [dia.fecha.slice(0, 10), dia.asistio ? 'Sí' : 'No',
+      dia.noLaborable ? 'Sí' : 'No', dia.cuentaEnTotal ? 'Sí' : 'No']));
+});
 
 cargarSesion().catch(() => sesion(false));

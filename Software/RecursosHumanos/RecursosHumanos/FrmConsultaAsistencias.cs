@@ -739,8 +739,6 @@ public class FrmConsultaAsistencias : FrmConsulta
 		fi = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(UcFechas1.Rango.Desde.Year.ToString(), Interaction.IIf(UcFechas1.Rango.Desde.Month.ToString().Length == 1, "0" + UcFechas1.Rango.Desde.Month, UcFechas1.Rango.Desde.Month.ToString())), Interaction.IIf(UcFechas1.Rango.Desde.Day.ToString().Length == 1, "0" + UcFechas1.Rango.Desde.Day, UcFechas1.Rango.Desde.Day.ToString())));
 		ff = Conversions.ToString(Operators.ConcatenateObject(Operators.ConcatenateObject(UcFechas1.Rango.Hasta.Year.ToString(), Interaction.IIf(UcFechas1.Rango.Hasta.Month.ToString().Length == 1, "0" + UcFechas1.Rango.Hasta.Month, UcFechas1.Rango.Hasta.Month.ToString())), Interaction.IIf(UcFechas1.Rango.Hasta.Day.ToString().Length == 1, "0" + UcFechas1.Rango.Hasta.Day, UcFechas1.Rango.Hasta.Day.ToString())));
 		string text = "[";
-		// RF-17: reemplaza el conteo de solo sabados y domingos; ahora suma los feriados (sin duplicar los que caen en fin de semana).
-		int num = CompositionRoot.CrearCalcularDiasNoLaborables().Ejecutar(UcFechas1.Rango.Desde, UcFechas1.Rango.Hasta);
 		TimeSpan timeSpan = UcFechas1.Rango.Hasta - UcFechas1.Rango.Desde;
 		double totalDays = timeSpan.TotalDays;
 		double num2 = 0.0;
@@ -858,37 +856,13 @@ public class FrmConsultaAsistencias : FrmConsulta
 				}
 				if (Operators.ConditionalCompareObjectEqual(RadioGroupTipo.EditValue, "A", TextCompare: false))
 				{
-					GridControl3.DataSource = Module1.DcGrll.spRRHH_GetDiasAsistidos(fi, ff, Conversions.ToChar(UcCBPartidaPresupuestal.SelectedValue.ToString()));
-					int num21 = GridView3.RowCount - 1;
-					int num22 = 0;
-					while (true)
-					{
-						int num23 = num22;
-						int num8 = num21;
-						if (num23 > num8)
-						{
-							break;
-						}
-						int num24 = GridView1.RowCount - 1;
-						int num25 = 0;
-						while (true)
-						{
-							int num26 = num25;
-							num8 = num24;
-							if (num26 > num8)
-							{
-								break;
-							}
-							if (Operators.ConditionalCompareObjectEqual(GridView3.GetRowCellValue(num22, "IdEmpleado"), GridView1.GetRowCellValue(num25, "IdEmpleado"), TextCompare: false))
-							{
-								object obj2 = Operators.AddObject(num, GridView3.GetRowCellValue(num22, "Dias_Asistidos"));
-								GridView1.SetRowCellValue(num25, "DiasAsistidos", RuntimeHelpers.GetObjectValue(obj2));
-								break;
-							}
-							num25++;
-						}
-						num22++;
-					}
+                    var reporte = CompositionRoot.CrearReporteAsistenciaConFeriados();
+                    for (int fila = 0; fila < GridView1.RowCount; fila++)
+                    {
+                        int empleado = Conversions.ToInteger(GridView1.GetRowCellValue(fila, "IdEmpleado"));
+                        var resumen = reporte.Ejecutar(empleado, UcFechas1.Rango.Desde, UcFechas1.Rango.Hasta, false);
+                        GridView1.SetRowCellValue(fila, "DiasAsistidos", resumen.Total);
+                    }
 				}
 				else if (Operators.ConditionalCompareObjectEqual(RadioGroupTipo.EditValue, "P", TextCompare: false))
 				{
