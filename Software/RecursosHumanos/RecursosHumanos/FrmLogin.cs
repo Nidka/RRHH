@@ -142,6 +142,11 @@ public sealed class FrmLogin : Form
 				return;
 			}
 
+            if(CompositionRoot.SoloAutoservicio && !CompositionRoot.EsAutoservicio(access))
+            {
+                _status.Text="Este acceso acepta únicamente cuentas del rol de empleado.";
+                return;
+            }
 			ApplyAccess(access);
 			DialogResult = DialogResult.OK;
 			Close();

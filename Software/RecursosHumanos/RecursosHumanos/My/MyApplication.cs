@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 using Microsoft.VisualBasic.ApplicationServices;
+using global::RRHH.Application.Seguridad;
 
 namespace RecursosHumanos.My;
 
@@ -13,6 +14,8 @@ namespace RecursosHumanos.My;
 [EditorBrowsable(EditorBrowsableState.Never)]
 internal class MyApplication : WindowsFormsApplicationBase
 {
+    private AccesoUsuario _accesoInicial;
+    private string _nombreInicial;
 	private static List<WeakReference> __ENCList = new List<WeakReference>();
 
 	[DebuggerNonUserCode]
@@ -87,9 +90,22 @@ internal class MyApplication : WindowsFormsApplicationBase
 		ShutdownStyle = ShutdownMode.AfterMainFormCloses;
 	}
 
-	[DebuggerStepThrough]
-	protected override void OnCreateMainForm()
-	{
-		MainForm = MyProject.Forms.MainMDI;
-	}
+    /// <summary>Autentica antes de crear una ventana operativa; cancelar no abre el MDI.</summary>
+    protected override bool OnStartup(StartupEventArgs eventArgs)
+    {
+        return base.OnStartup(eventArgs) && CompositionRoot.IntentarAccesoInicial(out _accesoInicial,out _nombreInicial);
+    }
+
+    /// <summary>El empleado recibe una ventana propia; el operador conserva la instancia MDI del legado.</summary>
+    protected override void OnCreateMainForm()
+    {
+        if(_accesoInicial==null)throw new InvalidOperationException("No hay una identidad autenticada.");
+        if(CompositionRoot.EsAutoservicio(_accesoInicial)) MainForm=CompositionRoot.CrearMisVacaciones(_accesoInicial);
+        else
+        {
+            var principal=MyProject.Forms.MainMDI;
+            principal.EstablecerAccesoInicial(_accesoInicial,_nombreInicial);
+            MainForm=principal;
+        }
+    }
 }

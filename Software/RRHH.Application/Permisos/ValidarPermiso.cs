@@ -4,9 +4,8 @@ using RRHH.Application.Comun;
 namespace RRHH.Application.Permisos;
 
 /// <summary>
-/// Punto único de validación al registrar o editar un permiso: aplica la regla de no solapamiento (RF-03) y la de
-/// licencia de una vez por año (RF-06). El formulario llama solo a esta clase, de modo que agregar otra regla de
-/// permisos no obliga a tocar la pantalla.
+/// Consulta orientativa de no solapamiento (RF-03) y licencia anual (RF-06).
+/// No escribe ni sustituye a GuardarPermiso, que comprueba las reglas dentro de la transacción de guardado.
 /// </summary>
 public sealed class ValidarPermiso
 {
