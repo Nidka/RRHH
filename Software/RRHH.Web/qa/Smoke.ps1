@@ -114,6 +114,7 @@ ALTER TABLE "Permiso" ADD "Retorno" boolean;
     Invoke-Checked $Dotnet @('build', (Join-Path $hostProject 'RRHH.Web.csproj'))
     $env:RRHH_WEB_POSTGRES = "Host=127.0.0.1;Port=$DatabasePort;Username=qa;Password=$dbPassword;Database=postgres;SSL Mode=Disable"
     $env:RRHH_WEB_ROLES = '10,3'
+    $env:RRHH_WEB_ROLES_AUTOCONSULTA='20'
     $env:RRHH_WEB_ROLES_AUSENCIAS = '10'
     $env:RRHH_WEB_ROLES_HORARIOS = '10'
     $env:RRHH_WEB_ROLES_MOTIVOS = '10'
@@ -354,10 +355,34 @@ VALUES (900,'Licencia ficticia A',1,true,true,'PILOTO-FAMILIAR'),(901,'Licencia 
     Assert-Http 400 (Post 'permisos' $permiso $session)
     Assert-Http 204 (Post 'salir' @{} $session)
     Assert-Http 401 (Invoke-WebRequest "$url/api/periodos?empleado=101" -WebSession $session -SkipHttpErrorCheck)
-    Write-Output 'QA correcta: sesión, roles, CSRF, teletrabajo, ausencias, turnos, motivos y guardado/estados de permisos RF-03/RF-06.'
+    $cuentas=@"
+UPDATE "Empleado" SET "FechaIngreso"='2024-03-01' WHERE "IdEmpleado"=102;
+INSERT INTO "Rol" VALUES (20,'0500000');
+INSERT INTO "Usuario" VALUES (4,'empleado_a',101,true,'$hash','$saltText',210000),(5,'empleado_b',102,true,'$hash','$saltText',210000);
+INSERT INTO "Usuario_Rol" VALUES (4,20),(5,20);
+"@
+    $cuentas | & $psql @argsDb
+    if($LASTEXITCODE){throw 'No se pudieron crear las cuentas ficticias de autoconsulta.'}
+    $cuentaA=[Microsoft.PowerShell.Commands.WebRequestSession]::new()
+    $cuentaB=[Microsoft.PowerShell.Commands.WebRequestSession]::new()
+    Assert-Http 204 (Post 'login' @{login='empleado_a';password=$password} $cuentaA)
+    Assert-Http 204 (Post 'login' @{login='empleado_b';password=$password} $cuentaB)
+    $propiaUrl="$url/api/mi/vacaciones?corte=2026-11-12"
+    Assert-Http 401 (Invoke-WebRequest $propiaUrl -SkipHttpErrorCheck)
+    $propiaA=Invoke-RestMethod "$propiaUrl&empleado=102" -WebSession $cuentaA
+    $propiaB=Invoke-RestMethod "$propiaUrl&empleado=101" -WebSession $cuentaB
+    if($propiaA.empleado -ne 101 -or $propiaB.empleado -ne 102 -or $propiaB.usadas -ne 0){throw 'RF-12: se consultó otro empleado.'}
+    if((Invoke-RestMethod "$url/api/sesion" -WebSession $cuentaA).operador){throw 'RF-12: empleado recibió rol operador.'}
+    Assert-Http 403 (Invoke-WebRequest "$url/api/periodos?empleado=102" -WebSession $cuentaA -SkipHttpErrorCheck)
+    Assert-Http 403 (Invoke-WebRequest $saldoUrl -WebSession $cuentaA -SkipHttpErrorCheck)
+    Assert-Http 403 (Post 'permisos' $permiso $cuentaA)
+    Assert-Http 204 (Post 'salir' @{} $cuentaA)
+    Assert-Http 401 (Invoke-WebRequest $propiaUrl -WebSession $cuentaA -SkipHttpErrorCheck)
+    Write-Output 'QA correcta: módulos operativos, vacaciones RF-08/09/10/11 y autoconsulta RF-12 aislada entre dos cuentas.'
 } finally {
     if ($server -and !$server.HasExited) { Stop-Process -Id $server.Id }
     if ($dbStarted) { & $pgctl -D $data -m fast -w stop }
     Remove-Item Env:PGPASSWORD, Env:RRHH_WEB_POSTGRES, Env:RRHH_WEB_ROLES, Env:RRHH_WEB_ROLES_AUSENCIAS, Env:RRHH_WEB_ROLES_HORARIOS, Env:RRHH_WEB_ROLES_MOTIVOS, Env:RRHH_WEB_ROLES_ASISTENCIA, Env:RRHH_WEB_ROLES_VACACIONES, Env:RRHH_WEB_ROLES_PERMISOS, Env:RRHH_VACACIONES_DIAS_ANUALES, Env:ASPNETCORE_ENVIRONMENT, Env:RRHH_TEST_POSTGRES_CONNECTION -ErrorAction SilentlyContinue
     Write-Output "Clúster de QA detenido. Diagnósticos ficticios en $workspace."
+    Remove-Item Env:RRHH_WEB_ROLES_AUTOCONSULTA -ErrorAction SilentlyContinue
 }

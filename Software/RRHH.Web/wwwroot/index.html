@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#122837">
-  <title>Teletrabajo · RRHH</title>
+  <title>Gestión de RRHH</title>
 
   <link rel="icon" href="/icon.svg">
   <link rel="stylesheet" href="/app.css">
@@ -13,7 +13,7 @@
 <body>
   <header><div><strong>RRHH</strong><span>Gestión de asistencia</span></div><button id="salir" hidden>Cerrar sesión</button></header>
   <main>
-    <h1>Teletrabajo</h1>
+    <h1>Gestión de RRHH</h1>
     <p id="mensaje" role="status" aria-live="polite"></p>
     <section id="acceso">
       <h2>Iniciar sesión</h2>
@@ -24,7 +24,16 @@
       </form>
     </section>
     <div id="panel" hidden>
-      <section>
+      <section id="seccion-mis-vacaciones" hidden>
+        <h2>Mis vacaciones</h2>
+        <form id="mis-vacaciones">
+          <label>Fecha de corte<input name="corte" type="date" required></label>
+          <button>Consultar mi saldo</button>
+        </form>
+        <p id="mi-saldo" role="status"></p>
+        <div id="mis-consumos" class="resultados"></div>
+      </section>
+      <section id="seccion-alta-remoto">
         <h2>Registrar periodo</h2>
         <form id="alta">
           <label>Código de empleado<input name="empleado" type="number" min="1" max="2147483647" required></label>
@@ -42,7 +51,7 @@
           <button>Registrar</button>
         </form>
       </section>
-      <section>
+      <section id="seccion-listado-remoto">
         <h2>Periodos vigentes</h2>
         <form id="listado">
           <label>Código de empleado<input name="empleado" type="number" min="1" max="2147483647" required></label>
@@ -50,7 +59,7 @@
         </form>
         <div id="periodos" class="resultados"></div>
       </section>
-      <section>
+      <section id="seccion-reporte-remoto">
         <h2>Reporte de días remotos</h2>
         <form id="reporte">
           <label>Empleado (vacío para todos)<input name="empleado" type="number" min="1" max="2147483647"></label>
@@ -60,7 +69,7 @@
         </form>
         <div id="dias" class="resultados"></div>
       </section>
-      <section>
+      <section id="seccion-clasificacion-remoto">
         <h2>Personal en teletrabajo total o parcial</h2>
         <form id="clasificacion">
           <label>Desde<input type="date" name="desde" required></label>

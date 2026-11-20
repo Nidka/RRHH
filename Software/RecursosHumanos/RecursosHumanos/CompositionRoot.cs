@@ -96,6 +96,22 @@ internal static class CompositionRoot
         return vista;
     }
 
+    /// <summary>Reconoce el rol de empleado configurado para la aplicación local.</summary>
+    public static bool EsAutoservicio(AccesoUsuario acceso)=>acceso!=null &&
+        (Environment.GetEnvironmentVariable("RRHH_AUTOCONSULTA_ROLES") ?? "").Split(',').Select(r=>r.Trim()).Contains(acceso.IdRol.ToString(CultureInfo.InvariantCulture));
+
+    /// <summary>Compone una consulta propia a partir de la identidad autenticada; no admite empleado de la vista.</summary>
+    public static FrmMisVacaciones CrearMisVacaciones(AccesoUsuario acceso)
+    {
+        if(!EsAutoservicio(acceso)) throw new InvalidOperationException("Rol sin acceso a autoconsulta.");
+        var dias=decimal.Parse(Environment.GetEnvironmentVariable("RRHH_VACACIONES_DIAS_ANUALES") ?? "30",CultureInfo.InvariantCulture);
+        var caso=new ConsultarMisVacaciones(new PostgreSqlUsuarioEmpleadoRepository(Database.Value),
+            new ConsultarSaldoVacaciones(new PostgreSqlSaldoVacacionesRepository(Database.Value),new RegimenVacacionesPiloto(dias)));
+        var vista=new FrmMisVacaciones();
+        _=new MisVacacionesPresenter(vista,caso,acceso.IdUsuario);
+        return vista;
+    }
+
 	public static bool EstablecerContrasenaUsuario(string login, string password)
 	{
 		return new PostgreSqlAccesoUsuarioRepository(Database.Value)
