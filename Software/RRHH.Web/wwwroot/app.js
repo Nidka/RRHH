@@ -30,6 +30,7 @@ function sesion(activa, permisos = {}) {
     byId('detalle-asistencia').replaceChildren();
     byId('total-asistencia').textContent = '';
     byId('reporte-asistencia').reset();
+    byId('asistencia-consolidada').reset();byId('resumen-consolidado').textContent='';byId('dias-consolidados').replaceChildren();
     byId('vacaciones-generadas').reset();
     byId('resultado-vacaciones').replaceChildren();
     byId('saldo-vacaciones').reset();
@@ -143,6 +144,13 @@ accion('mis-vacaciones',async datos=>{
   const saldo=await api('mi/vacaciones?'+new URLSearchParams(datos));
   byId('mi-saldo').textContent=`Empleado ${saldo.empleado} · generadas ${saldo.generadas} · usadas ${saldo.usadas} · pendientes ${saldo.pendientes} días`;
   resultados('mis-consumos',['Permiso','Desde','Hasta','Días'],saldo.consumos.map(c=>[c.numero,c.desde.slice(0,10),c.hasta.slice(0,10),c.dias]));
+});
+accion('asistencia-consolidada',async datos=>{
+  byId('resumen-consolidado').textContent='';byId('dias-consolidados').replaceChildren();
+  const resumen=await api('asistencia/consolidada?'+new URLSearchParams(datos));
+  byId('resumen-consolidado').textContent=`Laborables ${resumen.laborables} · ausencias ${resumen.ausencias} · presenciales ${resumen.presenciales} · remotos ${resumen.remotos} · sin registro ${resumen.sinRegistro} · inconsistencias ${resumen.inconsistencias}`;
+  resultados('dias-consolidados',['Fecha','Categoría','Ausencia aprobada','Marcación','Periodo remoto','Inconsistencia'],
+    resumen.dias.map(d=>[d.fecha.slice(0,10),d.categoria,d.ausencia?'Sí':'No',d.presencial?'Sí':'No',d.remoto?'Sí':'No',d.inconsistencia?'Revisar':'No']));
 });
 byId('nuevo-permiso').addEventListener('click', nuevoPermiso);
 accion('cargar-permiso', async datos => {

@@ -2286,6 +2286,11 @@ public class MainMDI : Form
 			RecordAsistenciasSemanalesToolStripMenuItem.Visible = true;
 		}
 		if (frmLogin.DialogResult == DialogResult.OK && HorariosToolStripMenuItem.Available) AgregarMenuTeletrabajo();
+        if(frmLogin.DialogResult==DialogResult.OK && CompositionRoot.PuedeConsolidarAsistencia())
+            MantenimientosToolStripMenuItem1.DropDownItems.Add("Asistencia consolidada del piloto",null,(_,_)=>
+            {
+                using(var vista=CompositionRoot.CrearAsistenciaConsolidada())vista.ShowDialog(this);
+            });
         if (frmLogin.DialogResult==DialogResult.OK && CompositionRoot.PuedeGestionarPermisos())
             MantenimientosToolStripMenuItem1.DropDownItems.Add("Permisos y vacaciones del piloto",null,(_,_) =>
             {
