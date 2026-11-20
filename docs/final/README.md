@@ -33,3 +33,5 @@ El navegador llama a la API del host ASP.NET Core. El host valida sesión, rol y
 5. Mostrar la spec, el diff y la [evidencia de verificación](../../Software/RRHH.Web/qa/RESULTADOS.md). Antes de la exposición, anotar el SHA y la versión del entorno utilizado.
 
 El build WinForms acredita que el ejecutable de escritorio se genera. Su recorrido visual pendiente debe registrarse por separado. La evaluación de este corte usa la demo del navegador.
+
+[Guía, simulador y evidencias de v1.6.0](../../qa/evidencias/v1.6.0/README.md).
