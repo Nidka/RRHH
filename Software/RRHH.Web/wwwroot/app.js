@@ -28,6 +28,9 @@ function sesion(activa, permisos = {}) {
     byId('reporte-asistencia').reset();
     byId('vacaciones-generadas').reset();
     byId('resultado-vacaciones').replaceChildren();
+    byId('saldo-vacaciones').reset();
+    byId('resumen-saldo').textContent='';
+    byId('consumos-vacaciones').replaceChildren();
     byId('cargar-permiso').reset();
     nuevoPermiso();
     limpiarMotivos();
@@ -107,6 +110,13 @@ function nuevoPermiso() {
   form.elements.idEmpleado.readOnly = false;
   byId('estado-permiso').textContent = 'Nuevo permiso';
 }
+accion('saldo-vacaciones',async datos => {
+  byId('resumen-saldo').textContent='';
+  byId('consumos-vacaciones').replaceChildren();
+  const saldo=await api('vacaciones/saldo?'+new URLSearchParams(datos));
+  byId('resumen-saldo').textContent=`Generadas: ${saldo.generadas} · usadas: ${saldo.usadas} · pendientes: ${saldo.pendientes} días`;
+  resultados('consumos-vacaciones',['Permiso','Desde','Hasta','Días'],saldo.consumos.map(c => [c.numero,c.desde.slice(0,10),c.hasta.slice(0,10),c.dias]));
+});
 byId('nuevo-permiso').addEventListener('click', nuevoPermiso);
 accion('cargar-permiso', async datos => {
   nuevoPermiso();

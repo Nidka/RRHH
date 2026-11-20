@@ -73,6 +73,17 @@ internal static class CompositionRoot
         return vista;
     }
 
+    /// <summary>Compone RF-08 con la misma política de acceso y régimen académico de RF-07.</summary>
+    public static FrmSaldoVacaciones CrearSaldoVacaciones()
+    {
+        if (!PuedeConsultarVacaciones()) throw new InvalidOperationException("Rol sin acceso a vacaciones.");
+        var dias=decimal.Parse(Environment.GetEnvironmentVariable("RRHH_VACACIONES_DIAS_ANUALES") ?? "30",CultureInfo.InvariantCulture);
+        var vista=new FrmSaldoVacaciones();
+        _=new SaldoVacacionesPresenter(vista,new ConsultarSaldoVacaciones(
+            new PostgreSqlSaldoVacacionesRepository(Database.Value),new RegimenVacacionesPiloto(dias)));
+        return vista;
+    }
+
 	public static bool EstablecerContrasenaUsuario(string login, string password)
 	{
 		return new PostgreSqlAccesoUsuarioRepository(Database.Value)
