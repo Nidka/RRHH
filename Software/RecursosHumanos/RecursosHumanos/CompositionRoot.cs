@@ -81,6 +81,8 @@ internal static class CompositionRoot
         var vista=new FrmSaldoVacaciones();
         _=new SaldoVacacionesPresenter(vista,new ConsultarSaldoVacaciones(
             new PostgreSqlSaldoVacacionesRepository(Database.Value),new RegimenVacacionesPiloto(dias)));
+        _=new TruncasVacacionesPresenter(vista,new ConsultarVacacionesTruncas(
+            new PostgreSqlIngresoVacacionesRepository(Database.Value),new RegimenVacacionesPiloto(dias)));
         return vista;
     }
 

@@ -202,6 +202,9 @@ operador.MapGet("/vacaciones/generadas", (int empleado, string corte, ReportarVa
     Ejecutar(() => Results.Ok(reporte.Ejecutar(empleado, Fecha(corte)))))
     .RequireAuthorization(CompositionRoot.PoliticaVacaciones);
 var permisos = operador.MapGroup("/permisos").RequireAuthorization(CompositionRoot.PoliticaPermisos);
+operador.MapGet("/vacaciones/truncas",(int empleado,string cese,ConsultarVacacionesTruncas consulta) =>
+    Ejecutar(()=>Results.Ok(consulta.Ejecutar(empleado,Fecha(cese)))))
+    .RequireAuthorization(CompositionRoot.PoliticaVacaciones);
 operador.MapGet("/vacaciones/saldo",(int empleado,string corte,ConsultarSaldoVacaciones consulta) =>
     Ejecutar(() => Results.Ok(consulta.Ejecutar(empleado,Fecha(corte)))))
     .RequireAuthorization(CompositionRoot.PoliticaVacaciones);
