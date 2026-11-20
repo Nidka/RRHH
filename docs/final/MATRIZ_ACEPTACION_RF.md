@@ -9,8 +9,8 @@ Los casos sin recorrido visual nuevo y las verificaciones de entorno compartido 
 | RF-01 | Guardar horario por periodo para empleado con historial anual | Regresión SQL del repositorio | Smoke HTTP de horarios |
 | RF-02 | Consultar histórico por empleado y controlar encabezados ambiguos | Regresión SQL del repositorio | Smoke HTTP de histórico |
 | RF-03 | Impedir solapamientos bloqueantes y salida inválida; anular permiso | Pantalla de permisos y regresión SQL; reloj físico pendiente | Smoke HTTP de estados y salida |
-| RF-04 | Crear motivo válido | Cobertura previa; recorrido pendiente | Smoke HTTP del catálogo |
-| RF-05 | Dar de baja un motivo | Cobertura previa; recorrido pendiente | Smoke HTTP del catálogo |
+| RF-04 | Crear motivo válido | Alta QAT observada en catálogo | Smoke HTTP del catálogo |
+| RF-05 | Dar de baja un motivo | QAT eliminado y catálogo actualizado | Smoke HTTP del catálogo |
 | RF-06 | Rechazar segunda licencia anual de un mismo grupo | Regresión SQL local | Smoke HTTP local |
 | RF-07 | Generar 60 días por dos aniversarios | Pantalla de saldo | Smoke HTTP |
 | RF-08 | Obtener 47,5 pendientes tras consumir 12,5 | Pantalla de saldo | Pantalla y smoke HTTP |
@@ -18,13 +18,15 @@ Los casos sin recorrido visual nuevo y las verificaciones de entorno compartido 
 | RF-10 | Descontar 0,5 y devolverlo al anular; rechazar saldo insuficiente | Pantalla de edición y regresión SQL | Smoke HTTP y comprobación cruzada |
 | RF-11 | Filtrar por año, área y empleado | Pantalla del reporte | Pantalla y smoke HTTP |
 | RF-12 | Consultar solo los datos vinculados a una cuenta activa | Pantalla de empleado_a y prueba SQL con dos identidades | Pantalla con dos cuentas y smoke HTTP |
-| RF-13 | Registrar periodo y rechazar solapamiento | Regresión SQL; recorrido pendiente | Smoke HTTP |
-| RF-14 | Consultar periodos y días computados | Cobertura previa; recorrido pendiente | Smoke HTTP |
+| RF-13 | Registrar periodo y rechazar solapamiento | Regresión SQL; alta y consulta visual del periodo 2 | Smoke HTTP |
+| RF-14 | Consultar periodos y días computados | Reporte visual: un día remoto para 101 y 102 el 20/11/2026 | Smoke HTTP |
 | RF-15 | Contar una sola categoría y señalar fuentes en conflicto | Pantalla del consolidado | Pantalla y smoke HTTP |
-| RF-16 | Distinguir teletrabajo total y parcial según patrón | Cobertura previa; recorrido pendiente | Smoke HTTP |
+| RF-16 | Distinguir teletrabajo total y parcial según patrón | Clasificación mensual visual: dos empleados parciales; escenario Total cubierto por pruebas previas | Smoke HTTP |
 | RF-17 | Contar la fecha una sola vez y comprobar Productividad | Pantalla nueva, casos A=4 y P=3 | Smoke HTTP |
-| RF-18 | Consultar ausencias con los filtros y roles admitidos | Cobertura previa; recorrido pendiente | Smoke HTTP |
+| RF-18 | Consultar ausencias con los filtros y roles admitidos | Consulta de noviembre: 4 filas; filtro Licencia ficticia: 3 filas | Smoke HTTP |
 
 [Evidencias de pantalla](../../qa/evidencias/20261119-final/) ·
 [Registro de RF-12](../../qa/evidencias/20261119-final/RF12-VERIFICACION.md) ·
 [Especificación y alcance](../../specs/CR-QA-018-aceptacion-local.md)
+
+[Capturas de WinForms del 20/11](../../qa/evidencias/20261120-winforms/).

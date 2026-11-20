@@ -7,3 +7,26 @@
 5. Preparar v1.6.0-beta.1 como candidata de escritorio y web. Compilar desde el commit elegido y adjuntar artefactos, requisitos de instalación, evidencia y limitaciones. Reservar v1.6.0 para la aceptación del alcance acordado por el equipo.
 
 El corte 7b90c45 tiene regresión local ejecutada. La selección del destino y las pruebas compartidas siguen pendientes.
+
+## Resultado de la validación local
+
+En PostgreSQL 18.3 se creó cmi_qa y se verificó restaurar su respaldo. El
+ensayo del esquema confirmó que TEC-002 debe preceder a la migración de
+grupo anual de RF-06. La suite de integridad verificó copias exactas y
+rechazo de filas ambiguas con datos ficticios. La clasificación de los
+duplicados de la base compartida requiere un respaldo anonimizado.
+
+La web verificó el aislamiento de dos cuentas y la restricción anual con
+dos motivos del mismo grupo. WinForms consultó 47,5 días pendientes para
+el empleado ficticio 101 en la misma base.
+
+## Alcance de la prueba del reloj
+
+La [guía de migración](../../Software/docs/POSTGRESQL_MIGRATION.md)
+describe la importación de Marcacion.mdb. La regresión de RF-03 comprueba
+las reglas de salida con marcaciones ficticias ya disponibles en PostgreSQL.
+Para validar la integración importada, hace falta un archivo de prueba y
+el proveedor de Access de la arquitectura del cliente. Para acreditar el
+dispositivo físico, el archivo debe provenir de una marcación de QA con
+fecha y empleado ficticios conocidos. Después de importar se debe comprobar
+la fecha y el empleado en PostgreSQL y ejecutar la validación de salidas.
