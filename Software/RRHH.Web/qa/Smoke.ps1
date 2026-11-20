@@ -4,16 +4,22 @@ param(
     [int]$DatabasePort = 55414,
     [int]$WebPort = 5080,
     [switch]$Demo,
+    [switch]$Escritorio,
+    [switch]$SoloEmpleado,
+    [string]$DemoPassword,
     [switch]$RegresionEscritorio
 )
 $ErrorActionPreference = 'Stop'
+if(($Escritorio -or $DemoPassword) -and !$Demo){throw 'Escritorio y DemoPassword solo se admiten con -Demo local.'}
+if($SoloEmpleado -and (!$Demo -or !$Escritorio)){throw 'SoloEmpleado requiere -Demo -Escritorio.'}
 $hostProject = Split-Path $PSScriptRoot
 $repo = Split-Path (Split-Path $hostProject)
 $workspace = Join-Path ([IO.Path]::GetTempPath()) ('rrhh-web-qa-' + [Guid]::NewGuid())
 New-Item -ItemType Directory $workspace | Out-Null
 $dbStarted = $false
 $server = $null
-$password = [Guid]::NewGuid().ToString('N')
+$desktop=$null
+$password = if($Demo -and $DemoPassword){$DemoPassword}else{[Guid]::NewGuid().ToString('N')}
 $dbPassword = [Guid]::NewGuid().ToString('N')
 $salt = [Security.Cryptography.RandomNumberGenerator]::GetBytes(16)
 $hash = [Convert]::ToBase64String([Security.Cryptography.Rfc2898DeriveBytes]::Pbkdf2(
@@ -51,7 +57,7 @@ try {
     $dbStarted = $true
     $env:PGPASSWORD = $dbPassword
     $psql = Join-Path $PostgreSqlBin 'psql.exe'
-    $argsDb = @('-X', '-v', 'ON_ERROR_STOP=1', '-h', '127.0.0.1', '-p', "$DatabasePort", '-U', 'qa', '-d', 'postgres')
+    $argsDb = @('-X', '-P','pager=off','-v', 'ON_ERROR_STOP=1', '-h', '127.0.0.1', '-p', "$DatabasePort", '-U', 'qa', '-d', 'postgres')
     $fixture = @"
 CREATE TABLE "Empleado" ("IdEmpleado" integer, "IdPersona" integer, "idAreaOrganiz" integer);
 ALTER TABLE "Empleado" ADD "FechaIngreso" timestamp;
@@ -134,10 +140,48 @@ ALTER TABLE "Permiso" ADD "Retorno" boolean;
     }
     if (!$ready) { throw "El host no arrancó. Revisar $workspace." }
     if ($Demo) {
+        $datosDemo=@"
+ALTER TABLE "Persona" ADD COLUMN "NumDocID" varchar(20) DEFAULT 'FICTICIO';
+ALTER TABLE "Empleado" ADD COLUMN "Foto" text;
+UPDATE "Empleado" SET "FechaIngreso"='2024-03-01' WHERE "IdEmpleado"=102;
+UPDATE "Permiso" SET "EstadoSolicitud"='Anulado' WHERE "IdEmpleado"=101;
+UPDATE "Motivo_Perm" SET "EsVacacionesPiloto"=true WHERE "idMotivo"=10;
+INSERT INTO "TipoPermiso" VALUES (2,'Salida autorizada ficticia');
+INSERT INTO "Motivo_Perm" ("idMotivo","Descrip_Motivo","Abrev","idTipoPermiso","TipoModalidad","Activo","UnaVezPorAnio","GrupoReglaAnual") VALUES
+(900,'Licencia académica A','LAA',1,'P',true,true,'PILOTO-FAMILIAR'),
+(901,'Licencia académica B','LAB',1,'P',true,true,'PILOTO-FAMILIAR'),
+(902,'Salida autorizada ficticia','SAL',2,'P',true,false,NULL);
+INSERT INTO "Permiso" ("IdEmpleado","NPermiso","idMotivo","FechaInicio","FechaFin","EstadoSolicitud","MediaJornadaVacaciones") VALUES
+(101,100,10,'2026-05-01','2026-05-12','Aprobado',false),(101,101,10,'2026-05-13','2026-05-13','Aprobado',true),
+(101,102,20,'2026-11-18','2026-11-18','Aprobado',false);
+INSERT INTO "Teletrabajo" ("IdEmpleado","FechaInicio","FechaFin","Modalidad","DiasRemotos") VALUES (101,'2026-11-16','2026-11-20','T',31);
+INSERT INTO "Asistencia" ("IdEmpleado","Fecha") VALUES (101,'2026-11-18'),(101,'2026-11-18 16:00'),(102,CURRENT_DATE);
+INSERT INTO "Rol" VALUES (20,'0500000');
+INSERT INTO "Usuario" VALUES (4,'empleado_a',101,true,'$hash','$saltText',210000),(5,'empleado_b',102,true,'$hash','$saltText',210000);
+INSERT INTO "Usuario_Rol" VALUES (4,20),(5,20);
+"@
+        $datosDemo | & $psql @argsDb
+        if($LASTEXITCODE){throw 'Falló la preparación de la demo integrada local.'}
+        if($Escritorio){
+            $ejecutable=Join-Path $repo 'Software/RecursosHumanos/bin/Debug/net48/RecursosHumanos.exe'
+            if(!(Test-Path -LiteralPath $ejecutable)){throw 'Ejecute Software/scripts/build.cmd antes de abrir la demo de escritorio.'}
+            $env:RRHH_POSTGRES_CONNECTION=$env:RRHH_WEB_POSTGRES
+            $env:RRHH_VACACIONES_ROLES='10'
+            $env:RRHH_PERMISOS_ROLES='10'
+            $env:RRHH_ASISTENCIA_ROLES='10'
+            $env:RRHH_AUTOCONSULTA_ROLES='20'
+            $env:RRHH_SOLO_AUTOCONSULTA=if($SoloEmpleado){'1'}else{'0'}
+            $env:RRHH_ENV_FILE=Join-Path $workspace 'demo.env'
+            [IO.File]::WriteAllText($env:RRHH_ENV_FILE,'# Demo local ficticia; conexión proporcionada solo al proceso.')
+            # Ventana interactiva solicitada para QA visual, no servicio auxiliar.
+            $desktop=Start-Process -FilePath $ejecutable -WorkingDirectory (Split-Path $ejecutable) -WindowStyle Normal -PassThru
+        }
         Write-Host "Página local: $url"
-        Write-Host 'Usuario ficticio: operador'
+        if($SoloEmpleado){Write-Host 'Usuario para esta demo de empleado: empleado_a'}else{Write-Host 'Usuario ficticio: operador'}
         Write-Host "Contraseña de esta sesión: $password"
         Write-Host 'Empleados ficticios: 101 y 102. El 11/11/2026 es feriado.'
+        Write-Host 'Autoconsulta ficticia: empleado_a (101), empleado_b (102); misma contraseña de esta sesión.'
+        Write-Host 'Ejemplos: saldo 101 al 12/11/2026 = 47,5; truncas = 21,00; consolidado 16–23/11/2026.'
         $null = Read-Host 'Presiona Enter al terminar la demostración'
         return
     }
@@ -412,9 +456,12 @@ INSERT INTO "Usuario_Rol" VALUES (4,20),(5,20);
     Assert-Http 401 (Invoke-WebRequest $propiaUrl -WebSession $cuentaA -SkipHttpErrorCheck)
     Write-Output 'QA correcta: módulos operativos, vacaciones RF-08/09/10/11 y autoconsulta RF-12 aislada entre dos cuentas.'
 } finally {
+    if($desktop -and !$desktop.HasExited){Stop-Process -Id $desktop.Id}
     if ($server -and !$server.HasExited) { Stop-Process -Id $server.Id }
     if ($dbStarted) { & $pgctl -D $data -m fast -w stop }
     Remove-Item Env:PGPASSWORD, Env:RRHH_WEB_POSTGRES, Env:RRHH_WEB_ROLES, Env:RRHH_WEB_ROLES_AUSENCIAS, Env:RRHH_WEB_ROLES_HORARIOS, Env:RRHH_WEB_ROLES_MOTIVOS, Env:RRHH_WEB_ROLES_ASISTENCIA, Env:RRHH_WEB_ROLES_VACACIONES, Env:RRHH_WEB_ROLES_PERMISOS, Env:RRHH_VACACIONES_DIAS_ANUALES, Env:ASPNETCORE_ENVIRONMENT, Env:RRHH_TEST_POSTGRES_CONNECTION -ErrorAction SilentlyContinue
     Write-Output "Clúster de QA detenido. Diagnósticos ficticios en $workspace."
     Remove-Item Env:RRHH_WEB_ROLES_AUTOCONSULTA -ErrorAction SilentlyContinue
+    Remove-Item Env:RRHH_POSTGRES_CONNECTION,Env:RRHH_VACACIONES_ROLES,Env:RRHH_PERMISOS_ROLES,Env:RRHH_ASISTENCIA_ROLES,Env:RRHH_AUTOCONSULTA_ROLES,Env:RRHH_ENV_FILE -ErrorAction SilentlyContinue
+    Remove-Item Env:RRHH_SOLO_AUTOCONSULTA -ErrorAction SilentlyContinue
 }

@@ -608,6 +608,45 @@ CREATE TABLE public."Asistencia" ("IdEmpleado" integer,"Fecha" timestamp,"Hor_Sa
         var resultado=caso.Ejecutar(dto);Assert.False(resultado.Exitoso);Assert.Contains("salida registrada",resultado.Mensaje);
         Assert.Equal(1,_db.ScalarInt("SELECT COUNT(*) FROM public.\"Permiso\";"));
     }
+
+    [PostgreSqlLocalFact]
+    public void RF08MotivoInactivoNoImpideDevolverSaldoDelHistorico()
+    {
+        var saldos=PrepararSaldo();
+        var repo=new PostgreSqlPermisoEscrituraRepository(_db);
+        var permiso=repo.Obtener(101,1);
+        _db.Execute("UPDATE public.\"Motivo_Perm\" SET \"Activo\"=false WHERE \"idMotivo\"=900;");
+        permiso.Estado="Anulado";
+        Assert.True(new GuardarPermiso(repo).Ejecutar(permiso).Exitoso);
+        Assert.Equal(59.5m,saldos.Ejecutar(101,new DateTime(2026,11,12)).Pendientes);
+        Assert.False(new GuardarPermiso(repo).Ejecutar(Solicitud()).Exitoso);
+    }
+
+    [PostgreSqlLocalFact]
+    public void RF01YRF13AceptanHistorialAnualSinElegirEncabezadoAmbiguo()
+    {
+        PrepararGuardado();
+        _db.Execute("""
+ALTER TABLE public."Empleado" ADD COLUMN "Year" integer DEFAULT 2025;
+ALTER TABLE public."Empleado" ADD COLUMN "IdPersona" integer DEFAULT 1;
+ALTER TABLE public."Empleado" ADD COLUMN "Foto" text;
+INSERT INTO public."Empleado" ("IdEmpleado","Year","IdPersona") VALUES (101,2026,1);
+DROP TABLE IF EXISTS public."Persona",public."HorarioTemporal",public."Horario",public."Teletrabajo" CASCADE;
+CREATE TABLE public."Persona" ("IdPersona" integer,"Nombres" text,"Apellido_Paterno" text,"Apellido_Materno" text,"NumDocID" text);
+INSERT INTO public."Persona" VALUES(1,'Empleado','Ficticio','','QA');
+CREATE TABLE public."Horario" ("idHorario" integer);INSERT INTO public."Horario" VALUES(1);
+CREATE TABLE public."HorarioTemporal" ("idEmpleado" integer,"N" integer,"FechaInicio" timestamp,"FechaFin" timestamp,"HorarioAsignado" integer,"NroDocumento" text,"Sisgedo" text,"FechaRegistro" timestamp);
+CREATE TABLE public."Teletrabajo" ("Id" serial PRIMARY KEY,"IdEmpleado" integer,"FechaInicio" date,"FechaFin" date,"Modalidad" text,"DiasRemotos" integer,"Autorizacion" text,"Estado" boolean DEFAULT true);
+""");
+        var horarios=new RRHH.PostgreSql.Asistencia.PostgreSqlHorarioTemporalRepository(_db);
+        Assert.Equal("Empleado",horarios.ObtenerEmpleado(101).Nombres);
+        Assert.Equal(1,horarios.Guardar(new RRHH.Domain.Asistencia.AsignacionHorario(101,0,
+            RangoFechas.Crear(new DateTime(2026,3,1),new DateTime(2026,3,2)),1,null,null)));
+        Assert.Equal(1,new RRHH.PostgreSql.Teletrabajo.PostgreSqlTeletrabajoRepository(_db).Registrar(
+            new RRHH.Domain.Teletrabajo.PeriodoTeletrabajo(101,RangoFechas.Crear(new DateTime(2026,11,16),new DateTime(2026,11,20)),RRHH.Domain.Teletrabajo.ModalidadTeletrabajo.Total,31,null)));
+        _db.Execute("INSERT INTO public.\"Empleado\" (\"IdEmpleado\",\"Year\",\"IdPersona\") VALUES (101,2026,1);");
+        Assert.Throws<ReglaNegocioException>(()=>horarios.ObtenerEmpleado(101));
+    }
 }
 
 public sealed class PostgreSqlLocalFactAttribute : FactAttribute

@@ -21,9 +21,9 @@ public sealed class PostgreSqlPermisoEscrituraRepository : IPermisoEscrituraRepo
     private readonly bool _permitirSalidasAutorizadas;
     private readonly RegimenVacacionesPiloto _regimen;
     private readonly Func<DateTime> _hoy;
-    /// <summary>Configura el alcance del host; web excluye salidas cuyo control de marcación sigue en escritorio.</summary>
+    /// <summary>Configura régimen, reloj y disponibilidad del flujo compartido de salidas autorizadas.</summary>
     /// <param name="db">Ejecutor para consultas y transacciones PostgreSQL.</param>
-    /// <param name="permitirSalidasAutorizadas">True solo en el host que conserva los controles de salida autorizada.</param>
+    /// <param name="permitirSalidasAutorizadas">Habilita salidas con comprobación transaccional de marcaciones; false restringe ese flujo.</param>
     /// <param name="diasAnuales">Días anuales del régimen académico; debe coincidir con las consultas de saldo.</param>
     /// <param name="hoy">Reloj local del host; se inyecta en QA para evitar pruebas dependientes de la fecha real.</param>
     public PostgreSqlPermisoEscrituraRepository(PostgreSqlExecutor db, bool permitirSalidasAutorizadas = true,decimal diasAnuales=30m,Func<DateTime> hoy=null)
@@ -84,9 +84,13 @@ OR (table_name='Motivo_Perm' AND column_name='EsVacacionesPiloto'));
             var numeroAnterior = new PostgreSqlParameterValue("numeroAnterior", dto.Numero, DbType.Int32);
             if (tx.ScalarInt("SELECT COUNT(*) FROM public.\"Empleado\" WHERE \"IdEmpleado\"=@empleado;", empleado) == 0)
                 throw new ReglaNegocioException("El empleado no existe.");
-            if (tx.ScalarInt("SELECT COUNT(*) FROM public.\"Motivo_Perm\" WHERE \"idMotivo\"=@motivo AND \"Activo\" IS TRUE;",
-                new PostgreSqlParameterValue("motivo", dto.IdMotivo, DbType.Int32)) != 1)
-                throw new ReglaNegocioException("El motivo no existe, está inactivo o tiene un ID duplicado.");
+            var motivoParametro=new PostgreSqlParameterValue("motivo",dto.IdMotivo,DbType.Int32);
+            if(tx.ScalarInt("SELECT COUNT(*) FROM public.\"Motivo_Perm\" WHERE \"idMotivo\"=@motivo;",motivoParametro)!=1)
+                throw new ReglaNegocioException("El motivo no existe o tiene un ID duplicado.");
+            bool retirarHistorico=dto.Numero>0 && (dto.Estado=="Anulado" || dto.Estado=="Rechazado") &&
+                tx.ScalarInt("SELECT \"idMotivo\" FROM public.\"Permiso\" WHERE \"IdEmpleado\"=@empleado AND \"NPermiso\"=@numeroAnterior;",empleado,numeroAnterior)==dto.IdMotivo;
+            if(tx.ScalarInt("SELECT COUNT(*) FROM public.\"Motivo_Perm\" WHERE \"idMotivo\"=@motivo AND \"Activo\" IS TRUE;",motivoParametro)!=1 && !retirarHistorico)
+                throw new ReglaNegocioException("El motivo está inactivo; solo puede anular o rechazar su permiso histórico sin cambiar el motivo.");
             if (!_permitirSalidasAutorizadas && tx.ScalarInt(
                 "SELECT \"idTipoPermiso\" FROM public.\"Motivo_Perm\" WHERE \"idMotivo\"=@motivo;",
                 new PostgreSqlParameterValue("motivo", dto.IdMotivo, DbType.Int32)) == 2)

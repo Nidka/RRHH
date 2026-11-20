@@ -16,6 +16,16 @@ namespace RecursosHumanos;
 [DesignerGenerated]
 public class MainMDI : Form
 {
+    private global::RRHH.Application.Seguridad.AccesoUsuario _accesoInicial;
+    private string _nombreInicial;
+
+    /// <summary>Recibe la identidad del arranque una única vez, antes de mostrar la instancia MDI.</summary>
+    internal void EstablecerAccesoInicial(global::RRHH.Application.Seguridad.AccesoUsuario acceso,string nombre)
+    {
+        if(_accesoInicial!=null || Visible)throw new InvalidOperationException("La sesión inicial ya fue establecida.");
+        _accesoInicial=acceso ?? throw new ArgumentNullException(nameof(acceso));
+        _nombreInicial=nombre;
+    }
 	private static List<WeakReference> __ENCList = new List<WeakReference>();
 
 	private IContainer components;
@@ -2209,24 +2219,23 @@ public class MainMDI : Form
 
 	private void MainMDI_Load(object sender, EventArgs e)
 	{
-		FrmLogin frmLogin = new FrmLogin();
-		frmLogin.ShowDialog(this);
-        if(frmLogin.DialogResult==DialogResult.OK && CompositionRoot.EsAutoservicio(frmLogin.AccesoActual))
+        var acceso=_accesoInicial;
+        var nombre=_nombreInicial;
+        if(acceso==null)
         {
-            MenuStrip1.Enabled=false;ToolStrip1.Enabled=false;Hide();
-            using(var vista=CompositionRoot.CrearMisVacaciones(frmLogin.AccesoActual)) vista.ShowDialog();
-            Dispose();
-            return;
+            // Compatibilidad con una instancia abierta directamente por el legado.
+            using(var login=new FrmLogin())
+            {
+                if(login.ShowDialog(this)!=DialogResult.OK){Close();return;}
+                acceso=login.AccesoActual;nombre=login.EmployeeDisplayName;
+            }
         }
-		if (frmLogin.DialogResult == DialogResult.OK)
-		{
-			// El nombre ya fue obtenido mediante PostgreSQL durante el login.
-			TSSL_Usuario.Text = frmLogin.EmployeeDisplayName;
-		}
-		else
-		{
-			Close();
-		}
+        if(acceso==null || CompositionRoot.EsAutoservicio(acceso))
+        {
+            MessageBox.Show("La autoconsulta debe abrirse desde el acceso inicial de la aplicación.");
+            Close();return;
+        }
+        TSSL_Usuario.Text=nombre+" ("+acceso.Login+")";
 		if ((RRHH.Bienestar && RRHH.Bienestar) ? true : false)
 		{
 			MantenimientosToolStripMenuItem1.Visible = false;
@@ -2285,18 +2294,24 @@ public class MainMDI : Form
 			ListaPersonalToolStripMenuItem.Visible = false;
 			RecordAsistenciasSemanalesToolStripMenuItem.Visible = true;
 		}
-		if (frmLogin.DialogResult == DialogResult.OK && HorariosToolStripMenuItem.Available) AgregarMenuTeletrabajo();
-        if(frmLogin.DialogResult==DialogResult.OK && CompositionRoot.PuedeConsolidarAsistencia())
+		if (HorariosToolStripMenuItem.Available) AgregarMenuTeletrabajo();
+        if(CompositionRoot.PuedeConsolidarAsistencia())
+        {
             MantenimientosToolStripMenuItem1.DropDownItems.Add("Asistencia consolidada del piloto",null,(_,_)=>
             {
                 using(var vista=CompositionRoot.CrearAsistenciaConsolidada())vista.ShowDialog(this);
             });
-        if (frmLogin.DialogResult==DialogResult.OK && CompositionRoot.PuedeGestionarPermisos())
+            MantenimientosToolStripMenuItem1.DropDownItems.Add("Asistencias y días no laborables del piloto",null,(_,_)=>
+            {
+                using(var vista=CompositionRoot.CrearReporteAsistenciaPiloto())vista.ShowDialog(this);
+            });
+        }
+        if (CompositionRoot.PuedeGestionarPermisos())
             MantenimientosToolStripMenuItem1.DropDownItems.Add("Permisos y vacaciones del piloto",null,(_,_) =>
             {
                 using (var vista=CompositionRoot.CrearPermisoPiloto()) vista.ShowDialog(this);
             });
-        if (frmLogin.DialogResult == DialogResult.OK && CompositionRoot.PuedeConsultarVacaciones())
+        if (CompositionRoot.PuedeConsultarVacaciones())
         {
             var vacaciones = new ToolStripMenuItem("Vacaciones generadas del piloto");
             vacaciones.Click += (_, _) =>

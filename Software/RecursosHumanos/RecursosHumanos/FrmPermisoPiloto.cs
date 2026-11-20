@@ -6,7 +6,7 @@ using RRHH.Presentation.Permisos;
 
 namespace RecursosHumanos;
 
-/// <summary>Editor pasivo del piloto; las salidas por horas siguen en el formulario original.</summary>
+/// <summary>Editor pasivo de permisos, estados, vacaciones y salidas autorizadas del piloto.</summary>
 public sealed class FrmPermisoPiloto : Form,IPermisoEditorView
 {
     private readonly NumericUpDown _empleado=new NumericUpDown {Minimum=1,Maximum=int.MaxValue};

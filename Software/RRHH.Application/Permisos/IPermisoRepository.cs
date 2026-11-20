@@ -4,7 +4,7 @@ namespace RRHH.Application.Permisos;
 
 /// <summary>
 /// Contrato de consulta sobre los permisos registrados en <c>public."Permiso"</c>.
-/// Por ahora solo expone lo que necesita la regla de solapamiento (RF-03).
+/// Expone las consultas de solapamiento (RF-03) y restricción anual por motivo o grupo (RF-06).
 /// </summary>
 public interface IPermisoRepository
 {

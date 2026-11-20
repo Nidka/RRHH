@@ -27,8 +27,9 @@ public sealed class PostgreSqlTeletrabajoRepository : ITeletrabajoRepository
         var hasta = new PostgreSqlParameterValue("hasta", periodo.Rango.Hasta, DbType.Date);
 
         tx.Execute("""LOCK TABLE public."Empleado" IN SHARE MODE;""");
-        if (tx.ScalarInt("""SELECT COUNT(*) FROM public."Empleado" WHERE "IdEmpleado" = @empleado;""", empleado) != 1)
-            throw new ReglaNegocioException("El empleado no existe o su código está duplicado.");
+        // Empleado tiene una fila por año; varias filas históricas no son empleados distintos.
+        if (tx.ScalarInt("""SELECT COUNT(DISTINCT "IdEmpleado") FROM public."Empleado" WHERE "IdEmpleado" = @empleado;""", empleado) != 1)
+            throw new ReglaNegocioException("El empleado no existe.");
 
         tx.Execute("""LOCK TABLE public."Teletrabajo" IN SHARE ROW EXCLUSIVE MODE;""");
         // Predicado inclusivo equivalente a RangoFechas.Solapa, ejecutado bajo el mismo bloqueo del alta.

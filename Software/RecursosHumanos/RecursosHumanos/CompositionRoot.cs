@@ -73,6 +73,15 @@ internal static class CompositionRoot
         return vista;
     }
 
+    /// <summary>Compone una vista pasiva de RF-17 con el caso de uso ya compartido por web.</summary>
+    public static FrmReporteAsistenciaPiloto CrearReporteAsistenciaPiloto()
+    {
+        if(!PuedeConsolidarAsistencia())throw new InvalidOperationException("Rol sin acceso a asistencia.");
+        var vista=new FrmReporteAsistenciaPiloto();
+        _=new ReporteAsistenciaPilotoPresenter(vista,CrearReporteAsistenciaConFeriados());
+        return vista;
+    }
+
     /// <summary>Compone la vista RF-07 con el régimen y los datos de ingreso del piloto.</summary>
     public static FrmVacacionesGeneradas CrearVacacionesGeneradas()
     {
@@ -112,6 +121,22 @@ internal static class CompositionRoot
     public static bool EsAutoservicio(AccesoUsuario acceso)=>acceso!=null &&
         (Environment.GetEnvironmentVariable("RRHH_AUTOCONSULTA_ROLES") ?? "").Split(',').Select(r=>r.Trim()).Contains(acceso.IdRol.ToString(CultureInfo.InvariantCulture));
 
+    /// <summary>Indica que esta instalación debe aceptar exclusivamente cuentas del rol de empleado.</summary>
+    public static bool SoloAutoservicio=>Environment.GetEnvironmentVariable("RRHH_SOLO_AUTOCONSULTA")=="1";
+
+    /// <summary>Obtiene una identidad antes de elegir el formulario principal; cancelar detiene el arranque.</summary>
+    internal static bool IntentarAccesoInicial(out AccesoUsuario acceso,out string nombre)
+    {
+        using(var login=new FrmLogin())
+        {
+            // El acceso inicial no tiene ventana propietaria; debe ser visible en la barra de tareas.
+            login.ShowInTaskbar=true;
+            if(login.ShowDialog()!=DialogResult.OK){acceso=null;nombre=null;return false;}
+            acceso=login.AccesoActual;nombre=login.EmployeeDisplayName;
+            return acceso!=null;
+        }
+    }
+
     /// <summary>Compone una consulta propia a partir de la identidad autenticada; no admite empleado de la vista.</summary>
     public static FrmMisVacaciones CrearMisVacaciones(AccesoUsuario acceso)
     {
@@ -120,6 +145,7 @@ internal static class CompositionRoot
         var caso=new ConsultarMisVacaciones(new PostgreSqlUsuarioEmpleadoRepository(Database.Value),
             new ConsultarSaldoVacaciones(new PostgreSqlSaldoVacacionesRepository(Database.Value),new RegimenVacacionesPiloto(dias)));
         var vista=new FrmMisVacaciones();
+        vista.Text+=" ("+acceso.Login+")";
         _=new MisVacacionesPresenter(vista,caso,acceso.IdUsuario);
         return vista;
     }
@@ -236,7 +262,7 @@ internal static class CompositionRoot
     public static bool PuedeGestionarPermisos() => (Environment.GetEnvironmentVariable("RRHH_PERMISOS_ROLES") ?? "")
         .Split(',').Select(rol=>rol.Trim()).Contains(RRHH.IdROl);
 
-    /// <summary>Compone el editor MVP de estados y vacaciones; mantiene salidas por horas en el flujo anterior.</summary>
+    /// <summary>Compone el editor MVP de estados, vacaciones y salidas con sus controles transaccionales compartidos.</summary>
     public static FrmPermisoPiloto CrearPermisoPiloto()
     {
         if (!PuedeGestionarPermisos()) throw new InvalidOperationException("Rol sin acceso a permisos del piloto.");

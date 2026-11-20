@@ -41,7 +41,7 @@ FROM public."HorarioTemporal" WHERE "idEmpleado"=@empleado AND "N"=@numero;
         var tabla = _db.Query("""
 SELECT p."IdPersona" AS "PersonaId", p."Nombres", p."Apellido_Paterno", p."Apellido_Materno", p."NumDocID", e."Foto"
 FROM public."Empleado" e LEFT JOIN public."Persona" p ON p."IdPersona"=e."IdPersona"
-WHERE e."IdEmpleado"=@empleado;
+WHERE e."IdEmpleado"=@empleado AND e."Year"=(SELECT MAX(actual."Year") FROM public."Empleado" actual WHERE actual."IdEmpleado"=@empleado);
 """, Entero("empleado", empleado));
         if (tabla.Rows.Count > 1) throw Ambiguo();
         if (tabla.Rows.Count == 0) return null;
@@ -62,7 +62,7 @@ WHERE e."IdEmpleado"=@empleado;
         {
             tx.Execute("LOCK TABLE public.\"Horario\", public.\"Empleado\" IN SHARE MODE;");
             tx.Execute("LOCK TABLE public.\"HorarioTemporal\" IN SHARE ROW EXCLUSIVE MODE;");
-            if (tx.ScalarInt("SELECT COUNT(*) FROM public.\"Empleado\" WHERE \"IdEmpleado\"=@empleado;", Entero("empleado",a.IdEmpleado)) != 1 ||
+            if (tx.ScalarInt("SELECT COUNT(DISTINCT \"IdEmpleado\") FROM public.\"Empleado\" WHERE \"IdEmpleado\"=@empleado;", Entero("empleado",a.IdEmpleado)) != 1 ||
                 tx.ScalarInt("SELECT COUNT(*) FROM public.\"Horario\" WHERE \"idHorario\"=@horario;",Entero("horario",a.IdHorario)) != 1)
                 throw new ReglaNegocioException("El empleado o el horario no existe o tiene código duplicado.");
             var claves=new[] { Entero("empleado",a.IdEmpleado),Entero("numero",a.Numero) };
