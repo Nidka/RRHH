@@ -21,9 +21,9 @@ Los casos sin recorrido visual nuevo y las verificaciones de entorno compartido 
 | RF-13 | Registrar periodo y rechazar solapamiento | Regresión SQL; alta y consulta visual del periodo 2 | Smoke HTTP |
 | RF-14 | Consultar periodos y días computados | Reporte visual: un día remoto para 101 y 102 el 20/11/2026 | Smoke HTTP |
 | RF-15 | Contar una sola categoría y señalar fuentes en conflicto | Pantalla del consolidado | Pantalla y smoke HTTP |
-| RF-16 | Distinguir teletrabajo total y parcial según patrón | Clasificación mensual visual: dos empleados parciales; escenario Total cubierto por pruebas previas | Smoke HTTP |
+| RF-16 | Distinguir teletrabajo total y parcial según patrón | WinForms: Parcial en noviembre y Total el 20/11/2026, con 1 de 1 día remoto para 101 y 102 | Smoke HTTP |
 | RF-17 | Contar la fecha una sola vez y comprobar Productividad | Pantalla nueva, casos A=4 y P=3 | Smoke HTTP |
-| RF-18 | Consultar ausencias con los filtros y roles admitidos | Consulta de noviembre: 4 filas; filtro Licencia ficticia: 3 filas | Smoke HTTP |
+| RF-18 | Consultar ausencias con los filtros y roles admitidos | Consulta de noviembre: 4 filas; filtro Licencia ficticia: 3 filas. Incluye anulados; criterio pendiente del área usuaria | Smoke HTTP |
 
 [Evidencias de pantalla](../../qa/evidencias/20261119-final/) ·
 [Registro de RF-12](../../qa/evidencias/20261119-final/RF12-VERIFICACION.md) ·
