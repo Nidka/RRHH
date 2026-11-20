@@ -1,6 +1,6 @@
 # RRHH Web
 
-Versión web de RF-13 y RF-14 para operadores de RRHH. Reutiliza dominio, casos de uso y repositorios de T3.
+Versión web del piloto académico RRHH. Consulta la [matriz de los 18 RF](../../docs/final/MATRIZ_ACEPTACION_RF.md) para conocer los módulos y su evidencia.
 
 ## Preparación segura
 
@@ -26,14 +26,15 @@ Requiere las migraciones RF-06, agrupación anual y
 clúster ficticio local. Los motivos 900/901 se usan en QA; no se crean en la
 base compartida. El formulario permite introducir el código de un motivo
 activo del catálogo; el servidor comprueba su existencia y unicidad.
-Las salidas autorizadas por horas (tipo 2) siguen limitadas al escritorio:
-el endpoint las rechaza para conservar los controles de marcación y reloj
-que aún están en el formulario heredado. No se presenta este incremento
-como una migración completa de ese flujo.
+Las salidas autorizadas por horas (tipo 2) usan las comprobaciones compartidas de fecha y marcación. El reloj físico requiere validación en el entorno autorizado.
+
+## Autoconsulta y asistencia consolidada
+
+Configurar RRHH_WEB_ROLES_AUTOCONSULTA con roles distintos de RRHH_WEB_ROLES. Cada cuenta de empleado requiere un vínculo único y activo. La asistencia consolidada usa RRHH_WEB_ROLES_ASISTENCIA y muestra categorías diarias e inconsistencias.
 
 ## Ejecutar
 
-Para RF-07, habilitar `RRHH_WEB_ROLES_VACACIONES` con roles admitidos también en `RRHH_WEB_ROLES`. El régimen del piloto genera 30 días por año cumplido desde FechaIngreso. `RRHH_VACACIONES_DIAS_ANUALES` permite cambiar la cantidad anual. En escritorio se usa el mismo parámetro y los roles de consulta se habilitan con `RRHH_VACACIONES_ROLES`. La consulta muestra únicamente días generados.
+Para RF-07, habilitar `RRHH_WEB_ROLES_VACACIONES` con roles admitidos también en `RRHH_WEB_ROLES`. El régimen del piloto genera 30 días por año cumplido desde FechaIngreso. `RRHH_VACACIONES_DIAS_ANUALES` permite cambiar la cantidad anual. En escritorio se usa el mismo parámetro y los roles de consulta se habilitan con `RRHH_VACACIONES_ROLES`. La consulta incluye días generados y saldo. El módulo también ofrece truncas y reporte filtrado. Aplicar la migración 20261119_03_vacaciones_piloto.sql y configurar los motivos de vacaciones en el destino de QA.
 
 El reporte RF-17 consulta el total y detalle por empleado. Configurar `RRHH_WEB_ROLES_ASISTENCIA` con los roles autorizados, también habilitados en `RRHH_WEB_ROLES`. Asistencias cuenta una fecha una sola vez aunque tenga marcación y sea feriado o fin de semana. Productividad cuenta las fechas con asistencia registrada.
 
