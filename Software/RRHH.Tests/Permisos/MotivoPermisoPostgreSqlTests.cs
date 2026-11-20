@@ -587,6 +587,27 @@ INSERT INTO public."Permiso" ("IdEmpleado","NPermiso","idMotivo","FechaInicio","
         _db.Execute("UPDATE public.\"Teletrabajo\" SET \"Modalidad\"='P',\"DiasRemotos\"=1;");
         Assert.Equal(1,caso.Ejecutar(101,new DateTime(2026,11,16),new DateTime(2026,11,23)).Remotos);
     }
+
+    [PostgreSqlLocalFact]
+    public void RF03SalidaSeValidaDentroDelGuardadoYPermiteAnularHistorial()
+    {
+        PrepararGuardado();
+        _db.Execute("""
+UPDATE public."Motivo_Perm" SET "idTipoPermiso"=2,"UnaVezPorAnio"=false,"GrupoReglaAnual"=NULL WHERE "idMotivo"=900;
+DROP TABLE IF EXISTS public."Asistencia" CASCADE;
+CREATE TABLE public."Asistencia" ("IdEmpleado" integer,"Fecha" timestamp,"Hor_Sal" varchar(8));
+""");
+        var caso=new GuardarPermiso(new PostgreSqlPermisoEscrituraRepository(_db,true,30m,()=>new DateTime(2026,11,19)));
+        var dto=Solicitud();dto.Desde=dto.Hasta=new DateTime(2026,11,19);
+        Assert.False(caso.Ejecutar(dto).Exitoso);Assert.Equal(0,dto.Numero);
+        _db.Execute("INSERT INTO public.\"Asistencia\" VALUES (101,'2026-11-19','00:00:00');");
+        Assert.True(caso.Ejecutar(dto).Exitoso);
+        dto.Estado="Anulado";Assert.True(caso.Ejecutar(dto).Exitoso);
+        _db.Execute("INSERT INTO public.\"Asistencia\" VALUES (101,'2026-11-19','17:00:00');");
+        dto.Numero=0;dto.Estado="Solicitado";
+        var resultado=caso.Ejecutar(dto);Assert.False(resultado.Exitoso);Assert.Contains("salida registrada",resultado.Mensaje);
+        Assert.Equal(1,_db.ScalarInt("SELECT COUNT(*) FROM public.\"Permiso\";"));
+    }
 }
 
 public sealed class PostgreSqlLocalFactAttribute : FactAttribute
