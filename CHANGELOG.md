@@ -7,6 +7,8 @@ y el proyecto usa [Versionado Semántico](https://semver.org/lang/es/).
 
 ## [Sin publicar]
 
+## [1.6.0] - 2026-11-20
+
 ### Agregado
 - Piloto web de RRHH con horarios, motivos, permisos, vacaciones, teletrabajo y reportes.
 - RF-07 a RF-12: generación y saldo vacacional, truncas, media jornada, reporte y autoconsulta.
@@ -17,7 +19,7 @@ y el proyecto usa [Versionado Semántico](https://semver.org/lang/es/).
 - RF-17: asistencia por fecha sin duplicar el conteo.
 - RF-18: exclusión de permisos anulados del reporte de ausencias, conservando el historial.
 
-Candidata propuesta: v1.6.0-beta.1. El retiro de TableAdapters corresponde a la evolución futura.
+Entrega estable para el piloto de escritorio y web con datos ficticios.
 
 ## [1.5.0] - 2026-11-12
 
