@@ -1,5 +1,14 @@
 # Verificación del piloto web y móvil
 
+## Verificación de main del 20 de noviembre de 2026
+
+El commit 7b90c45 integra el PR #67. PostgreSQL 18 local y datos ficticios.
+La regresión registró 390 pruebas aprobadas, cero fallidas y cero omitidas.
+El smoke HTTP pasó. WinForms compiló con 0 errores y 26 advertencias.
+Las capturas previas corresponden al candidato con el mismo contenido.
+Ver la [matriz de aceptación](../../../docs/final/MATRIZ_ACEPTACION_RF.md).
+
+
 ## Continuación local RF-03 / RF-06 — 19/11/2026
 
 Rama `codex/rf-03-permisos-web`, sobre `f496a90` (PR #57).
