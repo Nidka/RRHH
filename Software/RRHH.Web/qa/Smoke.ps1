@@ -71,6 +71,7 @@ CREATE TABLE "Horario" ("idHorario" integer, "Descrip_Horario" text, "Ingreso1" 
 CREATE TABLE "HorarioTemporal" ("idEmpleado" integer, "N" integer, "FechaInicio" timestamp, "FechaFin" timestamp,
   "HorarioAsignado" integer, "NroDocumento" varchar(50), "Sisgedo" varchar(50), "FechaRegistro" timestamp);
 INSERT INTO "Empleado" VALUES (101, 1, 1, '2024-03-01'), (102, 1, 1, NULL);
+ALTER TABLE "Empleado" ADD "Year" integer NOT NULL DEFAULT 2026;
 INSERT INTO "Persona" VALUES (1, 'Ficticio', '', 'Operador');
 INSERT INTO "Usuario" VALUES (1, 'operador', 101, true, '$hash', '$saltText', 210000),
   (2, 'sin_permiso', 101, true, '$hash', '$saltText', 210000),
@@ -309,6 +310,13 @@ VALUES (900,'Licencia ficticia A',1,true,true,'PILOTO-FAMILIAR'),(901,'Licencia 
     Assert-Http 403 (Invoke-WebRequest $saldoUrl -WebSession $soloTeletrabajo -SkipHttpErrorCheck)
     $saldo=Invoke-RestMethod $saldoUrl -WebSession $session
     if ($saldo.generadas -ne 60 -or $saldo.usadas -ne 12.5 -or $saldo.pendientes -ne 47.5 -or $saldo.consumos.Count -ne 2) { throw 'RF-08: saldo 60 - 12,5 debe dar 47,5.' }
+    $reporteVacUrl="$url/api/vacaciones/reporte?anio=2026&corte=2026-11-12"
+    Assert-Http 401 (Invoke-WebRequest $reporteVacUrl -SkipHttpErrorCheck)
+    Assert-Http 403 (Invoke-WebRequest $reporteVacUrl -WebSession $soloTeletrabajo -SkipHttpErrorCheck)
+    $reporteVac=Invoke-RestMethod $reporteVacUrl -WebSession $session
+    if($reporteVac.Count -ne 2 -or $reporteVac[0].pendientes -ne 47.5 -or $reporteVac[0].truncasAlCorte -ne 21 -or !$reporteVac[1].error -or $null -ne $reporteVac[1].pendientes){throw 'RF-11: reporte no concilia o encubre datos incompletos.'}
+    if(@(Invoke-RestMethod "$reporteVacUrl&empleado=101&area=1" -WebSession $session).Count -ne 1){throw 'RF-11: filtros no aplicados.'}
+    Assert-Http 400 (Invoke-WebRequest "$url/api/vacaciones/reporte?anio=2025&corte=2026-11-12" -WebSession $session -SkipHttpErrorCheck)
     $truncasUrl="$url/api/vacaciones/truncas?empleado=101&cese=2026-11-12"
     Assert-Http 401 (Invoke-WebRequest $truncasUrl -SkipHttpErrorCheck)
     Assert-Http 403 (Invoke-WebRequest $truncasUrl -WebSession $soloTeletrabajo -SkipHttpErrorCheck)

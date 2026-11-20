@@ -191,6 +191,16 @@
           <button>Calcular truncas</button>
         </form>
         <p id="resultado-truncas" role="status"></p>
+        <h3>Reporte acumulado de vacaciones</h3>
+        <form id="reporte-vacaciones">
+          <label>Año del padrón<input name="anio" type="number" min="1900" max="9998" required></label>
+          <label>Corte dentro del año<input name="corte" type="date" required></label>
+          <label>Área (opcional)<input name="area" type="number" min="1" max="2147483647"></label>
+          <label>Empleado (opcional)<input name="empleado" type="number" min="1" max="2147483647"></label>
+          <button>Consultar reporte</button>
+        </form>
+        <p>Las truncas se simulan al corte indicado; no representan una liquidación al cese.</p>
+        <div id="tabla-vacaciones" class="resultados"></div>
       </section>
     </div>
   </main>

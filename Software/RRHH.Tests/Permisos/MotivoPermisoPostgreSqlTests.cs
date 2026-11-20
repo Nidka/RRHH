@@ -522,6 +522,26 @@ INSERT INTO public."Permiso" ("IdEmpleado","NPermiso","idMotivo","FechaInicio","
         Assert.Equal(60m,saldo.Ejecutar(101,new DateTime(2026,11,12)).Usadas);
         Assert.Equal(3,_db.ScalarInt("SELECT COUNT(*) FROM public.\"Permiso\";"));
     }
+
+    [PostgreSqlLocalFact]
+    public void RF11ReporteConciliaFiltrosYExponeDatosIncompletos()
+    {
+        PrepararSaldo();
+        _db.Execute("""
+ALTER TABLE public."Empleado" ADD COLUMN "Year" integer DEFAULT 2026;
+ALTER TABLE public."Empleado" ADD COLUMN "idAreaOrganiz" integer;
+UPDATE public."Empleado" SET "idAreaOrganiz"=CASE WHEN "IdEmpleado"=101 THEN 1 ELSE 2 END;
+UPDATE public."Empleado" SET "FechaIngreso"=NULL WHERE "IdEmpleado"=102;
+""");
+        var caso=new RRHH.Application.Asistencia.ReportarSaldoVacaciones(new RRHH.PostgreSql.Asistencia.PostgreSqlReporteVacacionesRepository(_db),new RRHH.Domain.Asistencia.RegimenVacacionesPiloto());
+        var filas=caso.Ejecutar(2026,new DateTime(2026,11,12));
+        Assert.Equal(2,filas.Count);Assert.Equal(47.5m,filas[0].Pendientes);Assert.Equal(21m,filas[0].TruncasAlCorte);
+        Assert.NotNull(filas[1].Error);Assert.Null(filas[1].Pendientes);
+        Assert.Single(caso.Ejecutar(2026,new DateTime(2026,11,12),1,101));
+        Assert.Single(caso.Ejecutar(2026,new DateTime(2026,11,12),2,null));
+        Assert.Empty(caso.Ejecutar(2025,new DateTime(2025,11,12)));
+        Assert.Throws<ReglaNegocioException>(()=>caso.Ejecutar(2025,new DateTime(2026,11,12)));
+    }
 }
 
 public sealed class PostgreSqlLocalFactAttribute : FactAttribute
