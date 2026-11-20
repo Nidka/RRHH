@@ -1,6 +1,6 @@
 # Matriz de aceptación de RRHH
 
-PR #67 integrado en main, commit 7b90c45. PostgreSQL 18 local con datos ficticios.
+Corte de código validado en main: 0be0ee6 (PR #67 a #70). PostgreSQL 18 local con datos ficticios.
 El registro distingue recorridos de pantalla y regresión automatizada.
 Los casos sin recorrido visual nuevo y las verificaciones de entorno compartido quedan por confirmar.
 
@@ -23,7 +23,7 @@ Los casos sin recorrido visual nuevo y las verificaciones de entorno compartido 
 | RF-15 | Contar una sola categoría y señalar fuentes en conflicto | Pantalla del consolidado | Pantalla y smoke HTTP |
 | RF-16 | Distinguir teletrabajo total y parcial según patrón | WinForms: Parcial en noviembre y Total el 20/11/2026, con 1 de 1 día remoto para 101 y 102 | Smoke HTTP |
 | RF-17 | Contar la fecha una sola vez y comprobar Productividad | Pantalla nueva, casos A=4 y P=3 | Smoke HTTP |
-| RF-18 | Consultar ausencias con los filtros y roles admitidos | Consulta de noviembre: 4 filas; filtro Licencia ficticia: 3 filas. Incluye anulados; criterio pendiente del área usuaria | Smoke HTTP |
+| RF-18 | Consultar ausencias con los filtros y roles admitidos | Pantalla y filtro verificados antes del PR #70; el repositorio compartido ya excluye anulados | Smoke HTTP en 0be0ee6: excluye anulados con y sin filtro y conserva historial |
 
 [Evidencias de pantalla](../../qa/evidencias/20261119-final/) ·
 [Registro de RF-12](../../qa/evidencias/20261119-final/RF12-VERIFICACION.md) ·

@@ -7,7 +7,17 @@ y el proyecto usa [Versionado Semántico](https://semver.org/lang/es/).
 
 ## [Sin publicar]
 
-Pendiente para la Evaluación Final: requerimientos de vacaciones (RF-07 a RF-12), RF-15 y el retiro de TableAdapters (2.0.0).
+### Agregado
+- Piloto web de RRHH con horarios, motivos, permisos, vacaciones, teletrabajo y reportes.
+- RF-07 a RF-12: generación y saldo vacacional, truncas, media jornada, reporte y autoconsulta.
+- RF-15: asistencia consolidada con una categoría por día e indicador de inconsistencias.
+
+### Corregido
+- RF-03 y RF-06: permisos por estado, salidas autorizadas y restricción anual por grupo.
+- RF-17: asistencia por fecha sin duplicar el conteo.
+- RF-18: exclusión de permisos anulados del reporte de ausencias, conservando el historial.
+
+Candidata propuesta: v1.6.0-beta.1. El retiro de TableAdapters corresponde a la evolución futura.
 
 ## [1.5.0] - 2026-11-12
 
