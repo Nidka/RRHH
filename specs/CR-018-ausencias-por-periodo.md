@@ -103,3 +103,21 @@ Revertir el commit `feat(RF-18)`: elimina los archivos nuevos y la entrada de me
 ## Uso de IA y decisiones humanas
 
 El análisis, el código y las pruebas se prepararon con un asistente de IA a partir de la lectura del repositorio. Las hipótesis anteriores las debe confirmar el responsable con el área usuaria, y los resultados pendientes (compilación, `dotnet test` y QA en la aplicación) los debe ejecutar una persona en Windows antes de dar el RF por validado.
+
+## Ajuste de RF-18 para permisos anulados
+
+Decisión del responsable del piloto: excluir el estado explícito Anulado
+del reporte de ausencias y conservar el permiso en su historial.
+Actualmente ListarSolapadas en PostgreSqlAusenciasRepository selecciona
+por fechas y motivo, por lo que muestra también permisos anulados.
+
+Mantenimiento correctivo en la consulta compartida por WinForms y web.
+Se conserva el MVP, el contrato IAusenciasRepository y el comportamiento
+del resto de estados, incluidos los permisos legados sin EstadoSolicitud.
+No se cambia el flujo de escritura, el esquema ni el historial.
+El filtro se aplica en el repositorio antes de devolver los resultados.
+La prueba HTTP añadirá un permiso anulado solapado y comprobará que el
+reporte lo omite tanto con motivo específico como sin filtro, mientras
+la fila sigue en la base. La reversión retira este filtro y su prueba.
+
+Verificado en PostgreSQL 18 local: el smoke HTTP omite el anulado con y sin filtro y confirma que la fila permanece en Permiso. La regresión pasó 390/390 pruebas net48. WinForms compiló con 0 errores y 26 advertencias.
