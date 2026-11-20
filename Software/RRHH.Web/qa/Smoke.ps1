@@ -229,6 +229,20 @@ INSERT INTO "Usuario_Rol" VALUES (4,20),(5,20);
     $ausencias = Invoke-RestMethod $ausenciasUrl -WebSession $session
     if ($ausencias.Count -ne 2 -or $ausencias[0].idEmpleado -ne 101 -or
         $ausencias[0].diasEnPeriodo -ne 3 -or $ausencias[1].diasEnPeriodo -ne 1) { throw 'El reporte RF-18 no respetó el solapamiento inclusivo.' }
+    $permisoAnuladoRf18 = @'
+INSERT INTO public."Permiso" ("IdEmpleado", "FechaInicio", "FechaFin", "idMotivo", "EstadoSolicitud")
+VALUES (101, '2026-11-11', '2026-11-11', 40, 'Anulado');
+'@
+    $permisoAnuladoRf18 | & $psql @argsDb
+    if ($LASTEXITCODE) { throw 'No se pudo preparar el permiso anulado de RF-18.' }
+    $ausenciasConAnulado = Invoke-RestMethod $ausenciasUrl -WebSession $session
+    $ausenciasMotivoAnulado = Invoke-RestMethod "$ausenciasUrl&motivo=40" -WebSession $session
+    if ($ausenciasConAnulado.Count -ne 2 -or $ausenciasMotivoAnulado.Count -ne 0) {
+        throw "RF-18 debía devolver 2 filas generales y 0 para el motivo anulado. Obtuvo $($ausenciasConAnulado.Count) y $($ausenciasMotivoAnulado.Count)."
+    }
+    $historialRf18 = 'SELECT count(*) FROM public."Permiso" WHERE "IdEmpleado"=101 AND "idMotivo"=40 AND "EstadoSolicitud"=''Anulado'';' | & $psql @argsDb -At
+    if ($LASTEXITCODE -or $historialRf18 -ne '1') { throw 'RF-18 no conservó el permiso anulado en el historial.' }
+    Write-Output 'RF-18: anulado excluido con y sin filtro y conservado en el historial.'
     $licencias = Invoke-RestMethod "$ausenciasUrl&motivo=20" -WebSession $session
     if ($licencias.Count -ne 1 -or $licencias[0].idMotivo -ne 20) { throw 'No se aplicó el filtro por motivo.' }
     Assert-Http 400 (Invoke-WebRequest "$url/api/ausencias?desde=2026-11-12&hasta=2026-11-10" -WebSession $session -SkipHttpErrorCheck)

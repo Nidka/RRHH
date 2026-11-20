@@ -27,6 +27,7 @@ public sealed class PostgreSqlAusenciasRepository : IAusenciasRepository
 	/// <c>inicioPermiso &lt;= finPeriodo AND finPermiso &gt;= inicioPeriodo</c>. Los permisos con fecha inicial o final nula
 	/// no se informan (igual que en <c>PostgreSqlPermisoRepository.ExisteSolapamiento</c>). El motivo es opcional y los
 	/// permisos sin motivo en el catálogo se informan con motivo vacío.
+	/// Excluye el estado explícito Anulado. Las filas legadas sin EstadoSolicitud conservan su comportamiento.
 	/// </summary>
 	public IReadOnlyList<AusenciaRegistrada> ListarSolapadas(RangoFechas rango, int? idMotivo)
 	{
@@ -46,6 +47,7 @@ public sealed class PostgreSqlAusenciasRepository : IAusenciasRepository
 			"INNER JOIN public.\"Persona\" AS pe ON pe.\"IdPersona\" = e.\"IdPersona\" " +
 			"LEFT JOIN public.\"Motivo_Perm\" AS m ON m.\"idMotivo\" = p.\"idMotivo\" " +
 			"WHERE p.\"FechaInicio\" IS NOT NULL AND p.\"FechaFin\" IS NOT NULL " +
+			"AND (to_jsonb(p)->>'EstadoSolicitud') IS DISTINCT FROM 'Anulado' " +
 			"AND p.\"FechaInicio\"::date <= @hasta AND p.\"FechaFin\"::date >= @desde " +
 			"AND (@motivoId::integer IS NULL OR p.\"idMotivo\" = @motivoId::integer) " +
 			"ORDER BY empleado, inicio;",
