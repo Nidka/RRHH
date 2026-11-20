@@ -126,14 +126,14 @@ accion('cargar-permiso', async datos => {
     form.elements[campo].value = permiso[campo] ?? '';
   }
   for (const campo of ['desde', 'hasta']) form.elements[campo].value = permiso[campo].slice(0, 10);
-  for (const campo of ['dia', 'retorno']) form.elements[campo].checked = permiso[campo] === true;
+  for (const campo of ['dia', 'retorno','mediaJornadaVacaciones']) form.elements[campo].checked = permiso[campo] === true;
   form.elements.idEmpleado.readOnly = true;
   byId('estado-permiso').textContent = 'Editando permiso ' + permiso.numero + ' del empleado ' + permiso.idEmpleado;
 });
 accion('guardar-permiso', async datos => {
   const entrada = Object.fromEntries(datos);
   for (const campo of ['numero', 'idEmpleado', 'idMotivo']) entrada[campo] = Number(entrada[campo]);
-  for (const campo of ['dia', 'retorno']) entrada[campo] = datos.has(campo);
+  for (const campo of ['dia', 'retorno','mediaJornadaVacaciones']) entrada[campo] = datos.has(campo);
   const resultado = await api('permisos', entrada);
   const form = byId('guardar-permiso');
   form.elements.numero.value = resultado.numero;

@@ -1,6 +1,9 @@
 using System;
 using System.Data;
+using System.Linq;
 using RRHH.Application.Permisos;
+using RRHH.Domain.Asistencia;
+using RRHH.PostgreSql.Asistencia;
 using RRHH.Domain.Comun;
 
 namespace RRHH.PostgreSql.Permisos;
@@ -15,13 +18,16 @@ public sealed class PostgreSqlPermisoEscrituraRepository : IPermisoEscrituraRepo
 {
     private readonly PostgreSqlExecutor _db;
     private readonly bool _permitirSalidasAutorizadas;
+    private readonly RegimenVacacionesPiloto _regimen;
     /// <summary>Configura el alcance del host; web excluye salidas cuyo control de marcación sigue en escritorio.</summary>
     /// <param name="db">Ejecutor para consultas y transacciones PostgreSQL.</param>
     /// <param name="permitirSalidasAutorizadas">True solo en el host que conserva los controles de salida autorizada.</param>
-    public PostgreSqlPermisoEscrituraRepository(PostgreSqlExecutor db, bool permitirSalidasAutorizadas = true)
+    /// <param name="diasAnuales">Días anuales del régimen académico; debe coincidir con las consultas de saldo.</param>
+    public PostgreSqlPermisoEscrituraRepository(PostgreSqlExecutor db, bool permitirSalidasAutorizadas = true,decimal diasAnuales=30m)
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
         _permitirSalidasAutorizadas = permitirSalidasAutorizadas;
+        _regimen=new RegimenVacacionesPiloto(diasAnuales);
     }
 
     /// <inheritdoc/>
@@ -29,7 +35,7 @@ public sealed class PostgreSqlPermisoEscrituraRepository : IPermisoEscrituraRepo
     {
         DataTable filas = _db.Query("""
 SELECT "IdEmpleado","NPermiso","idMotivo","FechaInicio","FechaFin","EstadoSolicitud",
-"Lugar","Referencia","Autorizacion","Obs","Dia","Retorno" FROM public."Permiso"
+"Lugar","Referencia","Autorizacion","Obs","Dia","Retorno","MediaJornadaVacaciones" FROM public."Permiso"
 WHERE "IdEmpleado"=@empleado AND "NPermiso"=@numero;
 """, new PostgreSqlParameterValue("empleado", empleado, DbType.Int32),
             new PostgreSqlParameterValue("numero", numero, DbType.Int32));
@@ -44,7 +50,8 @@ WHERE "IdEmpleado"=@empleado AND "NPermiso"=@numero;
             Desde=Convert.ToDateTime(fila["FechaInicio"]), Hasta=Convert.ToDateTime(fila["FechaFin"]),
             Estado=Convert.ToString(fila["EstadoSolicitud"]), Lugar=Texto(fila,"Lugar"),
             Referencia=Texto(fila,"Referencia"), Autorizacion=Texto(fila,"Autorizacion"),
-            Observacion=Texto(fila,"Obs"), Dia=Booleano(fila,"Dia"), Retorno=Booleano(fila,"Retorno")
+            Observacion=Texto(fila,"Obs"), Dia=Booleano(fila,"Dia"), Retorno=Booleano(fila,"Retorno"),
+            MediaJornadaVacaciones=Booleano(fila,"MediaJornadaVacaciones")
         };
     }
 
@@ -63,6 +70,12 @@ SELECT COUNT(*) FROM information_schema.columns WHERE table_schema='public'
 AND table_name='Permiso' AND column_name='EstadoSolicitud';
 """) != 1)
                 throw new ReglaNegocioException("Falta aplicar 20261119_02_estados_permiso.sql antes de guardar permisos.");
+            if (tx.ScalarInt("""
+SELECT COUNT(*) FROM information_schema.columns WHERE table_schema='public' AND data_type='boolean'
+AND ((table_name='Permiso' AND column_name='MediaJornadaVacaciones')
+OR (table_name='Motivo_Perm' AND column_name='EsVacacionesPiloto'));
+""")!=2)
+                throw new ReglaNegocioException("Falta aplicar 20261119_03_vacaciones_piloto.sql antes de guardar permisos.");
             var empleado = new PostgreSqlParameterValue("empleado", dto.IdEmpleado, DbType.Int32);
             var numeroAnterior = new PostgreSqlParameterValue("numeroAnterior", dto.Numero, DbType.Int32);
             if (tx.ScalarInt("SELECT COUNT(*) FROM public.\"Empleado\" WHERE \"IdEmpleado\"=@empleado;", empleado) == 0)
@@ -75,6 +88,7 @@ AND table_name='Permiso' AND column_name='EstadoSolicitud';
                 new PostgreSqlParameterValue("motivo", dto.IdMotivo, DbType.Int32)) == 2)
                 throw new ReglaNegocioException("Las salidas autorizadas por horas todavía se gestionan desde la aplicación de escritorio.");
             string estado = dto.Estado ?? "Solicitado";
+            bool media=dto.MediaJornadaVacaciones ?? false;
             if (dto.Numero > 0)
             {
                 if (tx.ScalarInt("SELECT COUNT(*) FROM public.\"Permiso\" WHERE \"IdEmpleado\"=@empleado AND \"NPermiso\"=@numeroAnterior;",
@@ -88,6 +102,26 @@ WHERE p."IdEmpleado"=@empleado AND p."NPermiso"=@numeroAnterior AND m."idTipoPer
                 if (dto.Estado == null)
                     estado = (string)tx.Scalar("SELECT \"EstadoSolicitud\" FROM public.\"Permiso\" WHERE \"IdEmpleado\"=@empleado AND \"NPermiso\"=@numeroAnterior;",
                         empleado, numeroAnterior);
+                if (!dto.MediaJornadaVacaciones.HasValue)
+                    media=Convert.ToBoolean(tx.Scalar("SELECT \"MediaJornadaVacaciones\" FROM public.\"Permiso\" WHERE \"IdEmpleado\"=@empleado AND \"NPermiso\"=@numeroAnterior;",empleado,numeroAnterior));
+            }
+            bool vacaciones=tx.ScalarInt("SELECT COUNT(*) FROM public.\"Motivo_Perm\" m WHERE m.\"idMotivo\"=@motivo AND COALESCE((to_jsonb(m)->>'EsVacacionesPiloto')::boolean,false);",
+                new PostgreSqlParameterValue("motivo",dto.IdMotivo,DbType.Int32))==1;
+            if (media && !vacaciones) throw new ReglaNegocioException("La media jornada vacacional requiere un motivo de vacaciones del piloto.");
+            if (vacaciones && estado!="Anulado" && estado!="Rechazado")
+            {
+                // Las referencias y el calendario no cambian mientras se decide la aprobación.
+                tx.Execute("LOCK TABLE public.\"Empleado\",public.\"RRHH_Feriado\" IN SHARE MODE;");
+                bool laborable=dto.Desde.DayOfWeek!=DayOfWeek.Saturday && dto.Desde.DayOfWeek!=DayOfWeek.Sunday &&
+                    tx.ScalarInt("SELECT COUNT(*) FROM public.\"RRHH_Feriado\" WHERE \"Fecha\"::date=@fecha;",new PostgreSqlParameterValue("fecha",dto.Desde.Date,DbType.Date))==0;
+                decimal consumo=_regimen.Consumo(dto.Desde,dto.Hasta,media,laborable);
+                if (estado=="Aprobado")
+                {
+                    var ficha=new PostgreSqlSaldoVacacionesRepository(tx,dto.Numero).Obtener(dto.IdEmpleado,new DateTime(9998,12,31));
+                    decimal generadas=_regimen.AniosCumplidos(ficha.Ingreso,dto.Desde)*_regimen.DiasAnuales;
+                    if (ficha.Consumos.Sum(c => c.Dias)+consumo>generadas)
+                        throw new ReglaNegocioException("Saldo de vacaciones insuficiente; se incluyen las reservas futuras aprobadas.");
+                }
             }
             var consultas = new PostgreSqlPermisoRepository(tx);
             // También comprueba el contrato RF-06 cuando el estado no ocupa cupo.
@@ -115,15 +149,16 @@ WHERE p."IdEmpleado"=@empleado AND p."NPermiso"=@numeroAnterior AND m."idTipoPer
                 new PostgreSqlParameterValue("obs", dto.Observacion, DbType.String),
                 new PostgreSqlParameterValue("dia", dto.Dia, DbType.Boolean),
                 new PostgreSqlParameterValue("retorno", dto.Retorno, DbType.Boolean)
+                ,new PostgreSqlParameterValue("media",media,DbType.Boolean)
             };
             string sql = dto.Numero == 0 ? """
 INSERT INTO public."Permiso" ("IdEmpleado","NPermiso","idMotivo","FechaInicio","FechaFin",
-"EstadoSolicitud","Lugar","Referencia","Autorizacion","Obs","Dia","Retorno")
-VALUES (@empleado,@numero,@motivo,@desde,@hasta,@estado,@lugar,@referencia,@autorizacion,@obs,@dia,@retorno);
+"EstadoSolicitud","Lugar","Referencia","Autorizacion","Obs","Dia","Retorno","MediaJornadaVacaciones")
+VALUES (@empleado,@numero,@motivo,@desde,@hasta,@estado,@lugar,@referencia,@autorizacion,@obs,@dia,@retorno,@media);
 """ : """
 UPDATE public."Permiso" SET "idMotivo"=@motivo,"FechaInicio"=@desde,"FechaFin"=@hasta,
 "EstadoSolicitud"=@estado,"Lugar"=@lugar,"Referencia"=@referencia,"Autorizacion"=@autorizacion,
-"Obs"=@obs,"Dia"=@dia,"Retorno"=@retorno WHERE "IdEmpleado"=@empleado AND "NPermiso"=@numero;
+"Obs"=@obs,"Dia"=@dia,"Retorno"=@retorno,"MediaJornadaVacaciones"=@media WHERE "IdEmpleado"=@empleado AND "NPermiso"=@numero;
 """;
             if (tx.Execute(sql, valores) != 1)
                 throw new ReglaNegocioException("No se pudo guardar exactamente un permiso.");

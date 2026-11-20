@@ -189,7 +189,23 @@ internal static class CompositionRoot
 
     /// <summary>Crea el guardado que valida y escribe el permiso en una sola transacción PostgreSQL.</summary>
     public static GuardarPermiso CrearGuardarPermiso() =>
-        new GuardarPermiso(new PostgreSqlPermisoEscrituraRepository(Database.Value));
+        new GuardarPermiso(new PostgreSqlPermisoEscrituraRepository(Database.Value,diasAnuales:
+            decimal.Parse(Environment.GetEnvironmentVariable("RRHH_VACACIONES_DIAS_ANUALES") ?? "30",CultureInfo.InvariantCulture)));
+
+    /// <summary>Acceso explícito del piloto para gestionar permisos ajenos y sus estados.</summary>
+    public static bool PuedeGestionarPermisos() => (Environment.GetEnvironmentVariable("RRHH_PERMISOS_ROLES") ?? "")
+        .Split(',').Select(rol=>rol.Trim()).Contains(RRHH.IdROl);
+
+    /// <summary>Compone el editor MVP de estados y vacaciones; mantiene salidas por horas en el flujo anterior.</summary>
+    public static FrmPermisoPiloto CrearPermisoPiloto()
+    {
+        if (!PuedeGestionarPermisos()) throw new InvalidOperationException("Rol sin acceso a permisos del piloto.");
+        var dias=decimal.Parse(Environment.GetEnvironmentVariable("RRHH_VACACIONES_DIAS_ANUALES") ?? "30",CultureInfo.InvariantCulture);
+        var repo=new PostgreSqlPermisoEscrituraRepository(Database.Value,false,dias);
+        var vista=new FrmPermisoPiloto();
+        _=new PermisoEditorPresenter(vista,new ConsultarPermiso(repo),new GuardarPermiso(repo));
+        return vista;
+    }
 
     /// <summary>Crea la consulta orientativa de RF-03/RF-06; no sustituye al guardado transaccional.</summary>
 	public static ValidarPermiso CrearValidarPermiso()

@@ -21,6 +21,8 @@ public sealed class PermisoGuardarDto
     public string Observacion { get; set; }
     public bool? Dia { get; set; }
     public bool? Retorno { get; set; }
+    /// <summary>Null conserva el valor al editar; true consume 0,5 días para motivos de vacaciones del piloto.</summary>
+    public bool? MediaJornadaVacaciones { get; set; }
 }
 
 /// <summary>Persiste el permiso validando fechas y cupo anual dentro de la misma transacción.</summary>

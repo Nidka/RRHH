@@ -108,6 +108,17 @@ public sealed class PostgreSqlTransactionContext
 		_transaction = transaction;
 	}
 
+    /// <summary>Consulta filas tipadas por el adaptador utilizando la conexión y transacción actuales.</summary>
+    /// <remarks>No abre otra conexión; los bloqueos de la operación se mantienen durante la consulta.</remarks>
+    public DataTable Query(string sql, params PostgreSqlParameterValue[] parameters)
+    {
+        using NpgsqlCommand command=PostgreSqlExecutor.CreateCommand(_connection,_transaction,sql,parameters);
+        using NpgsqlDataAdapter adapter=new NpgsqlDataAdapter(command);
+        var table=new DataTable();
+        adapter.Fill(table);
+        return table;
+    }
+
 	public int Execute(string sql, params PostgreSqlParameterValue[] parameters)
 	{
 		using NpgsqlCommand command = PostgreSqlExecutor.CreateCommand(

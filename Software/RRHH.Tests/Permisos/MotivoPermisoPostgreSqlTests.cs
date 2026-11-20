@@ -353,6 +353,8 @@ UPDATE public."Permiso" SET "FechaFin"='2026-03-12';
 DELETE FROM public."Permiso";
 DROP TABLE IF EXISTS public."Empleado" CASCADE;
 CREATE TABLE public."Empleado" ("IdEmpleado" integer);
+DROP TABLE IF EXISTS public."RRHH_Feriado" CASCADE;
+CREATE TABLE public."RRHH_Feriado" ("Fecha" timestamp);
 INSERT INTO public."Empleado" VALUES (101),(102);
 UPDATE public."Motivo_Perm" SET "Activo"=true;
 ALTER TABLE public."Permiso" ADD COLUMN "FechaFin" timestamp;
@@ -368,6 +370,7 @@ ALTER TABLE public."Permiso" ADD COLUMN "Hora_Ret" varchar(8);
 ALTER TABLE public."Permiso" ADD COLUMN "AutorizacionRRHH" varchar(50);
 """);
         _db.Execute(LeerMigracion("20261119_02_estados_permiso.sql"));
+        _db.Execute(LeerMigracion("20261119_03_vacaciones_piloto.sql"));
         return new GuardarPermiso(new PostgreSqlPermisoEscrituraRepository(_db));
     }
 
@@ -442,7 +445,7 @@ ALTER TABLE public."Permiso" ADD COLUMN "AutorizacionRRHH" varchar(50);
         _db.Execute("""
 ALTER TABLE public."Empleado" ADD COLUMN "FechaIngreso" timestamp;
 UPDATE public."Empleado" SET "FechaIngreso"='2024-03-01';
-UPDATE public."Motivo_Perm" SET "EsVacacionesPiloto"=true WHERE "idMotivo"=900;
+UPDATE public."Motivo_Perm" SET "EsVacacionesPiloto"=true,"UnaVezPorAnio"=false,"GrupoReglaAnual"=NULL WHERE "idMotivo"=900;
 INSERT INTO public."Permiso" ("IdEmpleado","NPermiso","idMotivo","FechaInicio","FechaFin","EstadoSolicitud","MediaJornadaVacaciones") VALUES
 (101,1,900,'2026-05-01','2026-05-12','Aprobado',false),
 (101,2,900,'2026-05-13','2026-05-13','Aprobado',true),
@@ -476,6 +479,48 @@ INSERT INTO public."Permiso" ("IdEmpleado","NPermiso","idMotivo","FechaInicio","
         Assert.Throws<ReglaNegocioException>(() => caso.Ejecutar(101,new DateTime(2026,11,12)));
         _db.Execute("UPDATE public.\"Empleado\" SET \"FechaIngreso\"='2024-03-01'; INSERT INTO public.\"Motivo_Perm\" SELECT * FROM public.\"Motivo_Perm\" WHERE \"idMotivo\"=900;");
         Assert.Throws<ReglaNegocioException>(() => caso.Ejecutar(101,new DateTime(2026,11,12)));
+    }
+
+    [PostgreSqlLocalFact]
+    public void RF10MediaJornadaRespetaCalendarioSaldoYAnulacion()
+    {
+        var saldo=PrepararSaldo();
+        var guardar=new GuardarPermiso(new PostgreSqlPermisoEscrituraRepository(_db));
+        var media=Solicitud();media.Desde=media.Hasta=new DateTime(2026,3,4);media.Estado="Aprobado";media.MediaJornadaVacaciones=true;
+        Assert.True(guardar.Ejecutar(media).Exitoso);
+        Assert.Equal(13m,saldo.Ejecutar(101,new DateTime(2026,11,12)).Usadas);
+        var sabado=Solicitud();sabado.Desde=sabado.Hasta=new DateTime(2026,3,7);sabado.Estado="Aprobado";sabado.MediaJornadaVacaciones=true;
+        Assert.False(guardar.Ejecutar(sabado).Exitoso);
+        _db.Execute("INSERT INTO public.\"RRHH_Feriado\" VALUES ('2026-03-05');");
+        sabado.Desde=sabado.Hasta=new DateTime(2026,3,5);
+        Assert.False(guardar.Ejecutar(sabado).Exitoso);
+        var excesiva=Solicitud();excesiva.Desde=new DateTime(2026,5,20);excesiva.Hasta=new DateTime(2026,7,20);excesiva.Estado="Aprobado";
+        Assert.False(guardar.Ejecutar(excesiva).Exitoso);
+        Assert.Equal(0,excesiva.Numero);
+        // Un cambio posterior del calendario no puede impedir devolver el saldo.
+        _db.Execute("INSERT INTO public.\"RRHH_Feriado\" VALUES ('2026-03-04');");
+        media.Estado="Anulado";
+        Assert.True(guardar.Ejecutar(media).Exitoso);
+        Assert.Equal(12.5m,saldo.Ejecutar(101,new DateTime(2026,11,12)).Usadas);
+    }
+
+    [PostgreSqlLocalFact]
+    public async Task RF10AprobacionesConcurrentesNoGastanDosVecesElSaldo()
+    {
+        var saldo=PrepararSaldo();
+        _db.Execute("""
+DELETE FROM public."Permiso";
+INSERT INTO public."Permiso" ("IdEmpleado","NPermiso","idMotivo","FechaInicio","FechaFin","EstadoSolicitud","MediaJornadaVacaciones") VALUES
+(101,1,900,'2026-03-01','2026-04-28','Aprobado',false),(101,2,900,'2026-04-29','2026-04-29','Aprobado',true);
+""");
+        Assert.Equal(59.5m,saldo.Ejecutar(101,new DateTime(2026,11,12)).Usadas);
+        var a=Solicitud();a.Desde=a.Hasta=new DateTime(2026,5,4);a.Estado="Aprobado";a.MediaJornadaVacaciones=true;
+        var b=Solicitud();b.Desde=b.Hasta=new DateTime(2026,5,5);b.Estado="Aprobado";b.MediaJornadaVacaciones=true;
+        var guardar=new GuardarPermiso(new PostgreSqlPermisoEscrituraRepository(_db));
+        var resultados=await Task.WhenAll(Task.Run(()=>guardar.Ejecutar(a)),Task.Run(()=>guardar.Ejecutar(b)));
+        Assert.Single(resultados,r=>r.Exitoso);
+        Assert.Equal(60m,saldo.Ejecutar(101,new DateTime(2026,11,12)).Usadas);
+        Assert.Equal(3,_db.ScalarInt("SELECT COUNT(*) FROM public.\"Permiso\";"));
     }
 }
 

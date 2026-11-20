@@ -10,12 +10,21 @@ namespace RRHH.PostgreSql.Asistencia;
 public sealed class PostgreSqlSaldoVacacionesRepository : IVacacionesSaldoRepository
 {
     private readonly PostgreSqlExecutor _db;
+    private readonly PostgreSqlTransactionContext _transaction;
+    private readonly int _excluir;
     public PostgreSqlSaldoVacacionesRepository(PostgreSqlExecutor db) => _db=db ?? throw new ArgumentNullException(nameof(db));
+    internal PostgreSqlSaldoVacacionesRepository(PostgreSqlTransactionContext transaction,int excluir)
+    {
+        _transaction=transaction ?? throw new ArgumentNullException(nameof(transaction));
+        _excluir=excluir;
+    }
+    private DataTable Query(string sql,params PostgreSqlParameterValue[] parameters) =>
+        _transaction==null ? _db.Query(sql,parameters) : _transaction.Query(sql,parameters);
 
     /// <inheritdoc/>
     public FichaSaldoVacacionesDto Obtener(int empleado, DateTime corte)
     {
-        var filas=_db.Query("""
+        var filas=Query("""
 WITH ingreso AS (
  SELECT MIN("FechaIngreso"::date) AS fecha, COUNT(*) AS filas,
  COUNT(DISTINCT "FechaIngreso"::date) AS fechas,
@@ -31,6 +40,7 @@ WITH ingreso AS (
  COALESCE((to_jsonb(p)->>'MediaJornadaVacaciones')::boolean,false) AS media
  FROM public."Permiso" p
  WHERE p."IdEmpleado"=@empleado AND (p."FechaInicio" IS NULL OR p."FechaInicio"::date<=@corte)
+ AND (p."NPermiso" IS NULL OR p."NPermiso"<>@excluir)
  AND COALESCE(to_jsonb(p)->>'EstadoSolicitud',CASE WHEN (to_jsonb(p)->>'Autorizado')::boolean IS TRUE
  THEN 'Aprobado' ELSE 'Solicitado' END)='Aprobado'
  AND EXISTS (SELECT 1 FROM public."Motivo_Perm" m WHERE m."idMotivo"=p."idMotivo"
@@ -38,7 +48,8 @@ WITH ingreso AS (
 )
 SELECT ingreso.*,catalogo.*,c.* FROM ingreso CROSS JOIN catalogo LEFT JOIN consumos c ON true ORDER BY c.desde,c."NPermiso";
 """, new PostgreSqlParameterValue("empleado",empleado,DbType.Int32),
-            new PostgreSqlParameterValue("corte",corte.Date,DbType.Date));
+            new PostgreSqlParameterValue("corte",corte.Date,DbType.Date),
+            new PostgreSqlParameterValue("excluir",_excluir,DbType.Int32));
         var fila=filas.Rows[0];
         if (Convert.ToInt64(fila["configurados"])==0 || Convert.ToBoolean(fila["duplicados"]))
             throw new ReglaNegocioException("Configure motivos únicos de vacaciones del piloto antes de consultar el saldo.");
