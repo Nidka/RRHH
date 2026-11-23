@@ -14,7 +14,7 @@ Navegador / celular (PWA)  ──HTTPS──►  Render (contenedor RRHH.Web, .N
 
 - El navegador solo ve la API del host (`/api/...`). Las reglas viven en los casos de uso de T3; el SQL va parametrizado.
 - Sesión por cookie `HttpOnly`, `SameSite=Strict`, `Secure`; escrituras protegidas con token antifalsificación; límite de 10 intentos de login por minuto por IP.
-- `/salud` responde si el proceso está vivo. `/salud/lista` además comprueba la base (503 si no responde, con el motivo en el registro, sin la cadena de conexión).
+- `/salud` responde si el proceso está vivo. `/salud/lista` además comprueba la base (503 si no responde; el registro dice solo el tipo de error, nunca el mensaje, porque el de Npgsql puede incluir la cadena de conexión).
 - HTTPS: el contenedor escucha HTTP; **Render termina TLS en su borde** y reenvía `X-Forwarded-Proto`. La cookie de sesión es `Secure`, así que la web solo inicia sesión por HTTPS.
 
 ## Qué es gratis y qué limitaciones tiene

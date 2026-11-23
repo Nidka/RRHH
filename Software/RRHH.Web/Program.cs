@@ -66,8 +66,8 @@ app.MapGet("/salud/lista", (RRHH.PostgreSql.PostgreSqlExecutor baseDatos, ILogge
     }
     catch (Exception ex)
     {
-        // Solo tipo y mensaje: nunca la cadena de conexión.
-        registros.CreateLogger("Salud").LogWarning("La base de datos no respondió: {Tipo}: {Mensaje}", ex.GetType().Name, ex.Message);
+        // Solo los tipos de excepción: el mensaje de Npgsql puede incluir fragmentos de la cadena de conexión (usuario y clave).
+        registros.CreateLogger("Salud").LogWarning("La base de datos no respondió: {Tipo} (interna: {Interna})", ex.GetType().Name, ex.InnerException?.GetType().Name ?? "ninguna");
         return Results.Json(new { estado = "degradado", baseDatos = "sin conexión" }, statusCode: 503);
     }
 });
