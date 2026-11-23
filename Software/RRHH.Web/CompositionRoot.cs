@@ -31,6 +31,18 @@ internal static class CompositionRoot
         var roles = (builder.Configuration["RRHH_WEB_ROLES"] ?? "")
             .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             .Select(int.Parse).ToHashSet();
+        if (builder.Configuration.GetValue<bool>("RRHH_WEB_TRUST_PROXY"))
+        {
+            // Solo detrás del proxy de la plataforma: confiar en X-Forwarded-* desde cualquier origen
+            // permitiría falsear la IP si el contenedor se expusiera directamente.
+            builder.Services.Configure<Microsoft.AspNetCore.Builder.ForwardedHeadersOptions>(opciones =>
+            {
+                opciones.ForwardedHeaders = Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedFor
+                    | Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedProto;
+                opciones.KnownNetworks.Clear();
+                opciones.KnownProxies.Clear();
+            });
+        }
         builder.Services.AddSingleton(new RolesOperador(roles));
         var autoservicio=(builder.Configuration["RRHH_WEB_ROLES_AUTOCONSULTA"] ?? "")
             .Split(',',StringSplitOptions.RemoveEmptyEntries|StringSplitOptions.TrimEntries).Select(int.Parse).ToHashSet();

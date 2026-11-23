@@ -7,6 +7,12 @@ y el proyecto usa [Versionado Semántico](https://semver.org/lang/es/).
 
 ## [Sin publicar]
 
+### Agregado
+- Despliegue gratuito del host web (TEC-005): `Dockerfile`, demo local con `docker-compose.demo.yml`, configuración de Render (`render.yaml`), guía en `docs/despliegue/DESPLIEGUE.md` y flujos de CI.
+- `/salud` y `/salud/lista` para las sondas de la plataforma; soporte de proxy con `RRHH_WEB_TRUST_PROXY`.
+- PWA instalable: manifiesto, service worker (no guarda `/api`) e íconos.
+- `deploy/smoke.sh`, `deploy/aplicar-migraciones.sh` (simulación por defecto) y `deploy/generar-hash-password.py`.
+
 ## [1.6.0] - 2026-11-20
 
 ### Agregado

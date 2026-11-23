@@ -1,0 +1,43 @@
+# Demostración local completa: base PostgreSQL con datos ficticios + web.
+#   DEMO_PASSWORD='<clave-a-elegir>' docker compose -f docker-compose.demo.yml up --build
+# Abrir http://127.0.0.1:8080 e iniciar sesión con el usuario «operador» y esa clave.
+# SOLO demostración: no usar con datos reales ni exponer fuera de este equipo.
+# Usa variables DEMO_* a propósito: nunca toma DB_* (las de su .env real) para no mezclar la demo con una base real.
+name: rrhh-demo
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: rrhh
+      POSTGRES_PASSWORD: ${DEMO_DB_PASSWORD:-rrhh-demo-local}
+      POSTGRES_DB: rrhh
+      DEMO_PASSWORD: ${DEMO_PASSWORD:?Defina DEMO_PASSWORD}
+    volumes:
+      - ./deploy/demo/fixture.sql:/deploy/fixture.sql:ro
+      - ./BD/migrations:/migraciones:ro
+      - ./deploy/demo/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rrhh -d rrhh"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+  web:
+    build: .
+    image: rrhh-web:demo
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      RRHH_WEB_POSTGRES: Host=db;Port=5432;Database=rrhh;Username=rrhh;Password=${DEMO_DB_PASSWORD:-rrhh-demo-local};SSL Mode=Disable
+      RRHH_WEB_ROLES: "10,3"
+      RRHH_WEB_ROLES_AUTOCONSULTA: "20"
+      RRHH_WEB_ROLES_AUSENCIAS: "10"
+      RRHH_WEB_ROLES_HORARIOS: "10"
+      RRHH_WEB_ROLES_MOTIVOS: "10"
+      RRHH_WEB_ROLES_ASISTENCIA: "10"
+      RRHH_WEB_ROLES_VACACIONES: "10"
+      RRHH_WEB_ROLES_PERMISOS: "10"
+      RRHH_VACACIONES_DIAS_ANUALES: "30"
+    ports:
+      - "127.0.0.1:8080:8080"
