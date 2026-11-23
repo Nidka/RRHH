@@ -1,0 +1,54 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Reglas de negocio, repositorios y arquitectura (net48). No requiere las DLL licenciadas.
+  pruebas-escritorio:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - run: dotnet test Software/RRHH.Tests/RRHH.Tests.csproj --configuration Release
+
+  # Imagen del host web + base de demostración + recorrido HTTP completo.
+  web-contenedor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Clave efímera de la demo
+        run: |
+          clave="$(openssl rand -hex 12)"
+          echo "::add-mask::$clave"
+          echo "DEMO_PASSWORD=$clave" >> "$GITHUB_ENV"
+      - name: Levantar base de demo y web
+        run: docker compose -f docker-compose.demo.yml up -d --build --wait
+      - name: Prueba de humo completa
+        run: deploy/smoke.sh http://127.0.0.1:8080
+      - name: Arranque en modo Production detrás de proxy
+        run: |
+          docker run -d --name rrhh-web-prod --network rrhh-demo_default -p 8081:8080 \
+            -e ASPNETCORE_ENVIRONMENT=Production -e RRHH_WEB_TRUST_PROXY=true -e RRHH_WEB_ROLES=10 \
+            -e "RRHH_WEB_POSTGRES=Host=db;Port=5432;Database=rrhh;Username=rrhh;Password=rrhh-demo-local;SSL Mode=Disable" \
+            rrhh-web:demo
+          deploy/smoke.sh http://127.0.0.1:8081 --solo-salud
+      - name: Registros si falló
+        if: failure()
+        run: |
+          docker compose -f docker-compose.demo.yml logs --no-color || true
+          docker logs rrhh-web-prod || true
+      - name: Limpiar
+        if: always()
+        run: |
+          docker rm -f rrhh-web-prod || true
+          docker compose -f docker-compose.demo.yml down -v

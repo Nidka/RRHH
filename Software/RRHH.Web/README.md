@@ -2,6 +2,10 @@
 
 Versión web del piloto académico RRHH. Consulta la [matriz de los 18 RF](../../docs/final/MATRIZ_ACEPTACION_RF.md) para conocer los módulos y su evidencia.
 
+## Despliegue
+
+Imagen de contenedor, demo local y guía para publicarla gratis (Render + Neon): [docs/despliegue/DESPLIEGUE.md](../../docs/despliegue/DESPLIEGUE.md).
+
 ## Preparación segura
 
 - SDK .NET 8 y base PostgreSQL de QA con datos ficticios.

@@ -1,0 +1,35 @@
+# Blueprint de Render: despliegue gratuito del host web desde el Dockerfile del repositorio.
+# Los valores con sync:false se piden al crear el servicio y NO se guardan en Git.
+services:
+  - type: web
+    name: rrhh-web
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    # Vivacidad: no depende de la base, para que un corte de Neon no reinicie el servicio.
+    healthCheckPath: /salud
+    autoDeploy: false
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: RRHH_WEB_TRUST_PROXY
+        value: "true"
+      - key: RRHH_VACACIONES_DIAS_ANUALES
+        value: "30"
+      - key: RRHH_WEB_POSTGRES
+        sync: false
+      - key: RRHH_WEB_ROLES
+        sync: false
+      - key: RRHH_WEB_ROLES_AUSENCIAS
+        sync: false
+      - key: RRHH_WEB_ROLES_HORARIOS
+        sync: false
+      - key: RRHH_WEB_ROLES_MOTIVOS
+        sync: false
+      - key: RRHH_WEB_ROLES_ASISTENCIA
+        sync: false
+      - key: RRHH_WEB_ROLES_VACACIONES
+        sync: false
+      - key: RRHH_WEB_ROLES_PERMISOS
+        sync: false
