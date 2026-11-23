@@ -19,7 +19,8 @@ La web solo se ejecutaba con `dotnet run` y una base local de QA. No había imag
 | `deploy/smoke.sh` | Recorrido HTTP: salud, protección sin sesión, login (incluidos rechazos), alta y rechazo de solapamiento, reportes, cierre de sesión. |
 | `deploy/aplicar-migraciones.sh`, `deploy/generar-hash-password.py` | Migraciones con modo simulación por defecto y confirmación de respaldo; hash PBKDF2 sin guardar la clave. |
 | `render.yaml`, `deploy/web.env.example`, `docs/despliegue/DESPLIEGUE.md` | Configuración de Render y guía. |
-| `.github/workflows/ci.yml`, `imagen.yml` | CI de escritorio y del contenedor; imagen versionada por etiqueta. |
+| `deploy/ci/ci.yml`, `imagen.yml` | Plantillas de CI y de publicación de imagen (se copian a `.github/workflows/`; no se subieron ahí por falta de permiso `workflow`). Nunca ejecutadas. |
+| `deploy/verificar-listo.sh`, `docs/despliegue/CHECKLIST.md` | Verificación previa en un comando y lista de despliegue. |
 
 ## Decisiones
 
@@ -38,6 +39,11 @@ Ejecutado el 23/11/2026 en Docker Desktop (arm64) con la imagen final y PostgreS
 | Imagen en `Production` + `RRHH_WEB_TRUST_PROXY=true` + `PORT=10000`, `--solo-salud` | Correcto; contenedor `healthy`; usuario `app` sin privilegios |
 | Cookie de sesión tras proxy HTTPS | `secure; samesite=strict; httponly` |
 | Base detenida | `/salud` 200 y `/salud/lista` 503 con el motivo en el registro |
+| `deploy/verificar-listo.sh --con-docker` | Correcto (incluye prueba negativa del detector de secretos) |
+| Base vacía → `aplicar-migraciones.sh --restaurar-esquema` → repetir | 105 tablas y 7 migraciones, idempotente; sin `--confirmo-respaldo` se niega; sin esquema aborta |
+| Usuario nuevo → `generar-hash-password.py` → login web | Clave mala 401, clave nueva 204; rechaza claves de menos de 12 caracteres |
+| Hallazgo | `BD/schema.sql` trae `transaction_timeout` de PostgreSQL 18: el script lo filtra para 14 a 18 |
+| Hallazgo | `20261119_01` exige la PK de `Motivo_Perm` (TEC-002): el script la incluye con `--restaurar-esquema` |
 | Hallazgo | El primer intento de la demo tomó `DB_PASSWORD` del entorno del equipo; se separó a `DEMO_DB_PASSWORD` |
 
 **No ejecutado:** despliegue real en Render ni conexión a Neon (requieren las cuentas del equipo); los flujos de GitHub Actions (solo se validó su YAML); la suite de escritorio (este cambio no toca esos proyectos).

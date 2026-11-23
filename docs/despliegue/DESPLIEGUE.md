@@ -29,6 +29,8 @@ hay que volver a iniciar sesión. Para un piloto es aceptable. Para uso continuo
 
 ## Paso a paso
 
+Versión resumida para marcar: [CHECKLIST.md](CHECKLIST.md). Antes de empezar, `deploy/verificar-listo.sh` (o con `--con-docker`) comprueba que todo está en orden.
+
 ### 1. Probar todo localmente (sin Neon, sin Render)
 
 ```bash
@@ -44,7 +46,7 @@ Abra `http://127.0.0.1:8080`, usuario `operador` y la clave elegida. La base de 
 
 1. Cree un proyecto en [Neon](https://neon.com) (región cercana a la de Render).
 2. **Recomendado:** use una base **separada** de la compartida del equipo (otro proyecto, o una rama de Neon). La web escribe permisos, motivos y turnos.
-3. Si es una base nueva, restaure el esquema base: `psql "$DATABASE_URL" -f BD/schema.sql`.
+3. Si es una base nueva y vacía, el paso 3 puede restaurar el esquema base con `--restaurar-esquema` (BD/schema.sql se exportó con PostgreSQL 18; el script quita las líneas que versiones menores no entienden).
 4. Si es una copia de la base compartida, **cree antes una rama de respaldo en Neon**.
 
 ### 3. Aplicar las migraciones
@@ -52,11 +54,14 @@ Abra `http://127.0.0.1:8080`, usuario `operador` y la clave elegida. La base de 
 ```bash
 export DATABASE_URL='postgresql://USUARIO:CLAVE@HOST/BASE?sslmode=require'
 deploy/aplicar-migraciones.sh                                  # solo muestra el plan y comprueba la conexión
-deploy/aplicar-migraciones.sh --aplicar --confirmo-respaldo    # aplica
+deploy/aplicar-migraciones.sh --aplicar --confirmo-respaldo    # aplica (base ya restaurada)
+deploy/aplicar-migraciones.sh --aplicar --confirmo-respaldo --restaurar-esquema   # base nueva y vacía
 ```
 
 Aplica `BD/password-auth.sql` y las migraciones de teletrabajo, licencia anual, grupo anual, estados de permiso y vacaciones. Son idempotentes.
-La migración de integridad (TEC-002) no entra por defecto: requiere sanear duplicados antes (`--incluir-integridad`, ver `BD/tests/README.md`).
+**Dependencia importante:** la migración `20261119_01` exige la clave primaria de `Motivo_Perm`, que crea la migración de integridad (TEC-002).
+- Base nueva y vacía: use `--restaurar-esquema` (incluye TEC-002 automáticamente; sin datos no hay duplicados).
+- Copia de la base compartida: tiene filas duplicadas (Horario, RRHH_Feriado, TipoPermiso y Motivo_Perm). **Primero sanee una copia** (`BD/tests/sanear_copias_exactas_qa.sql`, ver `BD/tests/README.md`), compruebe, y luego aplique con `--incluir-integridad`. Si la base ya tiene esas claves, no hace falta.
 
 ### 4. Crear las claves de los usuarios
 
@@ -89,8 +94,11 @@ de la página; los datos se piden siempre al servidor y no se guardan sin conexi
 
 ## Integración continua
 
-- `.github/workflows/ci.yml` en cada PR: pruebas de escritorio (net48) en Windows, y en Ubuntu compila la imagen, levanta la demo y ejecuta `deploy/smoke.sh`.
-- `.github/workflows/imagen.yml` al crear una etiqueta `vX.Y.Z`: publica `ghcr.io/<usuario>/rrhh-web:X.Y.Z`.
+Las plantillas están en `deploy/ci/` (no en `.github/workflows/`, porque subirlas exige el permiso `workflow` del token). Para activarlas:
+`gh auth refresh -h github.com -s workflow && mkdir -p .github/workflows && cp deploy/ci/*.yml .github/workflows/`. Nunca se han ejecutado en GitHub.
+
+- `ci.yml` en cada PR: pruebas de escritorio (net48) en Windows, y en Ubuntu compila la imagen, levanta la demo y ejecuta `deploy/smoke.sh`.
+- `imagen.yml` al crear una etiqueta `vX.Y.Z`: publica `ghcr.io/<usuario>/rrhh-web:X.Y.Z`.
 
 ## Antes de usar datos reales
 
