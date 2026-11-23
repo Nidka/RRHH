@@ -1,5 +1,7 @@
 # RRHH Web
 
+Para ejecutar el host en un contenedor, ver [Despliegue con Docker](DESPLIEGUE_DOCKER.md).
+
 Versión web del piloto académico RRHH. Consulta la [matriz de los 18 RF](../../docs/final/MATRIZ_ACEPTACION_RF.md) para conocer los módulos y su evidencia.
 
 ## Preparación segura

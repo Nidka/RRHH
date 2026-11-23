@@ -1,0 +1,30 @@
+name: RRHH Web Docker
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  startup:
+    runs-on: ubuntu-latest
+    env:
+      RRHH_WEB_ENVIRONMENT: Development
+      RRHH_WEB_POSTGRES: Host=localhost;Database=qa;Username=qa;Password=ficticia
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build y arranque de la imagen
+        run: |
+          docker compose config --quiet
+          docker compose up --build -d
+          curl --fail --silent --show-error --retry 20 --retry-all-errors --retry-delay 1 http://127.0.0.1:8080/ --output /tmp/rrhh-index.html
+          grep -qi RRHH /tmp/rrhh-index.html
+      - name: Diagnóstico
+        if: failure()
+        run: docker compose logs --tail=100 web
+      - name: Detener contenedor
+        if: always()
+        run: docker compose down
