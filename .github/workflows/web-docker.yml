@@ -11,12 +11,12 @@ permissions:
 jobs:
   startup:
     runs-on: ubuntu-latest
+    env:
+      RRHH_WEB_ENVIRONMENT: Development
+      RRHH_WEB_POSTGRES: Host=localhost;Database=qa;Username=qa;Password=ficticia
     steps:
       - uses: actions/checkout@v4
       - name: Build y arranque de la imagen
-        env:
-          RRHH_WEB_ENVIRONMENT: Development
-          RRHH_WEB_POSTGRES: Host=localhost;Database=qa;Username=qa;Password=ficticia
         run: |
           docker compose config --quiet
           docker compose up --build -d
