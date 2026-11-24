@@ -1,0 +1,9 @@
+# Unifica los alias de cada integrante para `git shortlog` y `git log --use-mailmap`.
+# No reescribe el historial: solo agrupa identidades que ya aparecen en los commits.
+Francisco Kadin Valera Lizarraga <134814251+Nidka@users.noreply.github.com> Nidka <pepo.kadin@gmail.com>
+Jorge Enrique Cano Asto <kikecanoasto@gmail.com> Kike <kikecanoasto@gmail.com>
+Jorge Enrique Cano Asto <kikecanoasto@gmail.com> Jorge Enrique Cano Asto <N00324348@upn.pe>
+Frank Piero Mantilla Arqueros <pieromantillaarqueros@gmail.com> Piero <pieromantillaarqueros@gmail.com>
+Frank Piero Mantilla Arqueros <pieromantillaarqueros@gmail.com> Frank Piero Mantilla Arqueros <n00348448@upn.pe>
+Evelyn Victoria Rodriguez Cardozo <168020932+EVELYNRODRIGUEZ07@users.noreply.github.com> helcorp <evelyn.rodriguez@helcorp.pe>
+Evelyn Victoria Rodriguez Cardozo <168020932+EVELYNRODRIGUEZ07@users.noreply.github.com> Evelyn Victoria Rodriguez Cardozo <N00354278@upn.pe>
