@@ -1,0 +1,46 @@
+ok   sin sesión se muestra el acceso
+ok   credenciales erróneas muestran error
+ok   operador ve 5 módulos en orden: Gestión de turnos | Permisos y licencias | Vacaciones | Teletrabajo y presencialidad | Reportes generales
+ok   ningún texto dice «piloto»
+ok   abre «Asignar turno por periodo» sin error
+ok   abre «Histórico de turnos» sin error
+ok   abre «Registro de permisos y licencias» sin error
+ok   abre «Motivos de permiso» sin error
+ok   abre «Vacaciones generadas» sin error
+ok   abre «Vacaciones pendientes de goce» sin error
+ok   abre «Vacaciones truncas» sin error
+ok   abre «Reporte de vacaciones» sin error
+ok   abre «Periodos de teletrabajo» sin error
+ok   abre «Días de teletrabajo» sin error
+ok   abre «Presencialidad y teletrabajo por persona» sin error
+ok   abre «Teletrabajo total o parcial» sin error
+ok   abre «Asistencia con feriados» sin error
+ok   abre «Ausencias por periodo» sin error
+ok   el buscador muestra código y documento
+ok   RF-01 guarda la asignación: Asignación 1 guardada.
+ok   RF-01 lista la asignación del empleado
+ok   RF-01 «Editar» carga el periodo
+ok   RF-01 rechaza un periodo solapado: El empleado ya tiene un horario asignado en esas fechas.
+ok   el selector exige elegir un empleado de la lista
+ok   RF-02 muestra el histórico
+ok   RF-13 registra el periodo: Periodo registrado con código 1.
+ok   RF-13 lista el patrón Lun, Mié
+ok   RF-13 rechaza el solapamiento: El empleado ya tiene un periodo de teletrabajo que se solapa.
+ok   RF-14 descuenta el feriado del 11/11 (1 día): 101	1
+ok   RF-16 clasifica como Parcial
+ok   RF-03 guarda el permiso: Permiso guardado correctamente.
+ok   RF-03 rechaza dos permisos el mismo día: El empleado ya tiene un permiso en esas fechas. No se puede registrar otro permiso el mismo día.
+ok   RF-04 agrega el motivo: Motivo 41 registrado.
+ok   RF-05 elimina el motivo: Motivo 41 eliminado.
+ok   RF-07 genera 60 días por dos aniversarios
+ok   RF-09 calcula 21,67 días truncos
+ok   RF-17 muestra el total de días computados
+ok   RF-18 lista ausencias con nombre
+ok   una ruta inexistente vuelve al inicio con aviso
+ok   cerrar sesión vuelve al acceso
+ok   solo_teletrabajo ve solo su módulo: Periodos de teletrabajo, Días de teletrabajo, Teletrabajo total o parcial
+ok   solo_teletrabajo no puede abrir vacaciones por enlace directo
+ok   en celular el menú empieza cerrado
+ok   el botón Menú lo abre
+
+RECORRIDO CORRECTO: 44 verificaciones
