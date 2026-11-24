@@ -47,3 +47,7 @@ ALTER TABLE "Permiso" ADD "Autorizacion" varchar(50);
 ALTER TABLE "Permiso" ADD "Obs" varchar(200);
 ALTER TABLE "Permiso" ADD "Dia" boolean;
 ALTER TABLE "Permiso" ADD "Retorno" boolean;
+-- CR-019: columnas que usa la búsqueda de empleados (documento y estado; '1' = activo).
+ALTER TABLE "Persona" ADD "NumDocID" varchar(12);
+ALTER TABLE "Empleado" ADD "Estado" varchar(1) DEFAULT '1';
+UPDATE "Persona" SET "NumDocID" = '00000001' WHERE "IdPersona" = 1;

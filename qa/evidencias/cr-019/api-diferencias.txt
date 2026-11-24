@@ -1,0 +1,18 @@
+4,5c4,5
+< GET /api/modulos ->  [404]
+< GET /api/empleados?texto=fic ->  [404]
+---
+> GET /api/modulos ->  [401]
+> GET /api/empleados?texto=fic ->  [401]
+56,57c56,57
+< GET /api/modulos ->  [404]
+< GET /api/empleados?texto=fic ->  [404]
+---
+> GET /api/modulos -> [{"clave":"turnos","titulo":"Gestión de turnos","pantallas":[{"clave":"asignar-turno","titulo":"Asignar turno por periodo","requerimientos":["RF-01"]},{"clave":"historico-turnos","titulo":"Histórico de turnos","requerimientos":["RF-02"]}]},{"clave":"permisos","titulo":"Permisos y licencias","pantallas":[{"clave":"registro-permisos","titulo":"Registro de permisos y licencias","requerimientos":["RF-03","RF-06","RF-10"]},{"clave":"motivos-permiso","titulo":"Motivos de permiso","requerimientos":["RF-04","RF-05"]}]},{"clave":"vacaciones","titulo":"Vacaciones","pantallas":[{"clave":"vacaciones-generadas","titulo":"Vacaciones generadas","requerimientos":["RF-07"]},{"clave":"saldo-vacaciones","titulo":"Vacaciones pendientes de goce","requerimientos":["RF-08"]},{"clave":"vacaciones-truncas","titulo":"Vacaciones truncas","requerimientos":["RF-09"]},{"clave":"reporte-vacaciones","titulo":"Reporte de vacaciones","requerimientos":["RF-11"]}]},{"clave":"teletrabajo","titulo":"Teletrabajo y presencialidad","pantallas":[{"clave":"periodos-teletrabajo","titulo":"Periodos de teletrabajo","requerimientos":["RF-13"]},{"clave":"dias-teletrabajo","titulo":"Días de teletrabajo","requerimientos":["RF-14"]},{"clave":"presencialidad","titulo":"Presencialidad y teletrabajo por persona","requerimientos":["RF-15"]},{"clave":"teletrabajo-total-parcial","titulo":"Teletrabajo total o parcial","requerimientos":["RF-16"]}]},{"clave":"reportes","titulo":"Reportes generales","pantallas":[{"clave":"asistencia-feriados","titulo":"Asistencia con feriados","requerimientos":["RF-17"]},{"clave":"ausencias-periodo","titulo":"Ausencias por periodo","requerimientos":["RF-18"]}]}] [200]
+> GET /api/empleados?texto=fic -> [{"idEmpleado":101,"nombreCompleto":"Ficticio, Operador","documento":"00000001","activo":true},{"idEmpleado":102,"nombreCompleto":"Ficticio, Operador","documento":"00000001","activo":true}] [200]
+66,67c66,67
+< GET /api/modulos ->  [404]
+< GET /api/empleados?texto=fic ->  [404]
+---
+> GET /api/modulos -> [{"clave":"teletrabajo","titulo":"Teletrabajo y presencialidad","pantallas":[{"clave":"periodos-teletrabajo","titulo":"Periodos de teletrabajo","requerimientos":["RF-13"]},{"clave":"dias-teletrabajo","titulo":"Días de teletrabajo","requerimientos":["RF-14"]},{"clave":"teletrabajo-total-parcial","titulo":"Teletrabajo total o parcial","requerimientos":["RF-16"]}]}] [200]
+> GET /api/empleados?texto=fic -> [{"idEmpleado":101,"nombreCompleto":"Ficticio, Operador","documento":"00000001","activo":true},{"idEmpleado":102,"nombreCompleto":"Ficticio, Operador","documento":"00000001","activo":true}] [200]

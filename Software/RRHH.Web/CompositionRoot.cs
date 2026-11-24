@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using RRHH.Application.Asistencia;
 using RRHH.Application.Catalogos;
 using RRHH.Application.Permisos;
+using RRHH.Application.Personal;
 using RRHH.Application.Seguridad;
 using RRHH.Application.Teletrabajo;
 using RRHH.Domain.Catalogos;
@@ -12,6 +13,7 @@ using RRHH.PostgreSql;
 using RRHH.PostgreSql.Asistencia;
 using RRHH.PostgreSql.Catalogos;
 using RRHH.PostgreSql.Permisos;
+using RRHH.PostgreSql.Personal;
 using RRHH.PostgreSql.Seguridad;
 using RRHH.PostgreSql.Teletrabajo;
 
@@ -98,6 +100,8 @@ internal static class CompositionRoot
         builder.Services.AddScoped(sp => new ConsultarPermiso(sp.GetRequiredService<PostgreSqlPermisoEscrituraRepository>()));
         builder.Services.AddScoped(sp => new ListarCatalogo(new PostgreSqlCatalogoRepository(
             sp.GetRequiredService<PostgreSqlExecutor>(), MapeosCatalogo.Para(TipoCatalogo.TipoPermiso))));
+        builder.Services.AddScoped(sp => new BuscarEmpleados(
+            new PostgreSqlEmpleadoBusquedaRepository(sp.GetRequiredService<PostgreSqlExecutor>())));
 
         var seguridad = builder.Environment.IsDevelopment() ? CookieSecurePolicy.SameAsRequest : CookieSecurePolicy.Always;
         builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options =>
