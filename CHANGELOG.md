@@ -7,6 +7,8 @@ y el proyecto usa [Versionado Semántico](https://semver.org/lang/es/).
 
 ## [Sin publicar]
 
+## [1.7.0] - 2026-11-23
+
 ### Agregado
 - Despliegue gratuito del host web (TEC-005): `Dockerfile`, demo local con `docker-compose.demo.yml`, configuración de Render (`render.yaml`), guía en `docs/despliegue/DESPLIEGUE.md` y flujos de CI.
 - `/salud` y `/salud/lista` para las sondas de la plataforma; soporte de proxy con `RRHH_WEB_TRUST_PROXY`.
@@ -23,6 +25,8 @@ y el proyecto usa [Versionado Semántico](https://semver.org/lang/es/).
 - CR-019: la API web se organiza en un archivo de endpoints por módulo (`Program.cs` pasa de 301 a 57 líneas), sin cambiar rutas, contratos ni permisos.
 - CR-019: la interfaz web pasa de una página con 13 secciones apiladas a módulos ES con componentes compartidos y una pantalla por archivo. Se retiran los títulos «piloto». El service worker pasa a `rrhh-web-v2` para que los navegadores reciban la interfaz nueva.
 - CR-019: rediseño visual de la web: menú lateral con íconos, acceso en pantalla dividida, tarjetas, indicadores, gráficos (dona, barras, calendario y línea de tiempo), etiquetas de estado, avisos flotantes y diseño adaptable al celular. Service worker `rrhh-web-v3`.
+
+Versión de la evaluación final: la web queda organizada por módulos, con diseño moderno para los tres roles, desplegada en Render y con trazabilidad completa (matriz de 19 CR, 147 casos y 5 refactorizaciones). Suite net8 427/427; prueba de humo correcta en producción.
 
 ## [1.6.0] - 2026-11-20
 
@@ -107,7 +111,9 @@ documentación y no cambian la versión.
 - Motivos de permiso (TEC-004). PR #2
 - La importación biométrica escribe asistencia y marcaciones en PostgreSQL dentro de una transacción.
 
-[Sin publicar]: https://github.com/Nidka/RRHH/compare/v1.5.0...HEAD
+[Sin publicar]: https://github.com/Nidka/RRHH/compare/v1.7.0...HEAD
+[1.7.0]: https://github.com/Nidka/RRHH/releases/tag/v1.7.0
+[1.6.0]: https://github.com/Nidka/RRHH/releases/tag/v1.6.0
 [1.5.0]: https://github.com/Nidka/RRHH/releases/tag/v1.5.0
 [1.4.0]: https://github.com/Nidka/RRHH/releases/tag/v1.4.0
 [1.3.0]: https://github.com/Nidka/RRHH/releases/tag/v1.3.0

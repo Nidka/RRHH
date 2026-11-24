@@ -1,6 +1,6 @@
 # Registro de versiones
 
-Plan de versiones de la evaluación T3. El número definitivo sigue el orden real de integración y se confirma al crear la etiqueta;
+Plan y registro de versiones de T3 y de la evaluación final. El número definitivo sigue el orden real de integración y se confirma al crear la etiqueta;
 las fechas se completan al publicar cada versión.
 
 | Versión | Fecha | Tipo de cambio | Descripción | Responsable del contenido | Estado |
@@ -14,7 +14,9 @@ las fechas se completan al publicar cada versión.
 | 1.3.0 | 11/11/2026 | Mejora menor | RF-13 y RF-14: teletrabajo (CR-013, CR-014, PR #23 y #25). La tabla llega con PR #26 | Jorge Enrique Cano Asto | Publicada (pre-lanzamiento) |
 | 1.4.0 | 12/11/2026 | Mejora menor | RF-01 y RF-02: turnos por periodos e histórico (CR-001, CR-002, PR #27 y #28). **Versión intermedia de T3** | Evelyn Victoria Rodriguez Cardozo | Publicada (pre-lanzamiento) |
 | 1.5.0 | 12/11/2026 | Mejora menor | RF-16: personal en teletrabajo total o parcial (CR-016, PR #31). Completa los tres complementarios de T3 | Francisco Kadin Valera Lizarraga | Publicada; probada en Windows |
-| 2.0.0 | Entrega final | Cambio mayor | Retiro de TableAdapters de SQL Server y migración completa a MVP | Por asignar | Pendiente |
+| 1.6.0 | 20/11/2026 | Mejora menor | RF-07 a RF-12 y RF-15 (vacaciones y asistencia consolidada); web de los 18 RF; correcciones de RF-03, RF-06, RF-17 y RF-18 (PR #33 a #71) | Jorge Enrique Cano Asto | Publicada; recorrido WinForms y web con datos ficticios |
+| 1.7.0 | 23/11/2026 | Mejora menor | Despliegue de la web (TEC-005, PR #74 y #75), navegación por módulos y diseño moderno (CR-019, PR #76 y #77), trazabilidad, refactorizaciones y documentación final (PR #78 a #80) | Evelyn Victoria Rodriguez Cardozo / Kadin (despliegue) | Publicada; suite 427/427 y prueba de humo en producción |
+| 2.0.0 | Futuro | Cambio mayor | Retiro de TableAdapters de SQL Server y migración completa a MVP | Por asignar | Pendiente |
 
 Los números siguen el **orden real de integración** en `main`, no el plan inicial (que asignaba 1.1.0 a RF-01/02 y 1.4.0 a RF-18).
 
@@ -37,4 +39,8 @@ Pre-versiones de QA: `vX.Y.Z-rc.N`. La coordinación de los releases está a car
 | CR-004 / CR-005 | Cierre de agregar y eliminar motivos (RF-04/05) | Pruebas y documentación | — | Integrado (PR #29); no cambia la versión |
 | CR-016 | Teletrabajo total/parcial (RF-16) | Mejora | 1.5.0 | Integrado (PR #31); probado en Windows |
 | SC-001 / SC-002 / SC-003 | Documentos de análisis y planes de aceptación | Documentación | — | No cambian la versión |
+| CR-007 a CR-012 | Vacaciones: generadas, pendientes, truncas, media jornada, reporte y autoconsulta (RF-07 a RF-12) | Mejora | 1.6.0 | Integrado (PR #49 a #64) |
+| CR-015 | Presencialidad y teletrabajo por persona (RF-15) | Mejora | 1.6.0 | Integrado (PR #65) |
+| TEC-005 | Despliegue de la web (Render, Neon, PWA) | Adaptación | 1.7.0 | Integrado (PR #74, #75); desplegado |
+| CR-019 | Navegación por módulos y diseño de la web | Mejora | 1.7.0 | Integrado en web (PR #76, #77); escritorio pendiente |
 | Por asignar | Retiro de TableAdapters y SQL Server | Cambio mayor | 2.0.0 | Pendiente |
