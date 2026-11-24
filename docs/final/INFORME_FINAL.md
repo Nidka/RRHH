@@ -11,7 +11,7 @@
 | **Integrantes** | Evelyn Victoria Rodriguez Cardozo · Jorge Enrique Cano Asto · Frank Piero Mantilla Arqueros · Francisco Kadin Valera Lizarraga |
 | **Códigos** | *[completar cada integrante]* |
 | **Repositorio** | https://github.com/Nidka/RRHH |
-| **Versión entregada** | `main` en el commit de integración de este informe. Última versión publicada: v1.6.0; v1.7.0 lista para publicar |
+| **Versión entregada** | v1.7.0 (23/11/2026), desplegada en https://rrhh-web-ate6.onrender.com |
 | **Fecha** | Noviembre de 2026 |
 
 ## 2. Resumen ejecutivo
@@ -34,8 +34,8 @@
   - Arquitectura por capas con MVP de vista pasiva.
   - Cinco refactorizaciones documentadas.
   - 427 pruebas automatizadas y 147 casos de prueba registrados.
-  - Versionado semántico con 11 versiones etiquetadas (v1.7.0 por publicar) y despliegue de la web.
-- **Versión que se entrega.** v1.6.0 es la última publicada; v1.7.0 agrega la navegación por módulos, el diseño moderno y la trazabilidad completa ([CHANGELOG](../../CHANGELOG.md)).
+  - Versionado semántico con 12 versiones etiquetadas, hasta v1.7.0, y despliegue de la web.
+- **Versión que se entrega.** v1.7.0: los 18 RF de v1.6.0 más la navegación por módulos, el diseño moderno, el despliegue y la trazabilidad completa ([CHANGELOG](../../CHANGELOG.md)).
 
 ## 3. Descripción del sistema heredado
 
@@ -281,7 +281,7 @@ Matriz completa con tipo, riesgo, responsables, PR, revisión registrada, casos 
 | CR-016 | Teletrabajo total o parcial | P2 | Implementado (v1.5.0) | Kadin; Jorge (web) | CP-16-01 a CP-16-17 | `80450af` |
 | CR-017 | Feriados en el reporte general | P1 | Implementado (v1.0.3, v1.6.0) | Frank; Jorge | CP-17-01 a CP-17-11 | `cd4e46d`, `2d86eae` |
 | CR-018 | Ausentes por motivo y periodo | P2 | Implementado (v1.2.0, v1.6.0) | Kadin; Jorge | CP-18-01 a CP-18-S2 | `11b2429`, `2bfbbe2` |
-| CR-019 | Navegación por módulos y diseño web | P1 | Implementado en web (v1.7.0); escritorio pendiente | Evelyn | CP-19-01 a CP-19-15 | PR #76, #77 |
+| CR-019 | Navegación por módulos y diseño web | P1 | Implementado en web (v1.7.0); escritorio pendiente | Evelyn | CP-19-01 a CP-19-15 | `87d0fde`, `d97c020` (PR #76, #77) |
 
 **Trazabilidad:** requerimiento (RF) → solicitud (CR) → spec en `specs/` → implementación (commit) → PR → prueba (CP) → evidencia. Cada eslabón está enlazado en la matriz.
 
@@ -319,7 +319,7 @@ Fichas con el código antes y después extraído de Git: [docs/t3/refactorizacio
   - v1.4.0: RF-01 y RF-02;
   - v1.5.0: RF-16;
   - v1.6.0-beta.1 y v1.6.0 (20/11): web y vacaciones;
-  - v1.7.0: pendiente de publicar.
+  - v1.7.0 (23/11): despliegue de la web, navegación por módulos, diseño moderno y trazabilidad final.
 - **Changelog:** [CHANGELOG.md](../../CHANGELOG.md), en formato Keep a Changelog.
 - **Participación de integrantes** (commits propios sin merges, con `.mailmap` para unificar alias):
 
@@ -352,7 +352,7 @@ Fichas con el código antes y después extraído de Git: [docs/t3/refactorizacio
 2. **Las capas dieron resultado medible.** La web reutiliza los mismos casos de uso que el escritorio, sin duplicar reglas. La regla de solapamiento se escribió una vez y la usan RF-01, RF-03, RF-13 y RF-18.
 3. **Caracterizar evitó regresiones.** Comparar las respuestas antes y después (61/61 y 73/77) demostró que las refactorizaciones de CR-019 no cambiaron el comportamiento existente.
 4. **El control de cambios exige constancia.** La matriz llegó a estar desactualizada (CR-007 a CR-015 «pendientes» con el código ya en `main`). Se corrigió reconstruyendo la trazabilidad desde el historial de Git.
-5. **El versionado semántico dejó una historia legible.** Once versiones etiquetadas, con su release y su entrada en el changelog, permiten explicar qué cambió y cuándo.
+5. **El versionado semántico dejó una historia legible.** Doce versiones etiquetadas, con su release y su entrada en el changelog, permiten explicar qué cambió y cuándo.
 
 ## 13. Recomendaciones
 

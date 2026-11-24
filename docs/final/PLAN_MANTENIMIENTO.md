@@ -47,7 +47,7 @@ Prioridad: P1 = primero (base o defecto), P2 = después de las bases, P3 = requi
 | | RF-16 | Teletrabajo total o parcial | Perfectivo | P2 | 1.5.0 |
 | E. Reportes generales | RF-17 | Feriados sumados en el reporte general | Correctivo | P1 | 1.0.3 · 1.6.0 |
 | | RF-18 | Personas ausentes por motivo y periodo | Perfectivo | P2 | 1.2.0 · 1.6.0 |
-| Transversal | CR-019 | Navegación por módulos y diseño de la web | Perfectivo | P1 | 1.7.0 (propuesta) |
+| Transversal | CR-019 | Navegación por módulos y diseño de la web | Perfectivo | P1 | 1.7.0 |
 
 **Orden aplicado:**
 1. Bases: TEC-001 a TEC-004 y la base compartida `RangoFechas`/`CalendarioLaboral` (PR #18).
@@ -76,7 +76,7 @@ Prioridad: P1 = primero (base o defecto), P2 = después de las bases, P3 = requi
 | Reglas de vacaciones y licencias sin confirmar con el área usuaria | Cálculos discutibles | Régimen parametrizable, marcas explícitas por motivo y casos con datos ficticios | Abierto: requiere validación del área usuaria |
 | Dependencias licenciadas (DevExpress 11.2, GRLL) solo en Windows | No se compila ni prueba el escritorio fuera de Windows | Capas sin WinForms, probadas en net8; QA de escritorio en Windows | Abierto para la parte de escritorio de CR-019 |
 | Revisión cruzada insuficiente | Defectos sin detectar | PR por tarea y pruebas automatizadas | Materializado: solo los PR #20 y #21 tienen aprobación formal (ver la matriz) |
-| Despliegue manual de la web | La versión publicada queda atrás de `main` | Lista de despliegue y prueba de humo en `deploy/` | Abierto: `autoDeploy: false` en `render.yaml` |
+| Despliegue manual de la web | La versión publicada queda atrás de `main` | Lista de despliegue y prueba de humo en `deploy/` | Controlado: v1.7.0 desplegada y verificada (9/9); el despliegue sigue siendo manual |
 | Datos personales en evidencias | Exposición de información | Solo datos ficticios en pruebas, capturas y demo; `.env` fuera de Git | Controlado |
 
 ## 6. Estrategia de refactorización
@@ -130,7 +130,7 @@ Fechas reales tomadas de las etiquetas y commits de `main`.
 | T2: diagnóstico y paquetes técnicos | 17–29/10/2026 | TEC-001 a TEC-004, análisis T2 (PR #9), solicitudes SC-001 a SC-003 |
 | T3: implementación base | 11–13/11/2026 | RF-01 a RF-06, RF-13, RF-14, RF-16, RF-17, RF-18; **v1.0.1 a v1.5.0** |
 | Versión web y vacaciones | 17–20/11/2026 | RF-07 a RF-12, RF-15, web de los 18 RF, QA de aceptación; **v1.6.0** (20/11) |
-| Evaluación final | 23–24/11/2026 | Despliegue (PR #74, #75), CR-019 (PR #76, #77), trazabilidad y refactorizaciones (PR #78, #79); **v1.7.0** pendiente de publicar |
+| Evaluación final | 23–24/11/2026 | Despliegue (PR #74, #75), CR-019 (PR #76, #77), trazabilidad, refactorizaciones e informe (PR #78 a #80); **v1.7.0** (23/11) |
 
 ## 10. Criterios de aceptación
 
