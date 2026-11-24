@@ -52,6 +52,38 @@ public sealed class ReportarAsistenciaConFeriadosTests
         Assert.Equal(total, resultado.Total);
     }
 
+    /// <summary>
+    /// Escenario del enunciado «Consultar asistencia desde el año 2008». El heredado fijaba el año 2008 en
+    /// FrmConsultaFaltas (parámetro Anio de spRRHH_Faltas); aquí la consulta histórica no tiene un año fijo.
+    /// Semana del lunes 25/02 al domingo 02/03/2008, con el 29 de febrero bisiesto y un feriado ficticio el 27.
+    /// </summary>
+    [Theory]
+    [InlineData(false, 5)]
+    [InlineData(true, 2)]
+    public void ConsultaHistoricaDe2008IncluyeElBisiestoYElFeriado(bool productividad, int total)
+    {
+        var fechas = new Fechas { Valores = new[] { new DateTime(2008, 2, 25), new DateTime(2008, 2, 29) } };
+        var feriados = new FakeFeriadoRepository();
+        feriados.Registros.Add(Feriado.Reconstituir(1, new DateTime(2008, 2, 27), "Ficticio"));
+        var resultado = new ReportarAsistenciaConFeriados(fechas, feriados)
+            .Ejecutar(101, new DateTime(2008, 2, 25), new DateTime(2008, 3, 2), productividad);
+        Assert.Equal(total, resultado.Total);
+        Assert.Equal(7, resultado.Dias.Count);
+        Assert.True(resultado.Dias.Single(dia => dia.Fecha == new DateTime(2008, 2, 29)).Asistio);
+    }
+
+    /// <summary>El año 2008 completo: 366 días, 104 de fin de semana y el feriado ficticio del martes 1 de enero.</summary>
+    [Fact]
+    public void ConsultaDelAnio2008CompletoCuentaCadaDiaNoLaborableUnaVez()
+    {
+        var feriados = new FakeFeriadoRepository();
+        feriados.Registros.Add(Feriado.Reconstituir(1, new DateTime(2008, 1, 1), "Ficticio"));
+        var resultado = new ReportarAsistenciaConFeriados(new Fechas(), feriados)
+            .Ejecutar(101, new DateTime(2008, 1, 1), new DateTime(2008, 12, 31), false);
+        Assert.Equal(366, resultado.Dias.Count);
+        Assert.Equal(105, resultado.Total);
+    }
+
     [Fact]
     public void RangoInvertidoNoConsultaDatos()
     {
