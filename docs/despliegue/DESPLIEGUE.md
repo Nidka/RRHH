@@ -87,6 +87,26 @@ deploy/smoke.sh https://rrhh-web-XXXX.onrender.com --solo-salud
 
 Comprueba salud, base de datos, rechazo sin sesión y encabezados de seguridad. Luego inicie sesión desde el navegador y recorra un módulo.
 
+### 6.1. Cargar datos de demostración (opcional)
+
+Una base nueva no tiene empleados, así que las pantallas se ven vacías. Para la demostración se cargan datos **ficticios**:
+
+```bash
+deploy/cargar-datos-demo.sh                                   # muestra qué hay y qué haría
+deploy/cargar-datos-demo.sh --aplicar --confirmo-respaldo     # carga los datos
+```
+
+Carga [deploy/demo/datos-demo-despliegue.sql](../../deploy/demo/datos-demo-despliegue.sql):
+- 12 empleados ficticios (códigos 9101 a 9112, documentos `DEMO-…`) en 4 áreas;
+- 3 horarios, turnos por periodo con histórico, 6 motivos y 13 permisos en sus cuatro estados, incluida una media jornada;
+- 4 periodos de teletrabajo (1 total y 3 parciales);
+- feriados nacionales de 2008 y 2026, si no existen;
+- marcaciones de octubre y noviembre de 2026, y de febrero y marzo de 2008 para la consulta histórica.
+
+Es idempotente: solo borra y recrea sus propias filas (rango 9101 a 9199) y no toca usuarios ni claves. Se niega a cargar si la base
+tiene más de 20 empleados ajenos a la demo, porque probablemente son datos reales. Para que un usuario de autoconsulta vea sus
+vacaciones, vincúlelo a uno de estos empleados (`Usuario.IdEmpleado`) y dele una clave con el paso 4.
+
 ### 7. Instalarla como aplicación
 
 En Chrome/Edge (escritorio o Android) aparece «Instalar». En iPhone: Compartir → «Añadir a pantalla de inicio». La instalación guarda solo la estructura
