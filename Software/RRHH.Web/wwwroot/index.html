@@ -10,221 +10,31 @@
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="apple-touch-icon" href="/icon-192.png">
   <link rel="stylesheet" href="/app.css">
-  <script src="/app.js" defer></script>
+  <script type="module" src="/js/app.js"></script>
   <script src="/pwa.js" defer></script>
 </head>
 <body>
-  <header><div><strong>RRHH</strong><span>Gestión de asistencia</span></div><button id="salir" hidden>Cerrar sesión</button></header>
-  <main>
-    <h1>Gestión de RRHH</h1>
-    <p id="mensaje" role="status" aria-live="polite"></p>
-    <section id="acceso">
-      <h2>Iniciar sesión</h2>
-      <form id="login">
-        <label>Usuario RRHH<input name="login" autocomplete="username" maxlength="128" required></label>
-        <label>Contraseña<input name="password" type="password" autocomplete="current-password" maxlength="256" required></label>
-        <button>Entrar</button>
-      </form>
-    </section>
-    <div id="panel" hidden>
-      <section id="seccion-mis-vacaciones" hidden>
-        <h2>Mis vacaciones</h2>
-        <form id="mis-vacaciones">
-          <label>Fecha de corte<input name="corte" type="date" required></label>
-          <button>Consultar mi saldo</button>
-        </form>
-        <p id="mi-saldo" role="status"></p>
-        <div id="mis-consumos" class="resultados"></div>
-      </section>
-      <section id="seccion-alta-remoto">
-        <h2>Registrar periodo</h2>
-        <form id="alta">
-          <label>Código de empleado<input name="empleado" type="number" min="1" max="2147483647" required></label>
-          <label>Modalidad<select name="modalidad"><option value="T">Total</option><option value="P">Parcial</option></select></label>
-          <label>Desde<input type="date" name="desde" required></label>
-          <label>Hasta<input type="date" name="hasta" required></label>
-          <fieldset id="patron" hidden><legend>Días remotos</legend>
-            <label><input type="checkbox" name="dia" value="1">Lunes</label>
-            <label><input type="checkbox" name="dia" value="2">Martes</label>
-            <label><input type="checkbox" name="dia" value="4">Miércoles</label>
-            <label><input type="checkbox" name="dia" value="8">Jueves</label>
-            <label><input type="checkbox" name="dia" value="16">Viernes</label>
-          </fieldset>
-          <label class="completo">Referencia de autorización (opcional)<input name="autorizacion" maxlength="200"></label>
-          <button>Registrar</button>
-        </form>
-      </section>
-      <section id="seccion-listado-remoto">
-        <h2>Periodos vigentes</h2>
-        <form id="listado">
-          <label>Código de empleado<input name="empleado" type="number" min="1" max="2147483647" required></label>
-          <button>Consultar periodos</button>
-        </form>
-        <div id="periodos" class="resultados"></div>
-      </section>
-      <section id="seccion-reporte-remoto">
-        <h2>Reporte de días remotos</h2>
-        <form id="reporte">
-          <label>Empleado (vacío para todos)<input name="empleado" type="number" min="1" max="2147483647"></label>
-          <label>Desde<input type="date" name="desde" required></label>
-          <label>Hasta<input type="date" name="hasta" required></label>
-          <button>Calcular días</button>
-        </form>
-        <div id="dias" class="resultados"></div>
-      </section>
-      <section id="seccion-clasificacion-remoto">
-        <h2>Personal en teletrabajo total o parcial</h2>
-        <form id="clasificacion">
-          <label>Desde<input type="date" name="desde" required></label>
-          <label>Hasta<input type="date" name="hasta" required></label>
-          <label>Clasificación<select name="clase"><option value="">Todas</option><option value="T">Total</option><option value="P">Parcial</option></select></label>
-          <button>Consultar personal</button>
-        </form>
-        <p id="resumen-clasificacion" role="status"></p>
-        <div id="personal-remoto" class="resultados"></div>
-      </section>
-      <section id="seccion-ausencias" hidden>
-        <h2>Ausencias por periodo</h2>
-        <form id="ausencias">
-          <label>Desde<input type="date" name="desde" required></label>
-          <label>Hasta<input type="date" name="hasta" required></label>
-          <label>Motivo<select name="motivo"><option value="">Todos los motivos</option></select></label>
-          <button>Consultar ausencias</button>
-        </form>
-        <div id="resultado-ausencias" class="resultados"></div>
-      </section>
-      <section id="seccion-horarios" hidden>
-        <h2>Asignar turno por periodo</h2>
-        <form id="cargar-turno">
-          <label>Código de empleado<input name="empleado" type="number" min="1" max="2147483647" required></label>
-          <label>Número de asignación<input name="numero" type="number" min="1" max="2147483647" required></label>
-          <button>Cargar para editar</button>
-        </form>
-        <form id="guardar-turno">
-          <input name="numero" type="hidden" value="0">
-          <label>Código de empleado<input name="empleado" type="number" min="1" max="2147483647" required></label>
-          <label>Horario<select name="horario" required><option value="">Seleccione un horario</option></select></label>
-          <label>Desde<input name="desde" type="date" required></label>
-          <label>Hasta<input name="hasta" type="date" required></label>
-          <label>Documento (opcional)<input name="documento" maxlength="50"></label>
-          <label>Sisgedo (opcional)<input name="sisgedo" maxlength="50"></label>
-          <button>Registrar turno</button>
-          <button type="button" id="nuevo-turno" hidden>Nueva asignación</button>
-        </form>
-        <p id="estado-turno" role="status"></p>
-      </section>
-      <section id="seccion-historico" hidden>
-        <h2>Histórico de turnos</h2>
-        <form id="historico-turnos">
-          <label>Código de empleado<input name="empleado" type="number" min="1" max="2147483647" required></label>
-          <label>Desde (opcional)<input name="desde" type="date"></label>
-          <label>Hasta (opcional)<input name="hasta" type="date"></label>
-          <button>Consultar histórico</button>
-        </form>
-        <div id="resultado-historico" class="resultados"></div>
-      </section>
-      <section id="seccion-motivos" hidden>
-        <h2>Motivos de permiso</h2>
-        <form id="alta-motivo">
-          <label>Tipo de permiso<select name="tipo" required><option value="">Seleccione un tipo</option></select></label>
-          <label>Descripción<input name="descripcion" maxlength="50" required></label>
-          <label>Abreviatura (opcional)<input name="abreviatura" maxlength="3"></label>
-          <label>Con goce de haber<select name="salario"><option value="">Sin indicar</option><option value="true">Sí</option><option value="false">No</option></select></label>
-          <button>Agregar motivo</button>
-          <button type="button" id="consultar-motivos">Consultar motivos del tipo</button>
-        </form>
-        <p id="estado-motivo" role="status"></p>
-        <div id="resultado-motivos" class="resultados"></div>
-        <form id="baja-motivo" hidden>
-          <label>Motivo a eliminar<select name="id" required><option value="">Seleccione un motivo</option></select></label>
-          <label><input name="confirmar" type="checkbox" required>Confirmo la eliminación del motivo seleccionado</label>
-          <button>Eliminar motivo</button>
-        </form>
-      </section>
-      <section id="seccion-asistencia" hidden>
-        <h2>Asistencia y días no laborables</h2>
-        <form id="reporte-asistencia">
-          <label>Código de empleado<input name="empleado" type="number" min="1" max="2147483647" required></label>
-          <label>Desde<input name="desde" type="date" required></label>
-          <label>Hasta<input name="hasta" type="date" required></label>
-          <label>Modo<select name="modo"><option value="A">Asistencias</option><option value="P">Productividad</option></select></label>
-          <button>Consultar asistencia</button>
-        </form>
-        <p id="total-asistencia" role="status"></p>
-        <div id="detalle-asistencia" class="resultados"></div>
-        <h3>Consolidado diario de asistencia</h3>
-        <form id="asistencia-consolidada">
-          <label>Código de empleado<input name="empleado" type="number" min="1" max="2147483647" required></label>
-          <label>Desde<input name="desde" type="date" required></label>
-          <label>Hasta<input name="hasta" type="date" required></label>
-          <button>Consolidar asistencia</button>
-        </form>
-        <p id="resumen-consolidado" role="status"></p>
-        <div id="dias-consolidados" class="resultados"></div>
-      </section>
-      <section id="seccion-permisos" hidden>
-        <h2>Permisos y licencias del piloto</h2>
-        <p>Los estados Solicitado y Aprobado reservan fechas y cupo anual. Rechazado y Anulado los liberan.</p>
-        <p>Las salidas autorizadas requieren una marcación de hoy sin salida registrada y una única fecha: hoy.</p>
-        <form id="cargar-permiso">
-          <label>Código de empleado<input name="empleado" type="number" min="1" max="2147483647" required></label>
-          <label>Número de permiso<input name="numero" type="number" min="1" max="2147483647" required></label>
-          <button>Cargar permiso existente</button>
-        </form>
-        <form id="guardar-permiso">
-          <input name="numero" type="hidden" value="0">
-          <label>Código de empleado<input name="idEmpleado" type="number" min="1" max="2147483647" required></label>
-          <label>Código de motivo activo<input name="idMotivo" type="number" min="1" max="2147483647" required></label>
-          <label>Desde<input name="desde" type="date" required></label>
-          <label>Hasta<input name="hasta" type="date" required></label>
-          <label>Estado<select name="estado"><option>Solicitado</option><option>Aprobado</option><option>Rechazado</option><option>Anulado</option></select></label>
-          <label>Lugar<input name="lugar" maxlength="20"></label>
-          <label>Referencia<input name="referencia" maxlength="100"></label>
-          <label>Autorización<input name="autorizacion" maxlength="50"></label>
-          <label>Observación<input name="observacion" maxlength="200"></label>
-          <label><input name="dia" type="checkbox">Día completo</label>
-          <label><input name="retorno" type="checkbox">Con retorno</label>
-          <label><input name="mediaJornadaVacaciones" type="checkbox">Media jornada de vacaciones (0,5 días)</label>
-          <button>Guardar permiso</button>
-          <button id="nuevo-permiso" type="button">Nuevo permiso</button>
-        </form>
-        <p id="estado-permiso" role="status">Nuevo permiso</p>
-      </section>
-      <section id="seccion-vacaciones" hidden>
-        <h2>Vacaciones generadas del piloto</h2>
-        <form id="vacaciones-generadas">
-          <label>Código de empleado<input name="empleado" type="number" min="1" max="2147483647" required></label>
-          <label>Fecha de corte<input name="corte" type="date" required></label>
-          <button>Consultar vacaciones generadas</button>
-        </form>
-        <div id="resultado-vacaciones" class="resultados"></div>
-        <h3>Saldo y consumos aprobados</h3>
-        <form id="saldo-vacaciones">
-          <label>Código de empleado<input name="empleado" type="number" min="1" max="2147483647" required></label>
-          <label>Fecha de corte<input name="corte" type="date" required></label>
-          <button>Consultar saldo</button>
-        </form>
-        <p id="resumen-saldo" role="status"></p>
-        <div id="consumos-vacaciones" class="resultados"></div>
-        <h3>Simular vacaciones truncas al cese</h3>
-        <form id="truncas-vacaciones">
-          <label>Código de empleado<input name="empleado" type="number" min="1" max="2147483647" required></label>
-          <label>Último día de servicio, incluido<input name="cese" type="date" required></label>
-          <button>Calcular truncas</button>
-        </form>
-        <p id="resultado-truncas" role="status"></p>
-        <h3>Reporte acumulado de vacaciones</h3>
-        <form id="reporte-vacaciones">
-          <label>Año del padrón<input name="anio" type="number" min="1900" max="9998" required></label>
-          <label>Corte dentro del año<input name="corte" type="date" required></label>
-          <label>Área (opcional)<input name="area" type="number" min="1" max="2147483647"></label>
-          <label>Empleado (opcional)<input name="empleado" type="number" min="1" max="2147483647"></label>
-          <button>Consultar reporte</button>
-        </form>
-        <p>Las truncas se simulan al corte indicado; no representan una liquidación al cese.</p>
-        <div id="tabla-vacaciones" class="resultados"></div>
-      </section>
-    </div>
-  </main>
+  <a class="saltar" href="#vista">Ir al contenido</a>
+  <header class="barra">
+    <button id="abrir-menu" class="boton-menu" type="button" aria-controls="menu" aria-label="Abrir o cerrar el menú">Menú</button>
+    <div class="marca"><strong>RRHH</strong><span>Gestión de asistencia</span></div>
+    <div class="sesion"><span id="usuario"></span><button id="salir" type="button" hidden>Cerrar sesión</button></div>
+  </header>
+  <p id="mensaje" role="status" aria-live="polite"></p>
+
+  <section id="acceso" class="acceso" hidden>
+    <h1>Iniciar sesión</h1>
+    <p>Ingrese con su usuario de RRHH. Cada rol ve solo los módulos que tiene habilitados.</p>
+    <form id="login">
+      <label>Usuario RRHH<input name="login" autocomplete="username" maxlength="128" required></label>
+      <label>Contraseña<input name="password" type="password" autocomplete="current-password" maxlength="256" required></label>
+      <button>Entrar</button>
+    </form>
+  </section>
+
+  <div id="aplicacion" class="aplicacion" hidden>
+    <nav id="menu" class="menu" aria-label="Módulos del sistema"></nav>
+    <main id="vista" class="vista" tabindex="-1"></main>
+  </div>
 </body>
 </html>

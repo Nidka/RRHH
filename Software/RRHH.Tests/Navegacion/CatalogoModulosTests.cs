@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using RRHH.Application.Navegacion;
@@ -94,5 +95,31 @@ public sealed class CatalogoModulosTests
     public void VisiblesExigeLaFuncionDePermisos()
     {
         Assert.Throws<ArgumentNullException>(() => CatalogoModulos.Visibles(null));
+    }
+
+    /// <summary>La web carga js/modulos/&lt;módulo&gt;/&lt;pantalla&gt;.js por clave: una entrada sin archivo rompería el menú.</summary>
+    [Fact]
+    public void CadaPantallaTieneSuArchivoEnLaWebYNoSobranArchivos()
+    {
+        string raiz = CarpetaModulosWeb();
+        var esperados = CatalogoModulos.Todos
+            .SelectMany(m => m.Pantallas.Select(p => Path.Combine(raiz, m.Clave, p.Clave + ".js")))
+            .OrderBy(ruta => ruta, StringComparer.Ordinal).ToList();
+        var existentes = Directory.GetFiles(raiz, "*.js", SearchOption.AllDirectories)
+            .OrderBy(ruta => ruta, StringComparer.Ordinal).ToList();
+
+        Assert.Equal(esperados, existentes);
+    }
+
+    private static string CarpetaModulosWeb()
+    {
+        var carpeta = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory);
+        while (carpeta != null)
+        {
+            string ruta = Path.Combine(carpeta.FullName, "Software", "RRHH.Web", "wwwroot", "js", "modulos");
+            if (Directory.Exists(ruta)) return ruta;
+            carpeta = carpeta.Parent;
+        }
+        throw new DirectoryNotFoundException("Ejecutar las pruebas dentro del checkout que contiene Software/RRHH.Web.");
     }
 }
