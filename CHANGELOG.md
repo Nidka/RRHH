@@ -15,10 +15,14 @@ y el proyecto usa [Versionado Semántico](https://semver.org/lang/es/).
 - CR-019: navegación web por módulos (Gestión de turnos, Permisos y licencias, Vacaciones, Teletrabajo y presencialidad, Reportes generales y Mi cuenta), con los RF de cada pantalla visibles.
 - CR-019: búsqueda de empleados por apellidos, nombres o documento (`GET /api/empleados`); reemplaza el ingreso del código interno en los formularios web. Incluye cesados, marcados como tales.
 - CR-019: `GET /api/modulos`, que devuelve los módulos y pantallas habilitados para la sesión desde un catálogo único (`CatalogoModulos`).
+- CR-019: `GET /api/empleados/nombres` (`ObtenerNombresEmpleados`): los reportes de teletrabajo y vacaciones muestran nombres en lugar de códigos.
+- CR-019: inicio tipo panel según el rol (indicadores y gráficos de teletrabajo, ausencias y vacaciones, o el saldo propio del empleado), búsqueda rápida de pantallas (Ctrl K) y modo oscuro.
+- Demo: usuario de autoconsulta `empleado` y motivo de vacaciones marcado, para mostrar RF-08, RF-10 y RF-12 con datos ficticios.
 
 ### Cambiado
 - CR-019: la API web se organiza en un archivo de endpoints por módulo (`Program.cs` pasa de 301 a 57 líneas), sin cambiar rutas, contratos ni permisos.
 - CR-019: la interfaz web pasa de una página con 13 secciones apiladas a módulos ES con componentes compartidos y una pantalla por archivo. Se retiran los títulos «piloto». El service worker pasa a `rrhh-web-v2` para que los navegadores reciban la interfaz nueva.
+- CR-019: rediseño visual de la web: menú lateral con íconos, acceso en pantalla dividida, tarjetas, indicadores, gráficos (dona, barras, calendario y línea de tiempo), etiquetas de estado, avisos flotantes y diseño adaptable al celular. Service worker `rrhh-web-v3`.
 
 ## [1.6.0] - 2026-11-20
 
