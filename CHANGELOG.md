@@ -12,6 +12,13 @@ y el proyecto usa [Versionado Semántico](https://semver.org/lang/es/).
 - `/salud` y `/salud/lista` para las sondas de la plataforma; soporte de proxy con `RRHH_WEB_TRUST_PROXY`.
 - PWA instalable: manifiesto, service worker (no guarda `/api`) e íconos.
 - `deploy/smoke.sh`, `deploy/aplicar-migraciones.sh` (simulación por defecto) y `deploy/generar-hash-password.py`.
+- CR-019: navegación web por módulos (Gestión de turnos, Permisos y licencias, Vacaciones, Teletrabajo y presencialidad, Reportes generales y Mi cuenta), con los RF de cada pantalla visibles.
+- CR-019: búsqueda de empleados por apellidos, nombres o documento (`GET /api/empleados`); reemplaza el ingreso del código interno en los formularios web. Incluye cesados, marcados como tales.
+- CR-019: `GET /api/modulos`, que devuelve los módulos y pantallas habilitados para la sesión desde un catálogo único (`CatalogoModulos`).
+
+### Cambiado
+- CR-019: la API web se organiza en un archivo de endpoints por módulo (`Program.cs` pasa de 301 a 57 líneas), sin cambiar rutas, contratos ni permisos.
+- CR-019: la interfaz web pasa de una página con 13 secciones apiladas a módulos ES con componentes compartidos y una pantalla por archivo. Se retiran los títulos «piloto». El service worker pasa a `rrhh-web-v2` para que los navegadores reciban la interfaz nueva.
 
 ## [1.6.0] - 2026-11-20
 

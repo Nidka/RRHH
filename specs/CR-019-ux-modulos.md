@@ -1,6 +1,6 @@
 # CR-019: web por módulos y componentizada, selección de empleado por nombre
 
-- Estado: Borrador.
+- Estado: Web implementada y verificada en la rama; escritorio pendiente (requiere Windows para compilar y probar).
 - Tarea / RF / CR: CR-019 (transversal; afecta las pantallas de RF-01 a RF-18).
 - Autor responsable / revisor: Evelyn Victoria Rodriguez Cardozo / pendiente de asignar (otro integrante).
 - Versión/commit analizado: `9797b59` (main, después de v1.6.0 y del despliegue web de PR #74). Suite net8 en ese commit: 390 de 390 superadas (PostgreSQL 18 local desechable, datos ficticios, 23/11/2026). La rama parte de `7731ca2` (PR #75, que solo deja de registrar el mensaje de error de `/salud/lista`).
@@ -103,8 +103,10 @@ Impacto: el enunciado de la evaluación final pide funcionalidades «integradas 
 | Caso / comando | Resultado esperado | Resultado real / entorno / evidencia |
 |---|---|---|
 | Suite net8 (línea base `9797b59`) | 0 fallas | 390/390 superadas, macOS arm64, PostgreSQL 18 local desechable, 23/11/2026 |
-| Suite net8 con los cambios | 0 fallas, más las pruebas nuevas | Pendiente |
-| `deploy/smoke.sh` con la base de demostración | Prueba de humo correcta | Pendiente: requiere Docker o un host local |
+| Suite net8 con los cambios | 0 fallas, más las pruebas nuevas | 419/419 superadas (29 nuevas), macOS arm64, PostgreSQL 18 local, 23/11/2026 |
+| `deploy/smoke.sh` con la base de demostración | Prueba de humo correcta | Correcta, contra el host local con la base de demostración (sin Docker), 23/11/2026 |
+| Caracterización de la API antes/después (`qa/evidencias/cr-019/caracterizar.sh`) | Rutas existentes sin cambios | 61 de 61 respuestas idénticas; 6 diferencias solo en las rutas nuevas |
+| Recorrido en Chrome (`qa/evidencias/cr-019/recorrido-web.mjs`) | Navegación, reglas, roles y celular | 44 de 44 verificaciones, sin errores de JavaScript; casos CP-19-01 a CP-19-09 |
 | `deploy/smoke.sh https://rrhh-web-ate6.onrender.com --solo-salud` (línea base) | Prueba de humo correcta | Correcta, 9 de 9: salud, base de datos, PWA, 401 sin sesión y encabezados CSP/nosniff. Despliegue de `9797b59` en Render, 23/11/2026 |
 | La misma prueba tras redesplegar con los cambios | Prueba de humo correcta | Pendiente |
 | `Software\scripts\build.cmd` y QA de escritorio con dos roles | 0 errores; menús por rol | Pendiente: requiere Windows |
