@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace RRHH.Application.Personal;
 
@@ -34,6 +35,38 @@ public interface IEmpleadoBusquedaRepository
     /// <param name="texto">Texto ya validado; los comodines de LIKE se tratan como texto literal.</param>
     /// <param name="limite">Cantidad máxima de filas.</param>
     IReadOnlyList<EmpleadoResumenDto> Buscar(string texto, int limite);
+
+    /// <summary>
+    /// Devuelve una fila por cada código existente, tomada del periodo (<c>Year</c>) más reciente.
+    /// Los códigos que no existen se omiten.
+    /// </summary>
+    /// <param name="codigos">Códigos positivos y sin repetir.</param>
+    IReadOnlyList<EmpleadoResumenDto> ObtenerPorCodigos(IReadOnlyCollection<int> codigos);
+}
+
+/// <summary>
+/// CR-019: nombres de los empleados que aparecen en un reporte, para no mostrar códigos internos.
+/// </summary>
+public sealed class ObtenerNombresEmpleados
+{
+    /// <summary>Tope de códigos por consulta, para acotar el tamaño de la solicitud.</summary>
+    public const int MaximoCodigos = 500;
+
+    private readonly IEmpleadoBusquedaRepository _repositorio;
+
+    public ObtenerNombresEmpleados(IEmpleadoBusquedaRepository repositorio) =>
+        _repositorio = repositorio ?? throw new ArgumentNullException(nameof(repositorio));
+
+    /// <summary>Ignora códigos no positivos y repetidos; sin códigos válidos no consulta la base.</summary>
+    /// <exception cref="RRHH.Domain.Comun.ReglaNegocioException">Si se piden más de <see cref="MaximoCodigos"/> códigos.</exception>
+    public IReadOnlyList<EmpleadoResumenDto> Ejecutar(IEnumerable<int> codigos)
+    {
+        var validos = (codigos ?? Array.Empty<int>()).Where(c => c > 0).Distinct().ToList();
+        if (validos.Count == 0) return Array.Empty<EmpleadoResumenDto>();
+        if (validos.Count > MaximoCodigos)
+            throw new RRHH.Domain.Comun.ReglaNegocioException($"Consulte como máximo {MaximoCodigos} empleados a la vez.");
+        return _repositorio.ObtenerPorCodigos(validos);
+    }
 }
 
 /// <summary>
