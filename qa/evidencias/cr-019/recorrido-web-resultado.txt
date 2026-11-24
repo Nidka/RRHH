@@ -2,6 +2,10 @@ ok   sin sesión se muestra el acceso
 ok   credenciales erróneas muestran error
 ok   operador ve 5 módulos en orden: Gestión de turnos | Permisos y licencias | Vacaciones | Teletrabajo y presencialidad | Reportes generales
 ok   ningún texto dice «piloto»
+ok   el inicio muestra indicadores de ausencias, teletrabajo y vacaciones
+ok   el inicio muestra los gráficos de teletrabajo y ausencias
+ok   el perfil muestra el rol Operador RRHH
+ok   operador tiene sus 14 pantallas en el menú (la 15.ª, Mis vacaciones, es del empleado)
 ok   abre «Asignar turno por periodo» sin error
 ok   abre «Histórico de turnos» sin error
 ok   abre «Registro de permisos y licencias» sin error
@@ -19,6 +23,7 @@ ok   abre «Ausencias por periodo» sin error
 ok   el buscador muestra código y documento
 ok   RF-01 guarda la asignación: Asignación 1 guardada.
 ok   RF-01 lista la asignación del empleado
+ok   RF-01 dibuja la línea de tiempo
 ok   RF-01 «Editar» carga el periodo
 ok   RF-01 rechaza un periodo solapado: El empleado ya tiene un horario asignado en esas fechas.
 ok   el selector exige elegir un empleado de la lista
@@ -26,21 +31,33 @@ ok   RF-02 muestra el histórico
 ok   RF-13 registra el periodo: Periodo registrado con código 1.
 ok   RF-13 lista el patrón Lun, Mié
 ok   RF-13 rechaza el solapamiento: El empleado ya tiene un periodo de teletrabajo que se solapa.
-ok   RF-14 descuenta el feriado del 11/11 (1 día): 101	1
-ok   RF-16 clasifica como Parcial
+ok   RF-14 muestra el nombre y descuenta el feriado del 11/11 (1 día): OF Ficticio, Operador código 101 1
+ok   RF-16 clasifica como Parcial con 1 de 4 días
 ok   RF-03 guarda el permiso: Permiso guardado correctamente.
 ok   RF-03 rechaza dos permisos el mismo día: El empleado ya tiene un permiso en esas fechas. No se puede registrar otro permiso el mismo día.
+ok   RF-10 aprueba una media jornada de vacaciones: Permiso guardado correctamente.
 ok   RF-04 agrega el motivo: Motivo 41 registrado.
 ok   RF-05 elimina el motivo: Motivo 41 eliminado.
 ok   RF-07 genera 60 días por dos aniversarios
+ok   RF-08 descuenta la media jornada: Generadas 60 Usadas 0.5 Pendientes de goce 59.5
+ok   RF-08 muestra la media jornada en el detalle
 ok   RF-09 calcula 21,67 días truncos
+ok   RF-11 lista personas con nombre
+ok   RF-15 dibuja un día por fecha en el calendario
 ok   RF-17 muestra el total de días computados
 ok   RF-18 lista ausencias con nombre
+ok   Ctrl+K y «trunc» abre Vacaciones truncas
+ok   el modo oscuro se conserva al recargar
 ok   una ruta inexistente vuelve al inicio con aviso
 ok   cerrar sesión vuelve al acceso
-ok   solo_teletrabajo ve solo su módulo: Periodos de teletrabajo, Días de teletrabajo, Teletrabajo total o parcial
-ok   solo_teletrabajo no puede abrir vacaciones por enlace directo
-ok   en celular el menú empieza cerrado
+ok   solo_teletrabajo ve solo sus 3 pantallas: Periodos de teletrabajo, Días de teletrabajo, Teletrabajo total o parcial
+ok   su inicio muestra solo el indicador de teletrabajo
+ok   no abre vacaciones por enlace directo
+ok   el empleado entra directo a Mis vacaciones y ve solo Mi cuenta
+ok   RF-12 el empleado ve su media jornada usada
+ok   el empleado no abre pantallas de operador
+ok   en celular el menú empieza oculto
 ok   el botón Menú lo abre
+ok   elegir una pantalla cierra el menú
 
-RECORRIDO CORRECTO: 44 verificaciones
+RECORRIDO CORRECTO: 61 verificaciones

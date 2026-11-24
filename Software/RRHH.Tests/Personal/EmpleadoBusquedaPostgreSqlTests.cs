@@ -108,6 +108,16 @@ INSERT INTO public."Empleado" VALUES
     }
 
     [PostgreSqlLocalFact]
+    public void ObtienePorCodigoConElAnioMasRecienteYOmiteLosInexistentes()
+    {
+        var encontrados = _repo.ObtenerPorCodigos(new[] { 101, 102, 999 });
+
+        Assert.Equal(new[] { 101, 102 }, encontrados.Select(e => e.IdEmpleado).OrderBy(id => id));
+        Assert.Equal("García Pérez, Ana", encontrados.Single(e => e.IdEmpleado == 101).NombreCompleto);
+        Assert.False(encontrados.Single(e => e.IdEmpleado == 102).Activo);
+    }
+
+    [PostgreSqlLocalFact]
     public void RespetaElLimiteDeResultados()
     {
         _db.Execute("""

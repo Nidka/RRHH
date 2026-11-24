@@ -1,6 +1,6 @@
 # CR-019: web por módulos y componentizada, selección de empleado por nombre
 
-- Estado: Web implementada y verificada en la rama; escritorio pendiente (requiere Windows para compilar y probar).
+- Estado: Web implementada en dos entregas (PR #76 integrado; entrega 2 con el diseño moderno en `feature/cr-019-diseno-moderno`). Escritorio pendiente: requiere Windows para compilar y probar.
 - Tarea / RF / CR: CR-019 (transversal; afecta las pantallas de RF-01 a RF-18).
 - Autor responsable / revisor: Evelyn Victoria Rodriguez Cardozo / pendiente de asignar (otro integrante).
 - Versión/commit analizado: `9797b59` (main, después de v1.6.0 y del despliegue web de PR #74). Suite net8 en ese commit: 390 de 390 superadas (PostgreSQL 18 local desechable, datos ficticios, 23/11/2026). La rama parte de `7731ca2` (PR #75, que solo deja de registrar el mensaje de error de `/salud/lista`).
@@ -106,10 +106,28 @@ Impacto: el enunciado de la evaluación final pide funcionalidades «integradas 
 | Suite net8 con los cambios | 0 fallas, más las pruebas nuevas | 419/419 superadas (29 nuevas), macOS arm64, PostgreSQL 18 local, 23/11/2026 |
 | `deploy/smoke.sh` con la base de demostración | Prueba de humo correcta | Correcta, contra el host local con la base de demostración (sin Docker), 23/11/2026 |
 | Caracterización de la API antes/después (`qa/evidencias/cr-019/caracterizar.sh`) | Rutas existentes sin cambios | 61 de 61 respuestas idénticas; 6 diferencias solo en las rutas nuevas |
-| Recorrido en Chrome (`qa/evidencias/cr-019/recorrido-web.mjs`) | Navegación, reglas, roles y celular | 44 de 44 verificaciones, sin errores de JavaScript; casos CP-19-01 a CP-19-09 |
+| Recorrido en Chrome, entrega 1 | Navegación, reglas, roles y celular | 44 de 44 verificaciones, sin errores de JavaScript; casos CP-19-01 a CP-19-09 |
+| Entrega 2: suite net8 | 0 fallas | 424/424 (5 pruebas nuevas de `ObtenerNombresEmpleados`) |
+| Entrega 2: caracterización de la API frente a `78cedba` | Rutas existentes sin cambios | 73 de 77 idénticas; 4 diferencias solo en `/api/empleados/nombres` |
+| Entrega 2: recorrido en Chrome (`qa/evidencias/cr-019/recorrido-web.mjs`) | Los 3 roles, RF en pantalla, búsqueda rápida, tema y celular | 61 de 61, sin errores de JavaScript ni de CSP; casos CP-19-10 a CP-19-15 |
 | `deploy/smoke.sh https://rrhh-web-ate6.onrender.com --solo-salud` (línea base) | Prueba de humo correcta | Correcta, 9 de 9: salud, base de datos, PWA, 401 sin sesión y encabezados CSP/nosniff. Despliegue de `9797b59` en Render, 23/11/2026 |
 | La misma prueba tras redesplegar con los cambios | Prueba de humo correcta | Pendiente |
 | `Software\scripts\build.cmd` y QA de escritorio con dos roles | 0 errores; menús por rol | Pendiente: requiere Windows |
+
+## Entrega 2: diseño moderno
+
+**Motivo.** La entrega 1 ordenó la navegación, pero conservó el aspecto de formulario tradicional. La responsable pidió una interfaz moderna y aprobó una maqueta navegable antes de implementarla.
+
+**Alcance:**
+- Mismo diseño para todos los roles; cada rol ve solo sus módulos.
+- Inicio tipo panel: cada indicador o gráfico se pide solo si la sesión tiene la pantalla correspondiente, con las mismas rutas de la API.
+- Componentes nuevos (`ui`, `graficos`, `paleta`, `tema`, `nombres`): dona, barras, calendario, línea de tiempo, barra de progreso, etiquetas de estado, búsqueda rápida y modo oscuro. Todo en SVG y CSS, sin bibliotecas externas.
+- Única capacidad nueva del servidor: `GET /api/empleados/nombres` (`ObtenerNombresEmpleados`, solo lectura, un parámetro `integer[]`, máximo 500 códigos), para mostrar nombres en lugar de códigos.
+- **Se descartó** «actividad reciente» y la campana de avisos de la maqueta: no hay datos reales que los respalden.
+
+**Restricción de seguridad comprobada.** La política CSP (`default-src 'self'`) bloquea los atributos `style` escritos en las plantillas HTML. Por eso los estilos van en `app.css`, y los valores calculados (anchos y colores de gráficos) se asignan desde JavaScript.
+
+**Datos de demostración.** Se agregó el usuario `empleado` (rol 20), se marcó el motivo 10 como vacaciones del piloto y la persona ficticia 102 tiene su propio nombre. Solo afecta a la base de demostración local.
 
 ## Reversión
 

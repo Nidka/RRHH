@@ -100,8 +100,10 @@ internal static class CompositionRoot
         builder.Services.AddScoped(sp => new ConsultarPermiso(sp.GetRequiredService<PostgreSqlPermisoEscrituraRepository>()));
         builder.Services.AddScoped(sp => new ListarCatalogo(new PostgreSqlCatalogoRepository(
             sp.GetRequiredService<PostgreSqlExecutor>(), MapeosCatalogo.Para(TipoCatalogo.TipoPermiso))));
-        builder.Services.AddScoped(sp => new BuscarEmpleados(
-            new PostgreSqlEmpleadoBusquedaRepository(sp.GetRequiredService<PostgreSqlExecutor>())));
+        builder.Services.AddScoped<IEmpleadoBusquedaRepository>(sp =>
+            new PostgreSqlEmpleadoBusquedaRepository(sp.GetRequiredService<PostgreSqlExecutor>()));
+        builder.Services.AddScoped<BuscarEmpleados>();
+        builder.Services.AddScoped<ObtenerNombresEmpleados>();
 
         var seguridad = builder.Environment.IsDevelopment() ? CookieSecurePolicy.SameAsRequest : CookieSecurePolicy.Always;
         builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options =>

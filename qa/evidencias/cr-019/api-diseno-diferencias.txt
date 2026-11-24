@@ -1,0 +1,14 @@
+6c6
+< GET /api/empleados/nombres?codigos=101 ->  [404]
+---
+> GET /api/empleados/nombres?codigos=101 ->  [401]
+59,60c59,60
+< GET /api/empleados/nombres?codigos=101,102,999 ->  [404]
+< GET /api/empleados/nombres?codigos=101,abc ->  [404]
+---
+> GET /api/empleados/nombres?codigos=101,102,999 -> [{"idEmpleado":101,"nombreCompleto":"Ficticio, Operador","documento":"00000001","activo":true},{"idEmpleado":102,"nombreCompleto":"Demo Teletrabajo, Carla","documento":"00000002","activo":true}] [200]
+> GET /api/empleados/nombres?codigos=101,abc -> {"error":"Los códigos de empleado deben ser números separados por coma."} [400]
+71c71
+< GET /api/empleados/nombres?codigos=101 ->  [404]
+---
+> GET /api/empleados/nombres?codigos=101 -> [{"idEmpleado":101,"nombreCompleto":"Ficticio, Operador","documento":"00000001","activo":true}] [200]

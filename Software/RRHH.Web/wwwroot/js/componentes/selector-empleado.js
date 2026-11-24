@@ -4,6 +4,7 @@
 
 import { api } from './api.js';
 import { plantilla } from './formulario.js';
+import { avatar, chip, icono } from './ui.js';
 
 const MINIMO = 2;
 const ESPERA_MS = 250;
@@ -29,9 +30,11 @@ export function selectorEmpleado({ nombre = 'empleado', etiqueta = 'Empleado', r
   const fragmento = plantilla(`
     <div class="selector-empleado">
       <label for="${id}"></label>
-      <input id="${id}" type="search" role="combobox" autocomplete="off" spellcheck="false"
-             aria-autocomplete="list" aria-expanded="false" aria-controls="${id}-lista"
-             placeholder="Apellidos, nombres o documento">
+      <div class="selector-caja">
+        <input id="${id}" type="search" role="combobox" autocomplete="off" spellcheck="false"
+               aria-autocomplete="list" aria-expanded="false" aria-controls="${id}-lista"
+               placeholder="Apellidos, nombres o documento">
+      </div>
       <input type="hidden">
       <ul id="${id}-lista" role="listbox" hidden></ul>
       <small class="ayuda" id="${id}-ayuda" aria-live="polite"></small>
@@ -43,6 +46,7 @@ export function selectorEmpleado({ nombre = 'empleado', etiqueta = 'Empleado', r
   oculto.name = nombre;
   texto.required = requerido;
   texto.setAttribute('aria-describedby', ayuda.id);
+  texto.before(icono('buscar'));
 
   let resultados = [];
   let activo = -1;
@@ -91,16 +95,16 @@ export function selectorEmpleado({ nombre = 'empleado', etiqueta = 'Empleado', r
       const opcion = document.createElement('li');
       opcion.id = `${id}-opcion-${i}`;
       opcion.setAttribute('role', 'option');
-      const nombreVisible = document.createElement('span');
-      nombreVisible.textContent = empleado.nombreCompleto || `Empleado ${empleado.idEmpleado}`;
+      const nombreVisible = empleado.nombreCompleto || `Empleado ${empleado.idEmpleado}`;
+      const bloque = document.createElement('div');
+      const nombreFuerte = document.createElement('b');
+      nombreFuerte.textContent = nombreVisible;
       const detalle = document.createElement('small');
-      detalle.textContent = [empleado.documento, `código ${empleado.idEmpleado}`].filter(Boolean).join(' · ');
-      opcion.append(nombreVisible, detalle);
-      if (!empleado.activo) {
-        const estado = document.createElement('em');
-        estado.textContent = 'Cesado';
-        opcion.append(estado);
-      }
+      detalle.textContent = [empleado.documento && `DNI ${empleado.documento}`, `código ${empleado.idEmpleado}`].filter(Boolean).join(' · ');
+      bloque.append(nombreFuerte, detalle);
+      const estado = chip(empleado.activo ? 'Activo' : 'Cesado', empleado.activo ? 'exito' : 'peligro');
+      estado.style.marginLeft = 'auto';
+      opcion.append(avatar(nombreVisible, empleado.idEmpleado), bloque, estado);
       opcion.addEventListener('mousedown', evento => { evento.preventDefault(); elegir(empleado); });
       lista.append(opcion);
     });

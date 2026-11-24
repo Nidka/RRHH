@@ -17,9 +17,9 @@ CREATE TABLE "Asistencia" ("IdEmpleado" integer, "Fecha" timestamp);
 CREATE TABLE "Horario" ("idHorario" integer, "Descrip_Horario" text, "Ingreso1" text, "Salida1" text, "Ingreso2" text, "Salida2" text, "Estado" boolean);
 CREATE TABLE "HorarioTemporal" ("idEmpleado" integer, "N" integer, "FechaInicio" timestamp, "FechaFin" timestamp,
   "HorarioAsignado" integer, "NroDocumento" varchar(50), "Sisgedo" varchar(50), "FechaRegistro" timestamp);
-INSERT INTO "Empleado" VALUES (101, 1, 1, '2024-03-01'), (102, 1, 1, NULL);
+INSERT INTO "Empleado" VALUES (101, 1, 1, '2024-03-01'), (102, 2, 1, NULL);
 ALTER TABLE "Empleado" ADD "Year" integer NOT NULL DEFAULT 2026;
-INSERT INTO "Persona" VALUES (1, 'Ficticio', '', 'Operador');
+INSERT INTO "Persona" VALUES (1, 'Ficticio', '', 'Operador'), (2, 'Demo', 'Teletrabajo', 'Carla');
 INSERT INTO "Usuario" VALUES (1, 'operador', 101, true, :'hash', :'salt', 210000),
   (2, 'sin_permiso', 101, true, :'hash', :'salt', 210000),
   (3, 'solo_teletrabajo', 102, true, :'hash', :'salt', 210000);
@@ -51,3 +51,12 @@ ALTER TABLE "Permiso" ADD "Retorno" boolean;
 ALTER TABLE "Persona" ADD "NumDocID" varchar(12);
 ALTER TABLE "Empleado" ADD "Estado" varchar(1) DEFAULT '1';
 UPDATE "Persona" SET "NumDocID" = '00000001' WHERE "IdPersona" = 1;
+UPDATE "Persona" SET "NumDocID" = '00000002' WHERE "IdPersona" = 2;
+-- CR-019: usuario de autoconsulta (rol 20, ver RRHH_WEB_ROLES_AUTOCONSULTA) vinculado al empleado 101.
+INSERT INTO "Usuario" VALUES (4, 'empleado', 101, true, :'hash', :'salt', 210000);
+INSERT INTO "Rol" VALUES (20, '0500000');
+INSERT INTO "Usuario_Rol" VALUES (4, 20);
+-- CR-019: RF-08/RF-12 exigen un motivo marcado como vacaciones del piloto. La migración
+-- 20261119_03 crea la misma columna con IF NOT EXISTS, así que crearla aquí no la contradice.
+ALTER TABLE "Motivo_Perm" ADD "EsVacacionesPiloto" boolean NOT NULL DEFAULT false;
+UPDATE "Motivo_Perm" SET "EsVacacionesPiloto" = true WHERE "idMotivo" = 10;

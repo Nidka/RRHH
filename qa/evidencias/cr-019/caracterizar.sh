@@ -13,7 +13,7 @@ post() { printf 'POST %s %s -> ' "$1" "$2"; curl -s -b "$JAR" -c "$JAR" -H "X-RR
 entrar() { rm -f "$JAR"; post /api/login "{\"Login\":\"$1\",\"Password\":\"$2\"}" | sed "s/$PASS/***/"; }
 
 echo "== sin sesión"
-get /api/sesion; get "/api/periodos?empleado=101"; get /api/modulos; get "/api/empleados?texto=fic"
+get /api/sesion; get "/api/periodos?empleado=101"; get /api/modulos; get "/api/empleados?texto=fic"; get "/api/empleados/nombres?codigos=101"
 post /api/salir '{}'
 echo "== logins"
 entrar sin_permiso "$PASS"; entrar operador incorrecta
@@ -65,6 +65,8 @@ post /api/permisos '{}'
 get "/api/mi/vacaciones?corte=2026-11-20"
 get /api/modulos
 get "/api/empleados?texto=fic"
+get "/api/empleados/nombres?codigos=101,102,999"
+get "/api/empleados/nombres?codigos=101,abc"
 post /api/salir '{}'
 get /api/sesion
 echo "== solo_teletrabajo"
@@ -74,5 +76,12 @@ get "/api/periodos?empleado=102"
 get "/api/vacaciones/saldo?empleado=101&corte=2026-11-20"
 get /api/horarios/catalogo
 get /api/modulos
+get "/api/empleados?texto=fic"
+get "/api/empleados/nombres?codigos=101"
+echo "== empleado (autoconsulta)"
+entrar empleado "$PASS"
+get /api/sesion
+get /api/modulos
+get "/api/mi/vacaciones?corte=2026-11-20"
 get "/api/empleados?texto=fic"
 rm -f "$JAR"

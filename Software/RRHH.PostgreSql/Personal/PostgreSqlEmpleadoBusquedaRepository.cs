@@ -42,12 +42,33 @@ LIMIT @limite;
     public PostgreSqlEmpleadoBusquedaRepository(PostgreSqlExecutor db) =>
         _db = db ?? throw new ArgumentNullException(nameof(db));
 
+    /// <summary>Misma proyección que la búsqueda, filtrada por una lista de códigos (un solo parámetro integer[]).</summary>
+    private const string SqlPorCodigos = """
+SELECT DISTINCT ON (e."IdEmpleado")
+    e."IdEmpleado",
+    concat_ws(', ',
+        NULLIF(btrim(concat_ws(' ', btrim(p."Apellido_Paterno"), btrim(p."Apellido_Materno"))), ''),
+        NULLIF(btrim(p."Nombres"), '')) AS "NombreCompleto",
+    NULLIF(btrim(p."NumDocID"), '') AS "Documento",
+    COALESCE(NULLIF(btrim(e."Estado"), ''), '0') = '1' AS "Activo"
+FROM public."Empleado" AS e
+INNER JOIN public."Persona" AS p ON p."IdPersona" = e."IdPersona"
+WHERE e."IdEmpleado" = ANY(@codigos)
+ORDER BY e."IdEmpleado", e."Year" DESC;
+""";
+
     /// <inheritdoc/>
     public IReadOnlyList<EmpleadoResumenDto> Buscar(string texto, int limite) =>
-        _db.Query(Sql,
-                new PostgreSqlParameterValue("texto", EscaparComodines(texto ?? string.Empty), DbType.String),
-                new PostgreSqlParameterValue("limite", limite, DbType.Int32))
-            .Rows.Cast<DataRow>()
+        Mapear(_db.Query(Sql,
+            new PostgreSqlParameterValue("texto", EscaparComodines(texto ?? string.Empty), DbType.String),
+            new PostgreSqlParameterValue("limite", limite, DbType.Int32)));
+
+    /// <inheritdoc/>
+    public IReadOnlyList<EmpleadoResumenDto> ObtenerPorCodigos(IReadOnlyCollection<int> codigos) =>
+        Mapear(_db.Query(SqlPorCodigos, new PostgreSqlParameterValue("codigos", (codigos ?? Array.Empty<int>()).ToArray())));
+
+    private static IReadOnlyList<EmpleadoResumenDto> Mapear(DataTable tabla) =>
+        tabla.Rows.Cast<DataRow>()
             .Select(fila => new EmpleadoResumenDto(
                 Convert.ToInt32(fila["IdEmpleado"]),
                 fila.IsNull("NombreCompleto") ? string.Empty : (string)fila["NombreCompleto"],

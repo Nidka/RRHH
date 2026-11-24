@@ -70,5 +70,8 @@ public sealed class BuscarEmpleadosTests
             Limite = limite;
             return Resultado;
         }
+
+        public IReadOnlyList<EmpleadoResumenDto> ObtenerPorCodigos(IReadOnlyCollection<int> codigos) =>
+            throw new NotSupportedException();
     }
 }

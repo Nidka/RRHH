@@ -16,4 +16,4 @@ for migracion in 20261112_03_teletrabajo 20261111_01_licencia_una_vez_anio 20261
     20261119_02_estados_permiso 20261119_03_vacaciones_piloto; do
     psql -X -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" -f "/migraciones/${migracion}.sql"
 done
-echo "Demo lista: usuarios ficticios operador, sin_permiso y solo_teletrabajo."
+echo "Demo lista: usuarios ficticios operador, sin_permiso, solo_teletrabajo y empleado (autoconsulta)."
