@@ -8,11 +8,12 @@ import { hoy, mostrarFecha } from '../../componentes/fechas.js';
 
 export function montar(contenedor) {
   contenedor.append(plantilla(`
-    <form class="tarjeta">
+    <form class="tarjeta formulario en-linea">
       <div data-selector-empleado="empleado"></div>
       <label>Fecha de corte<input name="corte" type="date" required></label>
-      <div class="acciones"><button>Calcular vacaciones generadas</button></div>
+      <div class="acciones"><button class="btn btn-primario">Calcular</button></div>
     </form>
+    <p class="nota separado"><svg class="icono"><use href="#i-info"/></svg><span>Se generan los días del régimen por cada aniversario completo desde la fecha de ingreso hasta el corte.</span></p>
     <p class="estado" role="status"></p>
     <div class="indicadores"></div>`));
   const formulario = contenedor.querySelector('form');
@@ -27,9 +28,9 @@ export function montar(contenedor) {
     const fila = await api('vacaciones/generadas?' + consulta(datos));
     estado.textContent = `Ingreso ${mostrarFecha(fila.ingreso)} · corte ${mostrarFecha(fila.corte)}`;
     indicadores(resultado, [
-      ['Años cumplidos', fila.aniosCumplidos],
-      ['Días por año', fila.diasAnuales],
-      ['Días generados', fila.generadas]
+      ['Años cumplidos', fila.aniosCumplidos, { icono: 'calendario', tono: 'cian' }],
+      ['Días por año', fila.diasAnuales, { icono: 'vacaciones' }],
+      ['Días generados', fila.generadas, { icono: 'ok', tono: 'exito', detalle: `${fila.aniosCumplidos} × ${fila.diasAnuales} días` }]
     ]);
   });
 }

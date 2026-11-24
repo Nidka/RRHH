@@ -12,45 +12,55 @@ const CAMPOS_MARCA = ['dia', 'retorno', 'mediaJornadaVacaciones'];
 
 export function montar(contenedor) {
   contenedor.append(plantilla(`
-    <ul class="nota">
-      <li>No se registran dos permisos de la misma persona en fechas que se solapan.</li>
-      <li>Una licencia marcada «una vez por año» se rechaza si ya existe otra en el mismo año.</li>
-      <li>Solicitado y Aprobado reservan fechas y cupo anual; Rechazado y Anulado los liberan.</li>
-      <li>Una salida autorizada requiere una marcación de hoy sin salida registrada y la fecha de hoy.</li>
-    </ul>
-    <form class="tarjeta" data-formulario="guardar">
-      <input name="numero" type="hidden" value="0">
-      <div data-selector-empleado="idEmpleado"></div>
-      <label>Código de motivo<input name="idMotivo" type="number" min="1" max="2147483647" required></label>
-      <label>Desde<input name="desde" type="date" required></label>
-      <label>Hasta<input name="hasta" type="date" required></label>
-      <label>Estado<select name="estado"><option>Solicitado</option><option>Aprobado</option><option>Rechazado</option><option>Anulado</option></select></label>
-      <label>Lugar (opcional)<input name="lugar" maxlength="20"></label>
-      <label>Referencia (opcional)<input name="referencia" maxlength="100"></label>
-      <label>Autorización (opcional)<input name="autorizacion" maxlength="50"></label>
-      <label class="completo">Observación (opcional)<input name="observacion" maxlength="200"></label>
-      <fieldset><legend>Condiciones</legend>
-        <label><input name="dia" type="checkbox">Día completo</label>
-        <label><input name="retorno" type="checkbox">Con retorno</label>
-        <label><input name="mediaJornadaVacaciones" type="checkbox">Media jornada de vacaciones (0,5 días)</label>
-      </fieldset>
-      <div class="acciones">
-        <button>Guardar permiso</button>
-        <button type="button" class="secundario" data-nuevo>Nuevo permiso</button>
-      </div>
-    </form>
-    <p class="estado" role="status">Nuevo permiso</p>
-    <details class="tarjeta">
-      <summary>Editar un permiso existente</summary>
-      <form data-formulario="cargar">
-        <div data-selector-empleado="empleado"></div>
-        <label>Número de permiso<input name="numero" type="number" min="1" max="2147483647" required></label>
-        <div class="acciones"><button>Cargar permiso</button></div>
+    <div class="rejilla formulario-y-resultado">
+      <form class="tarjeta formulario" data-formulario="guardar">
+        <input name="numero" type="hidden" value="0">
+        <div data-selector-empleado="idEmpleado"></div>
+        <label>Código de motivo<input name="idMotivo" type="number" min="1" max="2147483647" required></label>
+        <label>Estado<select name="estado"><option>Solicitado</option><option>Aprobado</option><option>Rechazado</option><option>Anulado</option></select></label>
+        <label>Desde<input name="desde" type="date" required></label>
+        <label>Hasta<input name="hasta" type="date" required></label>
+        <label>Lugar <small>(opcional)</small><input name="lugar" maxlength="20"></label>
+        <label>Referencia <small>(opcional)</small><input name="referencia" maxlength="100"></label>
+        <label>Autorización <small>(opcional)</small><input name="autorizacion" maxlength="50"></label>
+        <label>Observación <small>(opcional)</small><input name="observacion" maxlength="200"></label>
+        <fieldset><legend>Condiciones</legend>
+          <div class="pastillas">
+            <label class="pastilla"><input name="dia" type="checkbox"><span>Día completo</span></label>
+            <label class="pastilla"><input name="retorno" type="checkbox"><span>Con retorno</span></label>
+            <label class="pastilla"><input name="mediaJornadaVacaciones" type="checkbox"><span>Media jornada de vacaciones (0,5 días)</span></label>
+          </div>
+        </fieldset>
+        <div class="acciones">
+          <button class="btn btn-primario">Guardar permiso</button>
+          <button type="button" class="btn btn-secundario" data-nuevo>Nuevo permiso</button>
+        </div>
+        <p class="estado completo" role="status">Nuevo permiso</p>
       </form>
-    </details>`));
+      <div>
+        <section class="tarjeta">
+          <div class="tarjeta-cabecera"><div><h2>Reglas que valida el sistema</h2><p>Se comprueban en el servidor, dentro de una transacción.</p></div></div>
+          <ul class="reglas">
+            <li><svg class="icono"><use href="#i-escudo"/></svg><span>No se registran dos permisos de la misma persona en fechas que se solapan (RF-03).</span></li>
+            <li><svg class="icono"><use href="#i-escudo"/></svg><span>Una licencia marcada «una vez por año» se rechaza si ya existe otra del mismo grupo en el año (RF-06).</span></li>
+            <li><svg class="icono"><use href="#i-escudo"/></svg><span>Solicitado y Aprobado reservan fechas y cupo; Rechazado y Anulado los liberan.</span></li>
+            <li><svg class="icono"><use href="#i-escudo"/></svg><span>La media jornada consume 0,5 días del saldo en una única fecha laborable (RF-10).</span></li>
+            <li><svg class="icono"><use href="#i-escudo"/></svg><span>Una salida autorizada requiere una marcación de hoy sin salida registrada.</span></li>
+          </ul>
+        </section>
+        <section class="tarjeta">
+          <div class="tarjeta-cabecera"><div><h2>Editar un permiso existente</h2><p>Cargue el permiso por empleado y número.</p></div></div>
+          <form class="formulario" data-formulario="cargar">
+            <div data-selector-empleado="empleado"></div>
+            <label>Número de permiso<input name="numero" type="number" min="1" max="2147483647" required></label>
+            <div class="acciones al-final"><button class="btn btn-secundario">Cargar permiso</button></div>
+          </form>
+        </section>
+      </div>
+    </div>`));
   const guardar = contenedor.querySelector('[data-formulario=guardar]');
   const cargar = contenedor.querySelector('[data-formulario=cargar]');
-  const estado = contenedor.querySelector('.estado');
+  const estado = guardar.querySelector('.estado');
   const empleadoPermiso = selectorEnFormulario(guardar, 'idEmpleado');
   const empleadoBusqueda = selectorEnFormulario(cargar);
 
