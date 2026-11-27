@@ -26,6 +26,7 @@ internal static class CompositionRoot
     internal const string PoliticaAsistencia = "ConsultarAsistencia";
     internal const string PoliticaVacaciones = "ConsultarVacaciones";
     internal const string PoliticaPermisos = "GestionarPermisos";
+    internal const string PoliticaPersonal = "GestionarPersonal";
     internal const string RolRrhh = "rrhh:rol";
 
     public static void Configurar(WebApplicationBuilder builder)
@@ -104,6 +105,13 @@ internal static class CompositionRoot
             new PostgreSqlEmpleadoBusquedaRepository(sp.GetRequiredService<PostgreSqlExecutor>()));
         builder.Services.AddScoped<BuscarEmpleados>();
         builder.Services.AddScoped<ObtenerNombresEmpleados>();
+        // CR-020: registro y edición de empleados.
+        builder.Services.AddScoped<IEmpleadoRegistroRepository>(sp =>
+            new PostgreSqlEmpleadoRegistroRepository(sp.GetRequiredService<PostgreSqlExecutor>()));
+        builder.Services.AddScoped(sp => new ObtenerDatosRegistroEmpleado(sp.GetRequiredService<IEmpleadoRegistroRepository>()));
+        builder.Services.AddScoped<ObtenerEmpleado>();
+        builder.Services.AddScoped(sp => new RegistrarEmpleado(sp.GetRequiredService<IEmpleadoRegistroRepository>()));
+        builder.Services.AddScoped(sp => new ActualizarEmpleado(sp.GetRequiredService<IEmpleadoRegistroRepository>()));
 
         var seguridad = builder.Environment.IsDevelopment() ? CookieSecurePolicy.SameAsRequest : CookieSecurePolicy.Always;
         builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options =>
@@ -124,6 +132,7 @@ internal static class CompositionRoot
             AgregarPoliticaPorRol(options, PoliticaAsistencia, builder.Configuration["RRHH_WEB_ROLES_ASISTENCIA"]);
             AgregarPoliticaPorRol(options, PoliticaVacaciones, builder.Configuration["RRHH_WEB_ROLES_VACACIONES"]);
             AgregarPoliticaPorRol(options, PoliticaPermisos, builder.Configuration["RRHH_WEB_ROLES_PERMISOS"]);
+            AgregarPoliticaPorRol(options, PoliticaPersonal, builder.Configuration["RRHH_WEB_ROLES_PERSONAL"]);
             var rolesMotivos = (builder.Configuration["RRHH_WEB_ROLES_MOTIVOS"] ?? "")
                 .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
             options.AddPolicy(PoliticaMotivos, policy => policy.RequireAssertion(context =>

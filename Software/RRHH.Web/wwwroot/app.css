@@ -216,6 +216,12 @@ legend { font-size: 13px; font-weight: 600; color: var(--tinta-2); padding: 0; m
 .chip.aviso { background: var(--aviso-suave); color: var(--aviso); border-color: transparent; }
 .chip.peligro { background: var(--peligro-suave); color: var(--peligro); border-color: transparent; }
 
+/* CR-020: datos de la ficha del empleado. */
+.ficha-datos { display: grid; grid-template-columns: max-content 1fr; gap: 8px 16px; margin: 16px 0 0; font-size: 14px; }
+.ficha-datos dt { color: var(--tenue); }
+.ficha-datos dd { margin: 0; color: var(--tinta); font-weight: 500; }
+[data-buscar] + form .chip, .resultados > .chip { margin-top: 12px; }
+
 /* ---------- Indicadores ---------- */
 .indicadores { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 16px; }
 .indicadores:empty { display: none; }

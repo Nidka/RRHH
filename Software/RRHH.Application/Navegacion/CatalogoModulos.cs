@@ -25,7 +25,9 @@ public enum PermisoModulo
     /// <summary>Vacaciones generadas, saldo, truncas y reporte (RF-07 a RF-09, RF-11).</summary>
     Vacaciones,
     /// <summary>Registro de permisos y licencias (RF-03, RF-06, RF-10).</summary>
-    Permisos
+    Permisos,
+    /// <summary>Registro y edición de empleados (CR-020).</summary>
+    Personal
 }
 
 /// <summary>Pantalla funcional del sistema y los requerimientos que atiende.</summary>
@@ -106,6 +108,11 @@ public static class CatalogoModulos
         {
             new PantallaModulo("asistencia-feriados", "Asistencia con feriados", PermisoModulo.Asistencia, "RF-17"),
             new PantallaModulo("ausencias-periodo", "Ausencias por periodo", PermisoModulo.Ausencias, "RF-18")
+        }),
+        // CR-020: fuera de la clasificación A-E del enunciado; permite usar la web sin el escritorio.
+        new ModuloSistema("personal", "Personal", new[]
+        {
+            new PantallaModulo("registro-empleados", "Registro de empleados", PermisoModulo.Personal)
         }),
         new ModuloSistema("mi-cuenta", "Mi cuenta", new[]
         {

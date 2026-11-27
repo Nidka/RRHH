@@ -62,7 +62,8 @@ internal static class CuentaEndpoints
                 motivos = permisos.Motivos,
                 asistencia = permisos.Asistencia,
                 vacaciones = permisos.Vacaciones,
-                permisos = permisos.Permisos
+                permisos = permisos.Permisos,
+                personal = permisos.Personal
             });
         });
         // CR-019: la navegación se arma en el servidor desde el catálogo único de módulos.
@@ -92,7 +93,7 @@ internal static class CuentaEndpoints
 
 /// <summary>Permisos de la sesión actual, evaluados con las mismas políticas que protegen los endpoints.</summary>
 internal sealed record PermisosSesion(bool Operador, bool Autoconsulta, bool Ausencias, bool Horarios,
-    bool Motivos, bool Asistencia, bool Vacaciones, bool Permisos)
+    bool Motivos, bool Asistencia, bool Vacaciones, bool Permisos, bool Personal)
 {
     internal static async Task<PermisosSesion> CalcularAsync(ClaimsPrincipal usuario, IAuthorizationService autorizacion)
     {
@@ -105,7 +106,8 @@ internal sealed record PermisosSesion(bool Operador, bool Autoconsulta, bool Aus
             await Cumple(CompositionRoot.PoliticaMotivos),
             await Cumple(CompositionRoot.PoliticaAsistencia),
             await Cumple(CompositionRoot.PoliticaVacaciones),
-            await Cumple(CompositionRoot.PoliticaPermisos));
+            await Cumple(CompositionRoot.PoliticaPermisos),
+            await Cumple(CompositionRoot.PoliticaPersonal));
     }
 
     /// <summary>
@@ -122,6 +124,7 @@ internal sealed record PermisosSesion(bool Operador, bool Autoconsulta, bool Aus
         PermisoModulo.Asistencia => Operador && Asistencia,
         PermisoModulo.Vacaciones => Operador && Vacaciones,
         PermisoModulo.Permisos => Operador && Permisos,
+        PermisoModulo.Personal => Operador && Personal,
         _ => false
     };
 }

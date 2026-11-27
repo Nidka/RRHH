@@ -6,8 +6,8 @@
 #   DATABASE_URL=... deploy/cargar-datos-demo.sh --aplicar --confirmo-respaldo
 #
 # Requisitos: la base ya tiene el esquema y las migraciones (deploy/aplicar-migraciones.sh).
-# Seguridad: se niega a cargar si la base parece tener datos reales (más de 20 empleados fuera del rango 9101-9199),
-# salvo que se agregue --base-con-datos. Solo escribe y borra filas propias del rango 9101-9199; no toca usuarios ni claves.
+# Seguridad: se niega a cargar si la base parece tener datos reales (más de 20 empleados fuera del rango 9101-9112),
+# salvo que se agregue --base-con-datos. Solo escribe y borra filas propias del rango 9101-9112; no toca usuarios ni claves.
 # Es idempotente: ejecutarlo de nuevo deja los mismos datos. La clave de DATABASE_URL nunca se imprime.
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -37,8 +37,8 @@ if [[ -n "$faltan" ]]; then
     echo "Faltan migraciones ($faltan). Ejecute antes deploy/aplicar-migraciones.sh." >&2; exit 1
 fi
 
-ajenos="$(consulta 'SELECT COUNT(DISTINCT "IdEmpleado") FROM public."Empleado" WHERE "IdEmpleado" NOT BETWEEN 9101 AND 9199;')"
-propios="$(consulta 'SELECT COUNT(DISTINCT "IdEmpleado") FROM public."Empleado" WHERE "IdEmpleado" BETWEEN 9101 AND 9199;')"
+ajenos="$(consulta 'SELECT COUNT(DISTINCT "IdEmpleado") FROM public."Empleado" WHERE "IdEmpleado" NOT BETWEEN 9101 AND 9112;')"
+propios="$(consulta 'SELECT COUNT(DISTINCT "IdEmpleado") FROM public."Empleado" WHERE "IdEmpleado" BETWEEN 9101 AND 9112;')"
 echo "Empleados existentes fuera de la demo: $ajenos · empleados de la demo ya cargados: $propios"
 if [[ "$ajenos" -gt 20 && $CON_DATOS -eq 0 ]]; then
     echo "La base parece tener datos reales. No se cargan datos ficticios ahí. Use una base separada para la demo," >&2
@@ -54,8 +54,8 @@ fi
 
 psql "$DATABASE_URL" -X -q -v ON_ERROR_STOP=1 -f deploy/demo/datos-demo-despliegue.sql
 consulta 'SELECT format($$Cargado: %s empleados, %s permisos, %s periodos de teletrabajo, %s marcaciones, %s feriados en total.$$,
-  (SELECT COUNT(*) FROM public."Empleado" WHERE "IdEmpleado" BETWEEN 9101 AND 9199),
-  (SELECT COUNT(*) FROM public."Permiso" WHERE "IdEmpleado" BETWEEN 9101 AND 9199),
-  (SELECT COUNT(*) FROM public."Teletrabajo" WHERE "IdEmpleado" BETWEEN 9101 AND 9199),
-  (SELECT COUNT(*) FROM public."Asistencia" WHERE "IdEmpleado" BETWEEN 9101 AND 9199),
+  (SELECT COUNT(*) FROM public."Empleado" WHERE "IdEmpleado" BETWEEN 9101 AND 9112),
+  (SELECT COUNT(*) FROM public."Permiso" WHERE "IdEmpleado" BETWEEN 9101 AND 9112),
+  (SELECT COUNT(*) FROM public."Teletrabajo" WHERE "IdEmpleado" BETWEEN 9101 AND 9112),
+  (SELECT COUNT(*) FROM public."Asistencia" WHERE "IdEmpleado" BETWEEN 9101 AND 9112),
   (SELECT COUNT(*) FROM public."RRHH_Feriado"));'
