@@ -291,6 +291,8 @@ tbody tr:hover td { background: color-mix(in srgb, var(--marca-suave) 50%, trans
 .linea-pista { position: relative; height: 38px; border-radius: 10px; background: var(--superficie-2); border: 1px solid var(--linea); }
 .tramo { position: absolute; top: 5px; bottom: 5px; min-width: 6px; border-radius: 7px; color: #fff; font-size: 11.5px; font-weight: 600; display: flex;
   align-items: center; justify-content: center; padding: 0 6px; overflow: hidden; white-space: nowrap; box-shadow: 0 6px 14px -8px rgb(0 0 0 / .5); }
+.tramo.estrecho { padding: 0; }
+.tramo-etiqueta { position: absolute; top: 50%; transform: translateY(-50%); font-size: 11.5px; font-weight: 600; color: var(--tinta); white-space: nowrap; pointer-events: none; }
 
 /* ---------- Inicio ---------- */
 .portada { position: relative; overflow: hidden; border-radius: 20px; padding: 26px 28px; color: #fff; margin-bottom: 18px;
