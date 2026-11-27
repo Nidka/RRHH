@@ -169,9 +169,35 @@ export function lineaTiempo(contenedor, tramos) {
     tramo.style.width = `${(dia(t.hasta) + DIA_MS - dia(t.desde)) / ancho * 100}%`;
     tramo.style.background = t.color || COLORES[i % COLORES.length];
     tramo.textContent = t.texto;
+    tramo.dataset.texto = t.texto;
     tramo.title = `${t.texto}: ${mostrarFecha(t.desde)} – ${mostrarFecha(t.hasta)}`;
     pista.append(tramo);
   });
   caja.append(meses, pista);
   contenedor.append(caja);
+  // Un tramo corto (por ejemplo, dos días en la escala de un mes) no tiene espacio para su nombre:
+  // se pinta la barra completa y el nombre va al lado, entero. Se recalcula si cambia el ancho.
+  const vigia = new ResizeObserver(() => etiquetasExternas(pista));
+  vigia.observe(pista);
+}
+
+function etiquetasExternas(pista) {
+  pista.querySelectorAll('.tramo-etiqueta').forEach(e => e.remove());
+  const anchoPista = pista.clientWidth;
+  if (!anchoPista) return;
+  for (const tramo of pista.querySelectorAll('.tramo')) {
+    tramo.classList.remove('estrecho');
+    tramo.textContent = tramo.dataset.texto;
+    if (tramo.scrollWidth <= tramo.clientWidth + 1) continue;
+    tramo.classList.add('estrecho');
+    tramo.textContent = '';
+    const etiqueta = document.createElement('span');
+    etiqueta.className = 'tramo-etiqueta';
+    etiqueta.textContent = tramo.dataset.texto;
+    pista.append(etiqueta);
+    const derecha = tramo.offsetLeft + tramo.offsetWidth + 8;
+    etiqueta.style.left = (derecha + etiqueta.offsetWidth <= anchoPista
+      ? derecha
+      : Math.max(4, tramo.offsetLeft - etiqueta.offsetWidth - 8)) + 'px';
+  }
 }
