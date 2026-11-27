@@ -7,6 +7,13 @@ y el proyecto usa [Versionado Semántico](https://semver.org/lang/es/).
 
 ## [Sin publicar]
 
+### Agregado
+- CR-020: módulo web **Personal → Registro de empleados** para dar de alta y editar empleados (documento, apellidos, nombres, área, fecha de ingreso y estado), con la política `RRHH_WEB_ROLES_PERSONAL`. Rutas `GET /api/personal/catalogos`, `GET /api/personal/empleados/{id}`, `POST /api/personal/empleados` y `POST /api/personal/empleados/{id}`.
+- Datos ficticios para la web desplegada: `deploy/cargar-datos-demo.sh` y `deploy/demo/datos-demo-despliegue.sql` (12 empleados 9101-9112, permisos, teletrabajo, feriados y marcaciones).
+
+### Cambiado
+- CR-020: un documento ya registrado por otra persona se rechaza (el escritorio solo advertía). La edición web actualiza solo el año más reciente del empleado y permite registrar el cese.
+
 ## [1.7.0] - 2026-11-23
 
 ### Agregado

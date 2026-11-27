@@ -103,7 +103,7 @@ Carga [deploy/demo/datos-demo-despliegue.sql](../../deploy/demo/datos-demo-despl
 - feriados nacionales de 2008 y 2026, si no existen;
 - marcaciones de octubre y noviembre de 2026, y de febrero y marzo de 2008 para la consulta histórica.
 
-Es idempotente: solo borra y recrea sus propias filas (rango 9101 a 9199) y no toca usuarios ni claves. Se niega a cargar si la base
+Es idempotente: solo borra y recrea sus propias filas (rango 9101 a 9112) y no toca usuarios ni claves. Se niega a cargar si la base
 tiene más de 20 empleados ajenos a la demo, porque probablemente son datos reales. Para que un usuario de autoconsulta vea sus
 vacaciones, vincúlelo a uno de estos empleados (`Usuario.IdEmpleado`) y dele una clave con el paso 4.
 

@@ -13,6 +13,7 @@ export const ESTILO_MODULO = {
   'vacaciones': { icono: 'vacaciones', fondo: 'linear-gradient(135deg,#10b981,#22c3e6)' },
   'teletrabajo': { icono: 'teletrabajo', fondo: 'linear-gradient(135deg,#0ea5e9,#6366f1)' },
   'reportes': { icono: 'reportes', fondo: 'linear-gradient(135deg,#8b5cf6,#ec4899)' },
+  'personal': { icono: 'personas', fondo: 'linear-gradient(135deg,#f59e0b,#f43f5e)' },
   'mi-cuenta': { icono: 'cuenta', fondo: 'linear-gradient(135deg,#14b8a6,#5b5bf6)' }
 };
 const estilo = clave => ESTILO_MODULO[clave] || { icono: 'reportes', fondo: 'var(--degradado)' };

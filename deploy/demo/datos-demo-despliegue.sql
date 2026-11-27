@@ -2,8 +2,9 @@
 -- Se aplican sobre el esquema completo (BD/schema.sql + BD/migrations) con deploy/cargar-datos-demo.sh.
 --
 -- Reglas:
---   * Todo lo propio usa códigos del 9101 al 9199 y documentos "DEMO-…", para no chocar con datos existentes.
---   * Es idempotente: borra y vuelve a crear solo sus propias filas (rango 9101-9199). No toca usuarios ni claves.
+--   * Todo lo propio usa códigos del 9101 al 9112 y documentos "DEMO-…". Los empleados que luego se registren en la web
+--     reciben 9113 o más (MAX + 1) y este script nunca los toca.
+--   * Es idempotente: borra y vuelve a crear solo sus propias filas (rango 9101-9112). No toca usuarios ni claves.
 --   * Los feriados se insertan solo si la fecha no existe; nunca se borran.
 --   * El tipo de permiso 2 significa «salida autorizada» en el código: aquí no se usa.
 --   * Modalidad "P" en todos los motivos: el rol de operador del despliegue (10) solo ve esa modalidad (AccesoMotivosPermiso).
@@ -11,23 +12,29 @@
 
 BEGIN;
 
--- 1. Limpieza de la propia demostración (solo el rango 9101-9199).
-DELETE FROM public."Asistencia"      WHERE "IdEmpleado" BETWEEN 9101 AND 9199;
-DELETE FROM public."Teletrabajo"     WHERE "IdEmpleado" BETWEEN 9101 AND 9199;
-DELETE FROM public."Permiso"         WHERE "IdEmpleado" BETWEEN 9101 AND 9199;
-DELETE FROM public."HorarioTemporal" WHERE "idEmpleado" BETWEEN 9101 AND 9199;
-DELETE FROM public."Empleado_Area"   WHERE "IdEmpleado" BETWEEN 9101 AND 9199;
-DELETE FROM public."Empleado"        WHERE "IdEmpleado" BETWEEN 9101 AND 9199;
-DELETE FROM public."Persona"         WHERE "IdPersona"  BETWEEN 9101 AND 9199;
-DELETE FROM public."Motivo_Perm"     WHERE "idMotivo"   BETWEEN 9101 AND 9199
+-- 1. Limpieza de la propia demostración (solo el rango 9101-9112).
+DELETE FROM public."Asistencia"      WHERE "IdEmpleado" BETWEEN 9101 AND 9112;
+DELETE FROM public."Teletrabajo"     WHERE "IdEmpleado" BETWEEN 9101 AND 9112;
+DELETE FROM public."Permiso"         WHERE "IdEmpleado" BETWEEN 9101 AND 9112;
+DELETE FROM public."HorarioTemporal" WHERE "idEmpleado" BETWEEN 9101 AND 9112;
+DELETE FROM public."Empleado_Area"   WHERE "IdEmpleado" BETWEEN 9101 AND 9112;
+DELETE FROM public."Empleado"        WHERE "IdEmpleado" BETWEEN 9101 AND 9112;
+DELETE FROM public."Persona"         WHERE "IdPersona"  BETWEEN 9101 AND 9112;
+DELETE FROM public."Motivo_Perm"     WHERE "idMotivo"   BETWEEN 9101 AND 9112
   AND NOT EXISTS (SELECT 1 FROM public."Permiso" p WHERE p."idMotivo" = "Motivo_Perm"."idMotivo");
-DELETE FROM public."TipoPermiso"     WHERE "idTipoPermiso" BETWEEN 9101 AND 9199
+DELETE FROM public."TipoPermiso"     WHERE "idTipoPermiso" BETWEEN 9101 AND 9112
   AND NOT EXISTS (SELECT 1 FROM public."Motivo_Perm" m WHERE m."idTipoPermiso" = "TipoPermiso"."idTipoPermiso");
-DELETE FROM public."Horario"         WHERE "idHorario"  BETWEEN 9101 AND 9199
+DELETE FROM public."Horario"         WHERE "idHorario"  BETWEEN 9101 AND 9112
   AND NOT EXISTS (SELECT 1 FROM public."Empleado" e WHERE e."idHorario" = "Horario"."idHorario")
   AND NOT EXISTS (SELECT 1 FROM public."HorarioTemporal" h WHERE h."HorarioAsignado" = "Horario"."idHorario")
   AND NOT EXISTS (SELECT 1 FROM public."Asistencia" a WHERE a."idHorario" = "Horario"."idHorario");
-DELETE FROM public."EstructOrganiz"  WHERE "idAreaOrganiz" BETWEEN 9101 AND 9199;
+DELETE FROM public."EstructOrganiz"  WHERE "idAreaOrganiz" BETWEEN 9101 AND 9112;
+
+-- 1.1. Tipos de documento (CR-020): solo si el catálogo no los tiene.
+INSERT INTO public."TipoDocID" ("TipoDocID", "Descripcion")
+SELECT (SELECT COALESCE(MAX("TipoDocID"), 0) FROM public."TipoDocID") + row_number() OVER (ORDER BY n.orden), n.descripcion
+FROM (VALUES (1, 'DNI'), (2, 'Carné de extranjería'), (3, 'Pasaporte')) AS n(orden, descripcion)
+WHERE NOT EXISTS (SELECT 1 FROM public."TipoDocID" t WHERE upper(btrim(t."Descripcion")) = upper(n.descripcion));
 
 -- 2. Áreas.
 INSERT INTO public."EstructOrganiz" ("Year", "idAreaOrganiz", "AreaOrganizacional", "Abrev", "Sigla") VALUES
@@ -75,8 +82,12 @@ INSERT INTO public."Empleado" ("IdEmpleado", "Year", "idAreaOrganiz", "IdPersona
   (9111, 2026, 9103, 9111, '2016-11-02', '1', 9101, 'Abogada'),
   (9112, 2010, 9103, 9112, '2006-05-02', '0', 9101, 'Técnico administrativo');
 
+UPDATE public."Persona" SET "TipoPersona" = 'N',
+  "TipoDocID" = (SELECT "TipoDocID" FROM public."TipoDocID" WHERE upper(btrim("Descripcion")) = 'DNI' ORDER BY 1 LIMIT 1)
+WHERE "IdPersona" BETWEEN 9101 AND 9112;
+
 INSERT INTO public."Empleado_Area" ("Year", "idAreaOrganiz", "IdEmpleado")
-SELECT "Year", "idAreaOrganiz", "IdEmpleado" FROM public."Empleado" WHERE "IdEmpleado" BETWEEN 9101 AND 9199;
+SELECT "Year", "idAreaOrganiz", "IdEmpleado" FROM public."Empleado" WHERE "IdEmpleado" BETWEEN 9101 AND 9112;
 
 -- 5. Turnos por periodo (RF-01) con histórico (RF-02).
 INSERT INTO public."HorarioTemporal" ("idEmpleado", "N", "FechaInicio", "FechaFin", "HorarioAsignado", "NroDocumento", "Sisgedo", "FechaRegistro") VALUES

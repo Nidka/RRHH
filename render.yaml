@@ -33,3 +33,5 @@ services:
         sync: false
       - key: RRHH_WEB_ROLES_PERMISOS
         sync: false
+      - key: RRHH_WEB_ROLES_PERSONAL
+        sync: false

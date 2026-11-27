@@ -27,11 +27,24 @@ public sealed class CatalogoModulosTests
     }
 
     [Fact]
-    public void LosModulosSiguenLaClasificacionDelEnunciado()
+    public void LosModulosSiguenLaClasificacionDelEnunciadoYLuegoPersonal()
     {
+        // A-E del enunciado; Personal (CR-020) no pertenece a esa clasificación y va después.
         Assert.Equal(
-            new[] { "Gestión de turnos", "Permisos y licencias", "Vacaciones", "Teletrabajo y presencialidad", "Reportes generales", "Mi cuenta" },
+            new[] { "Gestión de turnos", "Permisos y licencias", "Vacaciones", "Teletrabajo y presencialidad", "Reportes generales", "Personal", "Mi cuenta" },
             CatalogoModulos.Todos.Select(m => m.Titulo));
+    }
+
+    [Fact]
+    public void ElRegistroDeEmpleadosExigeSuPropioPermisoYNoCuentaComoRequerimiento()
+    {
+        var visibles = CatalogoModulos.Visibles(p => p == PermisoModulo.Personal);
+
+        var modulo = Assert.Single(visibles);
+        Assert.Equal("personal", modulo.Clave);
+        var pantalla = Assert.Single(modulo.Pantallas);
+        Assert.Equal("registro-empleados", pantalla.Clave);
+        Assert.Empty(pantalla.Requerimientos);
     }
 
     [Fact]

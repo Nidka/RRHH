@@ -52,6 +52,15 @@ ALTER TABLE "Persona" ADD "NumDocID" varchar(12);
 ALTER TABLE "Empleado" ADD "Estado" varchar(1) DEFAULT '1';
 UPDATE "Persona" SET "NumDocID" = '00000001' WHERE "IdPersona" = 1;
 UPDATE "Persona" SET "NumDocID" = '00000002' WHERE "IdPersona" = 2;
+-- CR-020: tablas y columnas que usa el registro de empleados.
+ALTER TABLE "Persona" ADD "TipoDocID" integer, ADD "TipoPersona" varchar(1), ADD "FechaRegistro" timestamp;
+UPDATE "Persona" SET "TipoDocID" = 1;
+CREATE TABLE "TipoDocID" ("TipoDocID" integer, "Descripcion" varchar(40));
+INSERT INTO "TipoDocID" VALUES (1, 'DNI'), (2, 'Carné de extranjería');
+CREATE TABLE "EstructOrganiz" ("Year" integer, "idAreaOrganiz" integer, "AreaOrganizacional" varchar(200), "Abrev" varchar(10), "Sigla" varchar(6));
+INSERT INTO "EstructOrganiz" VALUES (2026, 1, 'Área ficticia', 'FIC', 'FIC');
+CREATE TABLE "Empleado_Area" ("Year" integer, "idAreaOrganiz" integer, "IdEmpleado" integer);
+INSERT INTO "Empleado_Area" SELECT "Year", "idAreaOrganiz", "IdEmpleado" FROM "Empleado";
 -- CR-019: usuario de autoconsulta (rol 20, ver RRHH_WEB_ROLES_AUTOCONSULTA) vinculado al empleado 101.
 INSERT INTO "Usuario" VALUES (4, 'empleado', 101, true, :'hash', :'salt', 210000);
 INSERT INTO "Rol" VALUES (20, '0500000');
