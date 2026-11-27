@@ -7,7 +7,7 @@
 --   * Es idempotente: borra y vuelve a crear solo sus propias filas (rango 9101-9112). No toca usuarios ni claves.
 --   * Los feriados se insertan solo si la fecha no existe; nunca se borran.
 --   * El tipo de permiso 2 significa «salida autorizada» en el código: aquí no se usa.
---   * Modalidad "P" en todos los motivos: el rol de operador del despliegue (10) solo ve esa modalidad (AccesoMotivosPermiso).
+--   * Motivos 9101-9106 en modalidad "P" (rol 10 solo ve esa) y 9107-9109 en modalidad "C" (rol 14 solo ve esa); el rol 13 ve ambas (AccesoMotivosPermiso).
 -- Fecha de referencia de la demostración: noviembre de 2026.
 
 BEGIN;
@@ -110,7 +110,10 @@ SELECT * FROM (VALUES
   (9103, 'Licencia por familiar grave (anual)', 'FAM', true,  9101, 'P', true, true,  'FAMILIAR', false),
   (9104, 'Comisión de servicio',                'COM', true,  9102, 'P', true, false, NULL,       false),
   (9105, 'Permiso personal',                    'PER', false, 9102, 'P', true, false, NULL,       false),
-  (9106, 'Capacitación',                        'CAP', true,  9102, 'P', true, false, NULL,       false)
+  (9106, 'Capacitación',                        'CAP', true,  9102, 'P', true, false, NULL,       false),
+  (9107, 'CAS: licencia con goce',              'CLG', true,  9101, 'C', true, false, NULL,       false),
+  (9108, 'CAS: permiso personal',               'CPP', false, 9102, 'C', true, false, NULL,       false),
+  (9109, 'CAS: capacitación',                   'CCA', true,  9102, 'C', true, false, NULL,       false)
 ) AS m(id, d, a, s, t, mo, ac, anual, grupo, vac)
 WHERE NOT EXISTS (SELECT 1 FROM public."Motivo_Perm" x WHERE x."idMotivo" = m.id);
 
@@ -129,7 +132,11 @@ INSERT INTO public."Permiso" ("IdEmpleado", "NPermiso", "FechaInicio", "FechaFin
   (9108, 2, '2026-11-24', '2026-11-24', true, false, 9105, NULL, 'DEMO', NULL, 'Pendiente de aprobación', 'Solicitado', false),
   (9109, 1, '2026-11-25', '2026-11-27', true, false, 9106, 'Lima', 'DEMO', 'Jefatura SIS', 'Curso ficticio', 'Aprobado', false),
   (9111, 1, '2026-02-02', '2026-02-11', true, false, 9101, NULL, 'DEMO', 'Jefatura ADM',  'Dato ficticio', 'Aprobado', false),
-  (9111, 2, '2026-11-09', '2026-11-13', true, false, 9101, NULL, 'DEMO', NULL, 'Rechazado por necesidad de servicio', 'Rechazado', false);
+  (9111, 2, '2026-11-09', '2026-11-13', true, false, 9101, NULL, 'DEMO', NULL, 'Rechazado por necesidad de servicio', 'Rechazado', false),
+  -- Modalidad CAS (rol 14): fechas futuras para no chocar con las marcaciones ya generadas.
+  (9102, 1, '2026-12-14', '2026-12-15', true, false, 9107, NULL, 'DEMO', 'Jefatura SIS', 'CAS ficticio aprobado', 'Aprobado', false),
+  (9103, 2, '2026-12-10', '2026-12-10', true, false, 9108, NULL, 'DEMO', NULL, 'CAS ficticio pendiente', 'Solicitado', false),
+  (9110, 1, '2026-12-02', '2026-12-02', true, false, 9109, 'Lima', 'DEMO', 'Jefatura RRHH', 'CAS ficticio aprobado', 'Aprobado', false);
 
 -- 8. Teletrabajo (RF-13 a RF-16). Máscara de días: lunes=1, martes=2, miércoles=4, jueves=8, viernes=16; total=31.
 INSERT INTO public."Teletrabajo" ("IdEmpleado", "FechaInicio", "FechaFin", "Modalidad", "DiasRemotos", "Autorizacion") VALUES

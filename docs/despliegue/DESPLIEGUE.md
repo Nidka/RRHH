@@ -98,7 +98,7 @@ deploy/cargar-datos-demo.sh --aplicar --confirmo-respaldo     # carga los datos
 
 Carga [deploy/demo/datos-demo-despliegue.sql](../../deploy/demo/datos-demo-despliegue.sql):
 - 12 empleados ficticios (códigos 9101 a 9112, documentos `DEMO-…`) en 4 áreas;
-- 3 horarios, turnos por periodo con histórico, 6 motivos y 13 permisos en sus cuatro estados, incluida una media jornada;
+- 3 horarios, turnos por periodo con histórico, 9 motivos (6 de modalidad P para el rol 10 y 3 de modalidad C para el rol 14; el 13 ve ambas) y 16 permisos en sus cuatro estados, incluida una media jornada;
 - 4 periodos de teletrabajo (1 total y 3 parciales);
 - feriados nacionales de 2008 y 2026, si no existen;
 - marcaciones de octubre y noviembre de 2026, y de febrero y marzo de 2008 para la consulta histórica.
